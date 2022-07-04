@@ -12,6 +12,27 @@ mod_Suggest_ui <- function(id){
   tagList(
     fluidPage(
       fluidRow(
+        selectizeInput(
+          inputId = ns("area_sel"),
+          label = "Select Area",
+          # Hard coded for now, but we'll deal with this later!
+          choices = c("Pilot", "Clallam County", "Grays Harbor County",
+                      "Island County", "Jefferson County", "etc."),
+          selected = NULL,
+          width = '50%',
+          multiple = TRUE)
+      ),
+      fluidRow(
+        selectizeInput(
+          inputId = ns("owner_sel"),
+          label = "Select Ownership",
+          # Hard coded for now, but we'll deal with this later!
+          choices = c("All", "County", "City", "State", "Tribal", "etc."),
+          selected = NULL,
+          width = '50%',
+          multiple = TRUE)
+      ),
+      fluidRow(
         radioButtons(inputId = "obj",
           label = "Objective",
           choices = list("Enter Weights" = 1, "Upload PI Scores" = 2),
@@ -20,7 +41,7 @@ mod_Suggest_ui <- function(id){
           condition = "input.obj == 1",
           column(2,  "Habitat Quantity"),
           column(4,
-            numericInput(inputId = ns("hquantW"),
+            numericInput(inputId = ns("w1"),
               min = 0,
               max = 1,
               step = 0.01,
@@ -28,7 +49,7 @@ mod_Suggest_ui <- function(id){
               value = 0.5)),
           column(2, "Habitat Quality"),
           column(4,
-            numericInput(inputId = ns("NewVal4"),
+            numericInput(inputId = ns("w2"),
             min = 0,
             max = 1,
             step = 0.01,
@@ -58,28 +79,7 @@ mod_Suggest_ui <- function(id){
         numericInput(inputId = ns("budget"),
           label = "Enter Budget ($)",
           min = 0,
-          value = 350000)
-      ),
-      fluidRow(
-        selectizeInput(
-          inputId = ns("area_sel"),
-          label = "Select Area",
-          # Hard coded for now, but we'll deal with this later!
-          choices = c("Pilot", "Clallam County", "Grays Harbor County",
-                      "Island County", "Jefferson County", "etc."),
-          selected = "Pilot",
-          width = '50%',
-          multiple = FALSE)
-      ),
-      fluidRow(
-        selectizeInput(
-          inputId = ns("owner_sel"),
-          label = "Select Ownership",
-          # Hard coded for now, but we'll deal with this later!
-          choices = c("All", "County", "City", "State", "Tribal", "etc."),
-          selected = "All",
-          width = '50%',
-          multiple = FALSE)
+          value = NULL)
       ),
         fluidRow(
           actionButton(ns("submit"), "Submit")
@@ -94,8 +94,18 @@ mod_Suggest_ui <- function(id){
 mod_Suggest_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+
+    observeEvent(input$w1, {
+      updateNumericInput(session, 'w2', 
+                         value = 1 - input$w1)
+    })
+    
     observeEvent(input$submit, {
-      r$submit_suggest <- input$submit
+      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.na(input$budget))
+      {r$submit_suggest <- input$submit}
+      else
+      {showModal(modalDialog(title = "Warning!",
+      "Please fill all the fields before you click the Submit buttion."))}
     })
   })
 }

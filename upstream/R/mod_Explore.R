@@ -18,9 +18,9 @@ mod_Explore_ui <- function(id){
           # Hard coded for now, but we'll deal with this later!
           choices = c("Pilot", "Clallam County", "Grays Harbor County",
                       "Island County", "Jefferson County", "etc."),
-          selected = "Pilot",
+          selected = NULL,
           width = '50%',
-          multiple = FALSE)
+          multiple = TRUE)
       ),
       fluidRow(
         selectizeInput(
@@ -28,9 +28,9 @@ mod_Explore_ui <- function(id){
           label = "Select Ownership",
           # Hard coded for now, but we'll deal with this later!
           choices = c("All", "County", "City", "State", "Tribal", "etc."),
-          selected = "All",
+          selected = NULL,
           width = '50%',
-          multiple = FALSE)
+          multiple = TRUE)
       ),
       fluidRow(
         textInput(
@@ -51,9 +51,15 @@ mod_Explore_ui <- function(id){
 mod_Explore_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+    
     observeEvent(input$submit, {
-      r$submit_explore <- input$submit
+      if(input$barrierIDs != "" && !is.null(input$owner_sel) && !is.null(input$area_sel))
+      {r$submit_explore <- input$submit}
+      else
+      {showModal(modalDialog(title = "Warning!", 
+        "Please fill all the fields before you click the Submit buttion."))}
     })
+    
   })
 }
 

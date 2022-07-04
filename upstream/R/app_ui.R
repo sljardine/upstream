@@ -15,22 +15,24 @@ app_ui <- function(request) {
       tags$img(src = "www/no_logo.png", height = "50"))),
       shinydashboard::dashboardSidebar(disable = TRUE),
       shinydashboard::dashboardBody(
+        shinydashboard::tabBox(
+          title = "",
+          id = "tabset1",
+          side = "left", height = "550px",
+          selected = "Explore",
+          shiny::tabPanel("Explore", mod_Explore_ui("Explore_1")),
+          shiny::tabPanel("Suggest", mod_Suggest_ui("Suggest_1")),
+          shiny::tabPanel("Custom", mod_Custom_ui("Custom_1"))
+        ),
       fluidRow(
         shinydashboard::tabBox(
           title = "",
           # The id lets us use input$tabset1 on the server to find the current tab
-          id = "tabset1", height = "250px",
+          id = "tabset2", 
+          side = "left", height = "550px",
           shiny::tabPanel("Figures", mod_Figures_ui("Figures_1")),
           shiny::tabPanel("Report", mod_Tables_ui("Tables_1"))
-        ),
-        shinydashboard::tabBox(
-          title = "",
-          side = "right", height = "250px",
-          selected = "Explore",
-          shiny::tabPanel("Custom", mod_Custom_ui("Custom_1")),
-          shiny::tabPanel("Suggest", mod_Suggest_ui("Suggest_1")),
-          shiny::tabPanel("Explore", mod_Explore_ui("Explore_1"))
-         )
+        )
        )
      )
    )
