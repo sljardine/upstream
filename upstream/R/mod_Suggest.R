@@ -35,8 +35,7 @@ mod_Suggest_ui <- function(id){
       fluidRow(
         radioButtons(inputId = "obj",
           label = "Objective",
-          choices = list("Enter Weights" = 1, "Upload PI Scores" = 2),
-          selected = NULL),
+          choices = list("Enter Weights" = 1, "Upload PI Scores" = 2)),
         conditionalPanel(
           condition = "input.obj == 1",
           column(2,  "Habitat Quantity"),

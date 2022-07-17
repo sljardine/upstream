@@ -25,7 +25,7 @@ mod_Explore_ui <- function(id){
       fluidRow(
         selectizeInput(
           inputId = ns("owner_sel"),
-          label = "Select Ownership",
+          label = "Select Ownership Group",
           # Hard coded for now, but we'll deal with this later!
           choices = c("All", "County", "City", "State", "Tribal", "etc."),
           selected = NULL,
@@ -33,10 +33,46 @@ mod_Explore_ui <- function(id){
           multiple = TRUE)
       ),
       fluidRow(
-        textInput(
-          inputId = ns("barrierIDs"),
-          label = "Enter IDs",
-          placeholder = "Enter WDFW Barrier IDs")
+        radioButtons(inputId = ns("action"),
+                     label = "Select Action",
+                     choices = list("Inspect all barriers in area and ownership group" = 1,
+                                    "Compare a set of barriers to all other barriers in area and ownership group" = 2),
+                     width = '100%')
+      ),
+      fluidRow(
+        conditionalPanel(
+          condition = "input.action == 2",
+          ns = ns,
+            textInput(
+              inputId = ns("barrier_ids"),
+              label = "Enter ID(s) of Interest",
+              placeholder = "Enter WDFW Barrier IDs",
+              width = "100%")
+        )
+      ),
+      fluidRow(
+        column(6,
+          selectizeInput(
+          inputId = ns("x"),
+          label = "Variable on X axis",
+          # Hard coded for now, but we'll deal with this later!
+          choices = c("Habitat Quantity", "Cost Estimate", "Downstream Barriers",
+          "etc."),
+          selected = "Cost Estimate",
+          width = "100%"),
+          offset = 0
+        ),
+        column(6,
+          selectizeInput(
+            inputId = ns("y"),
+            label = "Variable on Y axis",
+            # Hard coded for now, but we'll deal with this later!
+            choices = c("Habitat Quantity", "Cost Estimate", "Downstream Barriers",
+            "etc."),
+            selected = "Habitat Quantity",
+            width = "100%"),
+          offset = 0
+        )
       ),
       fluidRow(
         actionButton(ns("submit"), "Submit")
@@ -53,9 +89,14 @@ mod_Explore_server <- function(id, r){
     ns <- session$ns
     
     observeEvent(input$submit, {
-      if(input$barrierIDs != "" && !is.null(input$owner_sel) && !is.null(input$area_sel))
+      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
+         input$action == 1)
       {r$submit_explore <- input$submit}
       else
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
+           input$action == 2 && input$barrier_ids != "")
+        {r$submit_explore <- input$submit}
+          else
       {showModal(modalDialog(title = "Warning!", 
         "Please fill all the fields before you click the Submit buttion."))}
     })
