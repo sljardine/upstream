@@ -72,7 +72,7 @@ mod_Custom_server <- function(id, r){
         {r$submit_custom <- input$submit}
         else
       {showModal(modalDialog(title = "Warning!", 
-      "Please enter at least one set of barrier IDs before you click the Submit buttion."))}
+      "Please enter at least one set of barrier IDs before you click the Submit button."))}
     })
   })
 }

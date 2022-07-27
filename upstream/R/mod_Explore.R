@@ -98,7 +98,7 @@ mod_Explore_server <- function(id, r){
         {r$submit_explore <- input$submit}
           else
       {showModal(modalDialog(title = "Warning!", 
-        "Please fill all the fields before you click the Submit buttion."))}
+        "Please fill all the fields before you click the Submit button."))}
     })
     
   })

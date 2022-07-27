@@ -33,11 +33,13 @@ mod_Suggest_ui <- function(id){
           multiple = TRUE)
       ),
       fluidRow(
-        radioButtons(inputId = "obj",
+        radioButtons(inputId = ns("obj"),
           label = "Objective",
-          choices = list("Enter Weights" = 1, "Upload PI Scores" = 2)),
+          choices = list("Habitat Quantity" = 1, "Weighted Attributes" = 2, 
+            "Custom PI Scores" = 3)),
         conditionalPanel(
-          condition = "input.obj == 1",
+          condition = "input.obj == 2",
+          ns = ns,
           column(2,  "Habitat Quantity"),
           column(4,
             numericInput(inputId = ns("w1"),
@@ -56,19 +58,21 @@ mod_Suggest_ui <- function(id){
             value = 0.5))
         ),
         conditionalPanel(
-          condition = "input.obj == 2",
+          condition = "input.obj == 3",
+          ns = ns,
           fileInput(inputId = ns("CustomScore"), 'Choose xlsx file',
                     accept = c(".xlsx")
           )
         )
       ),
       fluidRow(
-        radioButtons(inputId = "cost",
+        radioButtons(inputId = ns("cost"),
                      label = "Cost",
-                     choices = list("Default" = 1, "Upload Costs" = 2),
+                     choices = list("Default Predictions" = 1, "Custom Cost Estimates" = 2),
                      selected = NULL),
         conditionalPanel(
           condition = "input.cost == 2",
+          ns = ns,
           fileInput(inputId = ns("CustomCost"), 'Choose xlsx file',
                     accept = c(".xlsx")
           )
@@ -100,11 +104,27 @@ mod_Suggest_server <- function(id, r){
     })
     
     observeEvent(input$submit, {
-      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.na(input$budget))
+      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
+         !is.na(input$budget) && input$obj != 3 && input$cost != 2)
       {r$submit_suggest <- input$submit}
       else
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
+           !is.na(input$budget) && input$obj == 3 && 
+           !is.null(input$CustomScore) && input$cost != 2)
+        {r$submit_suggest <- input$submit}
+      else
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
+           !is.na(input$budget) && input$obj != 3 && 
+           input$cost == 2 && !is.null(input$CustomCost))
+        {r$submit_suggest <- input$submit}
+      else
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
+           !is.na(input$budget) && input$obj == 3 && 
+           !is.null(input$CustomScore) && input$cost == 2 && !is.null(input$CustomCost))
+        {r$submit_suggest <- input$submit}
+      else
       {showModal(modalDialog(title = "Warning!",
-      "Please fill all the fields before you click the Submit buttion."))}
+      "Please fill all the fields before you click the Submit button."))}
     })
   })
 }
