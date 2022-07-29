@@ -32,11 +32,22 @@ mod_Suggest_ui <- function(id){
           width = '50%',
           multiple = TRUE)
       ),
+      # fluidRow(
+      #   selectizeInput(inputId = ns("dat_source"),
+      #   label = "Select Data Sources",
+      #   choices = c("Use upstream data", "Provide benefit data, use upstream cost data", 
+      #   "Provide cost data, use upstream benefit data", "Provide benefit & cost data"),
+      #   options = list(
+      #     placeholder = 'Please select an option below',
+      #     onInitialize = I('function() { this.setValue(""); }')
+      #     )
+      #   )
+      # ),
       fluidRow(
         radioButtons(inputId = ns("obj"),
           label = "Objective",
           choices = list("Habitat Quantity" = 1, "Weighted Attributes" = 2, 
-            "Custom PI Scores" = 3)),
+            "Custom Barrier Scores" = 3)),
         conditionalPanel(
           condition = "input.obj == 2",
           ns = ns,
@@ -56,34 +67,49 @@ mod_Suggest_ui <- function(id){
             step = 0.01,
             label = NULL,
             value = 0.5))
-        ),
-        conditionalPanel(
-          condition = "input.obj == 3",
-          ns = ns,
-          fileInput(inputId = ns("CustomScore"), 'Choose xlsx file',
-                    accept = c(".xlsx")
-          )
         )
       ),
       fluidRow(
         radioButtons(inputId = ns("cost"),
-                     label = "Cost",
-                     choices = list("Default Predictions" = 1, "Custom Cost Estimates" = 2),
-                     selected = NULL),
+          label = "Cost",
+          choices = list("Default Predictions" = 1, "Custom Cost Estimates" = 2),
+          selected = NULL)
+      ),
+      fluidRow(
+        numericInput(inputId = ns("budget"),
+                     label = "Enter Budget ($)",
+                     min = 0,
+                     value = NULL)
+      ),
+      fluidRow(
         conditionalPanel(
-          condition = "input.cost == 2",
+          condition = "input.obj == 3 && input.cost == 1",
           ns = ns,
-          fileInput(inputId = ns("CustomCost"), 'Choose xlsx file',
+          fileInput(inputId = ns("cust_score"), 'Choose xlsx file with: IDs and Scores',
+            accept = c(".xlsx")
+          )
+        ),
+        conditionalPanel(
+          condition = "input.obj != 3 && input.cost == 2",
+          ns = ns,
+          fileInput(inputId = ns("cust_cost"), 'Choose xlsx file with: IDs and Costs',
+            accept = c(".xlsx")
+          )
+        ),
+        conditionalPanel(
+          condition = "input.obj == 3 && input.cost == 2",
+          ns = ns,
+          fileInput(inputId = ns("cust_score_cost"), 'Choose xlsx file with: IDs, Scores, and Costs',
                     accept = c(".xlsx")
           )
         )
       ),
-      fluidRow(
-        numericInput(inputId = ns("budget"),
-          label = "Enter Budget ($)",
-          min = 0,
-          value = NULL)
-      ),
+      # fluidRow(
+      #   numericInput(inputId = ns("budget"),
+      #     label = "Enter Budget ($)",
+      #     min = 0,
+      #     value = NULL)
+      # ),
         fluidRow(
           actionButton(ns("submit"), "Submit")
       )
@@ -110,17 +136,17 @@ mod_Suggest_server <- function(id, r){
       else
         if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
            !is.na(input$budget) && input$obj == 3 && 
-           !is.null(input$CustomScore) && input$cost != 2)
+           !is.null(input$cust_score) && input$cost != 2)
         {r$submit_suggest <- input$submit}
       else
         if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
            !is.na(input$budget) && input$obj != 3 && 
-           input$cost == 2 && !is.null(input$CustomCost))
+           input$cost == 2 && !is.null(input$cust_cost))
         {r$submit_suggest <- input$submit}
       else
         if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
            !is.na(input$budget) && input$obj == 3 && 
-           !is.null(input$CustomScore) && input$cost == 2 && !is.null(input$CustomCost))
+           input$cost == 2 && !is.null(input$cust_score_cost))
         {r$submit_suggest <- input$submit}
       else
       {showModal(modalDialog(title = "Warning!",
