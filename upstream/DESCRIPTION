@@ -1,12 +1,11 @@
 Package: upstream
-Title: An Amazing Shiny App
+Title: upstream: A decision support tool for barrier culvert restoration
 Version: 0.0.0.9000
-Authors@R: 
-    person(given = "firstname",
-           family = "lastname",
-           role = c("aut", "cre"),
-           email = "your@email.com")
-Description: What the package does (one paragraph).
+Authors@R: person('Sunny', 'Jardine', email = 'jardine@uw.edu', role = c('cre', 'aut'))
+Description: A decision support tool for barrier culvert restoration planning in Western Washington.
+  The tool enables exploration of candidate project attributes, identification of 
+  cost-effective barrier culvert restoration plans, and comparison of alternative 
+  restoration plans.
 License: MIT + file LICENSE
 Imports: 
     attempt,

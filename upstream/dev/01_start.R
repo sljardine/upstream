@@ -20,8 +20,11 @@
 ##
 golem::fill_desc(
   pkg_name = "upstream", # The Name of the package containing the App
-  pkg_title = "PKG_TITLE", # The Title of the package containing the App
-  pkg_description = "PKG_DESC.", # The Description of the package containing the App
+  pkg_title = "upstream: A decision support tool for barrier culvert restoration", # The Title of the package containing the App
+  pkg_description = "A decision support tool for barrier culvert restoration planning in Western Washington.
+  The tool enables exploration of candidate project attributes, identification of 
+  cost-effective barrier culvert restoration plans, and comparison of alternative 
+  restoration plans.", # The Description of the package containing the App
   author_first_name = "Sunny", # Your First Name
   author_last_name = "Jardine", # Your Last Name
   author_email = "jardine@uw.edu", # Your Email
