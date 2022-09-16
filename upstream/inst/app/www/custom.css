@@ -1,21 +1,45 @@
+
+
 /* logo */
-/*.skin-blue .main-header .logo {
-  background-color: #023047;
-}*/
+.skin-blue .main-header .logo {
+  background-color: #1c1cff;
+  font-weight: bold;
+}
 
 /* logo when hovered */
-/*.skin-blue .main-header .logo:hover {
-  background-color: #023047;
-}*/
+.skin-blue .main-header .logo:hover {
+  background-color: #1c1cff;
+}
 
 /* navbar (rest of the header) */
-/*.skin-blue .main-header .navbar {
-  background-color: #023047;
-}*/
+.skin-blue .main-header .navbar {
+  background-color: #1c1cff;
+}
 
 /* body */
-/*.content-wrapper, .right-side {
-   background-color: #f8f9fa;
-}*/
+.content-wrapper, .right-side {
+   background-color: #ffffff;
+   height: 1000px !important;
+}
+
+/* nav tabs */
+.nav-tabs {
+  background-color: #ffffff;
+} 
+
+.nav-tabs-custom .nav-tabs li.active {
+  border-top-color: #edc0b5;
+}
+
+/* fluid row */
+/*.row {
+  padding: 1em;
+  border-style: solid;
+  border-width: 5px;
+  margin: 1em;
+  border-radius: 50px;
+  border-color: #30279d;
+  background-color: #f6e1d7;
+} */
 
 

@@ -1,11 +1,11 @@
-Package: upstream
-Title: upstream: A decision support tool for barrier culvert restoration
+Package: Upstream
+Title: Upstream: A decision support tool for barrier culvert restoration
 Version: 0.0.0.9000
 Authors@R: person('Sunny', 'Jardine', email = 'jardine@uw.edu', role = c('cre', 'aut'))
 Description: A decision support tool for barrier culvert restoration planning in Western Washington.
   The tool enables exploration of candidate project attributes, identification of 
   cost-effective barrier culvert restoration plans, and comparison of alternative 
-  restoration plans.
+  customized restoration plans.
 License: MIT + file LICENSE
 Imports: 
     attempt,
@@ -13,6 +13,7 @@ Imports:
     DT,
     glue,
     golem (>= 0.3.2),
+    here,
     htmltools,
     shiny (>= 1.7.1)
 Encoding: UTF-8

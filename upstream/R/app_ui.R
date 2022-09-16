@@ -19,12 +19,13 @@ app_ui <- function(request) {
           title = "",
           id = "tabset1",
           side = "left", height = "750px",
-          selected = "Explore",
+          selected = "Welcome",
+          shiny::tabPanel("Welcome", mod_Welcome_ui("Welcome_1")),
           shiny::tabPanel("Explore", mod_Explore_ui("Explore_1")),
           shiny::tabPanel("Suggest", mod_Suggest_ui("Suggest_1")),
-          shiny::tabPanel("Custom", mod_Custom_ui("Custom_1"))
+          shiny::tabPanel("Custom", mod_Custom_ui("Custom_1")),
+          shiny::tabPanel("Learn", mod_Learn_ui("Learn_1"))
         ),
-      fluidRow(
         shinydashboard::tabBox(
           title = "",
           # The id lets us use input$tabset1 on the server to find the current tab
@@ -32,7 +33,6 @@ app_ui <- function(request) {
           side = "left", height = "750px",
           shiny::tabPanel("Figures", mod_Figures_ui("Figures_1")),
           shiny::tabPanel("Report", mod_Tables_ui("Tables_1"))
-        )
        )
      )
    )

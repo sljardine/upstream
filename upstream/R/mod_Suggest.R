@@ -32,17 +32,6 @@ mod_Suggest_ui <- function(id){
           width = '50%',
           multiple = TRUE)
       ),
-      # fluidRow(
-      #   selectizeInput(inputId = ns("dat_source"),
-      #   label = "Select Data Sources",
-      #   choices = c("Use upstream data", "Provide benefit data, use upstream cost data", 
-      #   "Provide cost data, use upstream benefit data", "Provide benefit & cost data"),
-      #   options = list(
-      #     placeholder = 'Please select an option below',
-      #     onInitialize = I('function() { this.setValue(""); }')
-      #     )
-      #   )
-      # ),
       fluidRow(
         radioButtons(inputId = ns("obj"),
           label = "Objective",
@@ -104,12 +93,6 @@ mod_Suggest_ui <- function(id){
           )
         )
       ),
-      # fluidRow(
-      #   numericInput(inputId = ns("budget"),
-      #     label = "Enter Budget ($)",
-      #     min = 0,
-      #     value = NULL)
-      # ),
         fluidRow(
           actionButton(ns("submit"), "Submit")
       )
@@ -121,7 +104,7 @@ mod_Suggest_ui <- function(id){
 #'
 #' @noRd
 mod_Suggest_server <- function(id, r){
-  moduleServer( id, function(input, output, session){
+  moduleServer(id, function(input, output, session){
     ns <- session$ns
 
     observeEvent(input$w1, {

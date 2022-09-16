@@ -10,22 +10,71 @@
 mod_Welcome_ui <- function(id){
   ns <- NS(id)
   tagList(
- 
+    fluidPage(
+      fluidRow(
+      h3(HTML("<b>Welcome to Upstream</b>"), align = "center"),
+      p("Upstream is a tool to inform data-based barrier culvert restoration planing
+        in Western Washington.", align = "center")
+      ),
+      fluidRow(
+        column(6,
+            tags$button(id = ns("explore_tab"), 
+              class = "btn action-button",
+              tags$img(src = "www/explore_placeholder.png",
+                width = "100%")
+         )  
+        ),
+        column(6,
+          tags$button(id = ns("suggest_tab"), 
+            class = "btn action-button",
+            tags$img(src = "www/suggest_placeholder.png",
+              width = "100%")
+          )  
+         )
+        ),
+      fluidRow(
+        column(6,
+          tags$button(id = ns("custom_tab"), 
+            class = "btn action-button",
+            tags$img(src = "www/custom_placeholder.png",
+              width = "100%")
+         )  
+        ),
+        column(6,
+          tags$button(id = ns("learn_tab"), 
+            class = "btn action-button",
+            tags$img(src = "www/learn_placeholder.png",
+            width = "100%")
+     )  
+    )
+   )      
   )
+ )
+
 }
     
 #' Welcome Server Functions
 #'
 #' @noRd 
-mod_Welcome_server <- function(id){
-  moduleServer( id, function(input, output, session){
+mod_Welcome_server <- function(id, r){
+  moduleServer(id, function(input, output, session){
     ns <- session$ns
+    
+    observeEvent(input$explore_tab, {
+      r$tab_sel <- "Explore"
+    })
+    
+    observeEvent(input$suggest_tab, {
+      r$tab_sel <- "Suggest"
+    })
+    
+    observeEvent(input$custom_tab, {
+      r$tab_sel <- "Custom"
+    })
+    
+    observeEvent(input$learn_tab, {
+      r$tab_sel <- "Learn"
+    })
  
   })
 }
-    
-## To be copied in the UI
-# mod_Welcome_ui("Welcome_1")
-    
-## To be copied in the server
-# mod_Welcome_server("Welcome_1")

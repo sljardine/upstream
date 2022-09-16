@@ -19,12 +19,13 @@ attachment::att_amend_desc()
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module(name = "Figures", with_test = TRUE) # Name of the module
-golem::add_module(name = "Tables", with_test = TRUE) # Name of the module
-golem::add_module(name = "Welcome", with_test = TRUE) # Name of the module
-golem::add_module(name = "Explore", with_test = TRUE) # Name of the module
-golem::add_module(name = "Suggest", with_test = TRUE) # Name of the module
-golem::add_module(name = "Custom", with_test = TRUE) # Name of the module
+golem::add_module(name = "Figures", with_test = TRUE) 
+golem::add_module(name = "Tables", with_test = TRUE) 
+golem::add_module(name = "Welcome", with_test = TRUE) 
+golem::add_module(name = "Explore", with_test = TRUE) 
+golem::add_module(name = "Suggest", with_test = TRUE) 
+golem::add_module(name = "Custom", with_test = TRUE) 
+golem::add_module(name = "Learn", with_test = TRUE) 
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
