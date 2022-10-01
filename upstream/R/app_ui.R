@@ -18,7 +18,7 @@ app_ui <- function(request) {
         shinydashboard::tabBox(
           title = "",
           id = "tabset1",
-          side = "left", height = "750px",
+          side = "left", height = "1050px",
           selected = "Welcome",
           shiny::tabPanel("Welcome", mod_Welcome_ui("Welcome_1")),
           shiny::tabPanel("Explore", mod_Explore_ui("Explore_1")),
@@ -30,7 +30,7 @@ app_ui <- function(request) {
           title = "",
           # The id lets us use input$tabset1 on the server to find the current tab
           id = "tabset2", 
-          side = "left", height = "750px",
+          side = "left", height = "1050px",
           shiny::tabPanel("Figures", mod_Figures_ui("Figures_1")),
           shiny::tabPanel("Report", mod_Tables_ui("Tables_1"))
        )

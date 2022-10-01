@@ -12,11 +12,20 @@ mod_Figures_ui <- function(id){
   tagList(
     fluidRow(
       #shinydashboard::box(
-        #width = 11,
-        #solidHeader = TRUE, 
-        uiOutput(ns("plot"))
+      #width = 11,
+      #solidHeader = TRUE, 
+      htmlOutput(ns("base_map")),
+      align = "center"
       #)
-    )
+    ),
+    fluidRow(
+      #shinydashboard::box(
+      #width = 11,
+      #solidHeader = TRUE, 
+      uiOutput(ns("plot")),
+      align = "center"
+      #)
+    )   
   )
 }
 
@@ -47,6 +56,12 @@ mod_Figures_server <- function(id, r){
         width = "75%",
         align = "center")
     }, deleteFile = FALSE)
+    
+    output$base_map <- renderUI({
+      tags$iframe(src= "www/base_map.html",
+        width = 450, height = 450,
+        frameBorder = "0")
+    })
     
     output$plot <- renderUI({
       if(!user_plot()){
