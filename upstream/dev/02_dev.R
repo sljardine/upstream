@@ -14,6 +14,12 @@
 # Engineering
 
 ## Dependencies ----
+usethis::use_package('tidyr')
+usethis::use_package('dplyr')
+usethis::use_package('ggplot2')
+usethis::use_package('sf')
+usethis::use_package('purrr')
+
 ## Amend DESCRIPTION with dependencies read from package code parsing
 attachment::att_amend_desc()
 
@@ -41,7 +47,8 @@ golem::add_sass_file("custom")
 
 ## Add internal datasets ----
 ## If you have data in your package
-usethis::use_data_raw(name = "my_dataset", open = FALSE)
+usethis::use_data_raw(name = "dfCulverts", open = TRUE)
+usethis::use_data_raw(name = "sfWRIA", open = TRUE)
 
 ## Tests ----
 ## Add one line by test you want to create
