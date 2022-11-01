@@ -19,13 +19,13 @@ attachment::att_amend_desc()
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module(name = "Figures", with_test = TRUE) 
-golem::add_module(name = "Tables", with_test = TRUE) 
-golem::add_module(name = "Welcome", with_test = TRUE) 
-golem::add_module(name = "Explore", with_test = TRUE) 
-golem::add_module(name = "Suggest", with_test = TRUE) 
-golem::add_module(name = "Custom", with_test = TRUE) 
-golem::add_module(name = "Learn", with_test = TRUE) 
+golem::add_module(name = "Figures", with_test = TRUE)
+golem::add_module(name = "Tables", with_test = TRUE)
+golem::add_module(name = "Welcome", with_test = TRUE)
+golem::add_module(name = "Explore", with_test = TRUE)
+golem::add_module(name = "Suggest", with_test = TRUE)
+golem::add_module(name = "Custom", with_test = TRUE)
+golem::add_module(name = "Learn", with_test = TRUE)
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
@@ -41,7 +41,8 @@ golem::add_sass_file("custom")
 
 ## Add internal datasets ----
 ## If you have data in your package
-usethis::use_data_raw(name = "my_dataset", open = FALSE)
+usethis::use_data_raw(name = "sfCulverts", open = TRUE)
+usethis::use_data_raw(name = "sfWRIA", open = TRUE)
 
 ## Tests ----
 ## Add one line by test you want to create
