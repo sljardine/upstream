@@ -18,10 +18,10 @@ mod_Explore_ui <- function(id){
           # TODO - Check - I will join by WRIA_NR to sfCulverts but should we use WRIA_ID instead (WRIA_ID is not in sfCulverts)?
           # TODO - Pass as argument or add to r reactive function?
           choices = setNames(
-            sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR),
-            nm = sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM)
+            c(0, sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
+            nm = c('All WRIAs', sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
           ),
-          selected = NULL,
+          selected = 0,
           width = '50%',
           multiple = TRUE
         )
@@ -29,14 +29,14 @@ mod_Explore_ui <- function(id){
       fluidRow(
         selectizeInput(
           inputId = ns("owner_sel"),
-          label = "Select Ownership Group",
+          label = "Select Ownership Type",
           # TODO - Check - I looked up owner names for owner_type_code from https://geodataservices.wdfw.wa.gov/hp/fishpassage/index.html
           # TODO - Pass as argument or add to r reactive function?
           choices = setNames(
-            sfCulverts %>% dplyr::distinct(owner_type_code) %>% dplyr::pull(owner_type_code) %>% sort(),
-            nm = c('City', 'County', 'Federal', 'Private', 'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Unknown')
+            c(0:9, 11, 12),
+            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
           ),
-          selected = NULL,
+          selected = 0,
           width = '50%',
           multiple = TRUE
         )
@@ -61,8 +61,8 @@ mod_Explore_ui <- function(id){
               label = "Variable on X axis",
               # TODO - Pass as argument or add to r reactive function?
               choices = setNames(
-                c('cost', 'barrier_count', 'potential_species', 'hmarg', 'hfull', 'wria_number', 'owner_type_code'),
-                nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Group')
+                c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
+                nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type')
               ),
               selected = "cost",
               width = "100%"),
@@ -75,10 +75,10 @@ mod_Explore_ui <- function(id){
                 label = "Variable on Y axis",
                 # TODO - Pass as argument or add to r reactive function?
                 choices = setNames(
-                  c('cost', 'barrier_count', 'potential_species', 'hmarg', 'hfull', 'wria_number', 'owner_type_code'),
-                  nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Group')
+                  c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
+                  nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type')
                 ),
-                selected = "hfull",
+                selected = "hfull_net",
                 width = "100%"
              ),
              offset = 0
@@ -113,8 +113,8 @@ mod_Explore_ui <- function(id){
            label = "Variable to display",
            # TODO - Pass as argument or add to r reactive function?
            choices = setNames(
-             c('cost', 'potential_species', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code'),
-             nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Group')
+             c('cost', 'potential_species', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
+             nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type')
            )
          ),
          # number of bins for numerical vars
@@ -183,20 +183,20 @@ mod_Explore_server <- function(id, r){
 
     # scatter plot variable choices
     cScatterPlotVariables <- setNames(
-      c('cost', 'barrier_count', 'potential_species', 'hmarg', 'hfull', 'wria_number', 'owner_type_code'),
-      nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Group')
+      c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
+      nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type')
     )
 
     # histogram choices
     cHistogramVariables <- setNames(
-      c('cost', 'potential_species', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code'),
-      nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Group')
+      c('cost', 'potential_species', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
+      nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type')
     )
 
     # color choices
     cColorVariables <- setNames(
-      c('none', 'cost', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code'),
-      nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Group')
+      c('none', 'cost', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
+      nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type')
     )
 
     # Explore tab submit event
@@ -215,36 +215,86 @@ mod_Explore_server <- function(id, r){
 
     # update barrier ids to filter to wria and owner
     observeEvent(c(input$area_sel, input$owner_sel), {
+      sfC <- sfCulverts %>% sf::st_drop_geometry()
+
+      # get areas to filter by
+      if('0' %in% input$area_sel){
+        cWRIA_NR <- sfWRIA %>% dplyr::pull(WRIA_NR)
+      } else {
+        cWRIA_NR <- as.integer(input$area_sel)
+      }
+
+      # get site ids for owner types to filter by
+      cSiteIds <- c()
+      if('0' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::pull(site_id))}
+      if('1' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
+      if('2' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
+      if('3' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
+      if('4' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
+      if('5' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
+      if('6' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
+      if('7' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
+      if('8' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
+      if('9' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
+      if('11' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
+      if('12' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
+
+      # filter sites
+      sfC <- sfC %>% dplyr::filter(wria_number %in% cWRIA_NR & site_id %in% cSiteIds)
+
+      # update select input choices
       updateSelectizeInput(
         session,
         inputId = 'barrier_ids',
-        choices = sfCulverts %>%
-          dplyr::filter(wria_number %in% input$area_sel & owner_type_code %in% input$owner_sel) %>%
-          dplyr::pull(site_id) %>%
-          sort()
+        choices = sfC %>% dplyr::pull(site_id) %>% sort(),
+        server = TRUE
       )
     })
 
     # update color variables for plot type
-    observeEvent(input$plot_type, {
+    observeEvent(c(input$plot_type, input$area_sel, input$owner_sel), {
       if(input$plot_type == 'Scatterplot'){
         cVars <- setNames(
-          c('none', 'cost', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code'),
-          nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Group')
+          c('none', 'cost', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
+          nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type')
         )
       } else {
         cVars <- setNames(
           c('none', 'barrier_count', 'wria_number', 'owner_type_code'),
-          nm = c('None', 'Downstream Barriers', 'WRIA', 'Ownership Group')
+          nm = c('None', 'Downstream Barriers', 'WRIA', 'Ownership Type')
         )
+      }
+
+      if(!is.null(input$area_sel)){
+        if(length(input$area_sel) < 2 & !('0' %in% input$area_sel)){
+          cVars <- cVars[cVars != 'wria_number']
+        }
+      }
+
+      if(!is.null(input$owner_sel)){
+        if(length(input$owner_sel) < 2 & !('0' %in% input$owner_sel)){
+          cVars <- cVars[cVars != 'owner_type_code']
+        }
       }
 
       updateSelectInput(inputId = 'color_variable', choices = cVars)
     })
 
     # update reactive values object with Explore inputs
-    observeEvent(input$area_sel, r$area_sel <- input$area_sel)
-    observeEvent(input$owner_sel, r$owner_sel <- input$owner_sel)
+    observeEvent(input$area_sel, {
+      if('0' %in% input$area_sel){
+        r$area_sel <- sfWRIA %>% dplyr::pull(WRIA_NR)
+      } else {
+        r$area_sel <- input$area_sel
+      }
+    })
+    observeEvent(input$owner_sel, {
+      if('0' %in% input$owner_sel){
+        r$owner_sel <- c(1:9, 11, 12)
+      } else {
+        r$owner_sel <- input$owner_sel
+      }
+    })
     observeEvent(input$plot_type, r$plot_type <- input$plot_type)
     observeEvent(input$x_axis_variable, r$x_axis_variable <- input$x_axis_variable)
     observeEvent(input$y_axis_variable, r$y_axis_variable <- input$y_axis_variable)
@@ -282,5 +332,3 @@ mod_Explore_server <- function(id, r){
     })
   })
 }
-
-# test commit from dev-jcomnick 20221101
