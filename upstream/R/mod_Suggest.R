@@ -15,27 +15,32 @@ mod_Suggest_ui <- function(id){
         selectizeInput(
           inputId = ns("area_sel"),
           label = "Select Area",
-          # Hard coded for now, but we'll deal with this later!
-          choices = c("Pilot", "Clallam County", "Grays Harbor County",
-                      "Island County", "Jefferson County", "etc."),
-          selected = NULL,
+          choices = setNames(
+            c(0, sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
+            nm = c('All WRIAs', sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
+          ),
+          selected = 0,
           width = '50%',
-          multiple = TRUE)
+          multiple = TRUE
+        )
       ),
       fluidRow(
         selectizeInput(
           inputId = ns("owner_sel"),
-          label = "Select Ownership",
-          # Hard coded for now, but we'll deal with this later!
-          choices = c("All", "County", "City", "State", "Tribal", "etc."),
-          selected = NULL,
+          label = "Select Ownership Type",
+          choices = setNames(
+            c(0:9, 11, 12),
+            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
+          ),
+          selected = 0,
           width = '50%',
-          multiple = TRUE)
+          multiple = TRUE
+        )
       ),
       fluidRow(
         radioButtons(inputId = ns("obj"),
           label = "Objective",
-          choices = list("Habitat Quantity" = 1, "Weighted Attributes" = 2, 
+          choices = list("Habitat Quantity" = 1, "Weighted Attributes" = 2,
             "Custom Barrier Scores" = 3)),
         conditionalPanel(
           condition = "input.obj == 2",
@@ -106,29 +111,33 @@ mod_Suggest_ui <- function(id){
 mod_Suggest_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
+    
+    observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
+    observeEvent(input$owner_sel, r$owner_sel_suggest <- input$owner_sel)
+    observeEvent(input$obj, r$obj_suggest <- input$obj)
+    observeEvent(input$budget, r$budget_suggest <- input$budget)
 
     observeEvent(input$w1, {
-      updateNumericInput(session, 'w2', 
-                         value = 1 - input$w1)
+      updateNumericInput(session, 'w2', value = 1 - input$w1)
     })
-    
+
     observeEvent(input$submit, {
-      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
+      if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
          !is.na(input$budget) && input$obj != 3 && input$cost != 2)
       {r$submit_suggest <- input$submit}
       else
-        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
-           !is.na(input$budget) && input$obj == 3 && 
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+           !is.na(input$budget) && input$obj == 3 &&
            !is.null(input$cust_score) && input$cost != 2)
         {r$submit_suggest <- input$submit}
       else
-        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
-           !is.na(input$budget) && input$obj != 3 && 
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+           !is.na(input$budget) && input$obj != 3 &&
            input$cost == 2 && !is.null(input$cust_cost))
         {r$submit_suggest <- input$submit}
       else
-        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && 
-           !is.na(input$budget) && input$obj == 3 && 
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+           !is.na(input$budget) && input$obj == 3 &&
            input$cost == 2 && !is.null(input$cust_score_cost))
         {r$submit_suggest <- input$submit}
       else

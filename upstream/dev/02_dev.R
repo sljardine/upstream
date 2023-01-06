@@ -16,6 +16,9 @@
 ## Dependencies ----
 ## Amend DESCRIPTION with dependencies read from package code parsing
 attachment::att_amend_desc()
+#usethis::use_package('leafgl')
+#usethis::use_package('ROI')
+#usethis::use_package('ROI.plugin.glpk')
 
 ## Add modules ----
 ## Create a module infrastructure in R/
@@ -44,6 +47,7 @@ golem::add_sass_file("custom")
 ## If you have data in your package
 usethis::use_data_raw(name = "sfCulverts", open = TRUE)
 usethis::use_data_raw(name = "sfWRIA", open = TRUE)
+
 
 ## Tests ----
 ## Add one line by test you want to create

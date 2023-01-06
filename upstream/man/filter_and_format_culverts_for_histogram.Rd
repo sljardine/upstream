@@ -4,7 +4,13 @@
 \alias{filter_and_format_culverts_for_histogram}
 \title{filter and format culverts for histogram}
 \usage{
-filter_and_format_culverts_for_histogram(sfC, r)
+filter_and_format_culverts_for_histogram(
+  sfC,
+  area_sel,
+  owner_sel,
+  color_variable,
+  histogram_variable
+)
 }
 \arguments{
 \item{sfC}{simple features data frame of culvert data}

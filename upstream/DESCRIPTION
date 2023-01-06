@@ -17,9 +17,12 @@ Imports:
     golem (>= 0.3.2),
     here,
     htmltools,
+    leafgl,
     leaflet,
     magrittr,
     purrr,
+    ROI,
+    ROI.plugin.glpk,
     sf,
     shiny (>= 1.7.1),
     tidyr

@@ -4,7 +4,7 @@
 \alias{get_wria_bounding_box}
 \title{get bounding box for selected wrias}
 \usage{
-get_wria_bounding_box(cWRIAs)
+get_wria_bounding_box(area_sel)
 }
 \arguments{
 \item{cWRIAs}{}
