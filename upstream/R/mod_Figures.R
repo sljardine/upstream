@@ -59,6 +59,7 @@ mod_Figures_server <- function(id, r){
     #  update_map_WRIA_labels(leaflet::leafletProxy(ns('base_map')), input$base_map_zoom, r)
     #})
     
+    # tab events
     observeEvent(r$tab_sel, {
       if(r$tab_sel == 'Welcome'){
         reset_map(leaflet::leafletProxy(ns('base_map')))
@@ -131,7 +132,6 @@ mod_Figures_server <- function(id, r){
           }
         }
       } else {
-        print('here')
         NULL
       }
     })
