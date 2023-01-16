@@ -11,8 +11,7 @@ app_ui <- function(request) {
     # Your application UI logic
     shinydashboard::dashboardPage(
       shinydashboard::dashboardHeader(title = "Upstream",
-      tags$li(class = "dropdown",
-      tags$img(src = "www/no_logo.png", height = "50"))),
+      tags$li(class = "dropdown")),
       shinydashboard::dashboardSidebar(disable = TRUE),
       shinydashboard::dashboardBody(
         shinydashboard::tabBox(

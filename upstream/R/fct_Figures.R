@@ -5,7 +5,7 @@
 #' @return A numeric vector of the bounding box for the provided WRIA simple features
 #' @export
 get_wria_bounding_box <- function(area_sel){
-  sfW <- sfWRIA %>%
+  sfW <- wrias %>%
     dplyr::filter(WRIA_NR %in% area_sel)
 
   bbox <- sfW %>%
@@ -21,7 +21,7 @@ get_wria_bounding_box <- function(area_sel){
 #' @export
 get_leaflet_map <- function(){
   # init the map
-  m <- sfWRIA %>%
+  m <- wrias %>%
     leaflet::leaflet() %>%
     leaflet::addProviderTiles("CartoDB.Positron", group = "Grayscale", options = leaflet::providerTileOptions(minZoom = 7))  %>%
     leaflet::addScaleBar("bottomleft")
@@ -45,7 +45,7 @@ get_leaflet_map <- function(){
   # add circle markers (could use addGlPoints maybe...)
   m <- m %>%
     leaflet::addCircleMarkers(
-      data = sfCulverts,
+      data = culverts_cmb,
       group = 'culverts',
       radius = 5,
       weight = 1.5,
@@ -66,7 +66,7 @@ reset_map <- function(leaf_proxy){
     leaflet::clearGroup('culverts') %>%
     leaflet::clearGroup('selected_wria') %>%
     leaflet::addCircleMarkers(
-      data = sfCulverts,
+      data = culverts_cmb,
       group = 'culverts',
       radius = 5,
       weight = 1.5,
@@ -82,7 +82,7 @@ reset_map <- function(leaf_proxy){
     )
   
   # selected wria bounding box
-  bbox <- get_wria_bounding_box(sfWRIA$WRIA_NR)
+  bbox <- get_wria_bounding_box(wrias$WRIA_NR)
   
   # zoom map to selected wrias
   leaf_proxy %>%
@@ -99,18 +99,18 @@ reset_map <- function(leaf_proxy){
 #' @export
 update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
   # get WRIA centroids
-  sfWC <- sfWRIA %>%
+  sfWC <- wrias %>%
     sf::st_drop_geometry() %>%
     dplyr::select(WRIA_NR, WRIA_NM) %>%
     dplyr::bind_cols(
-      sfWRIA %>%
+      wrias %>%
         dplyr::select() %>%
         sf::st_centroid() %>%
         sf::st_coordinates()
     )
 
   # summarize culvert count by WRIA
-  dfC <- sfCulverts %>% sf::st_drop_geometry()
+  dfC <- culverts_cmb %>% sf::st_drop_geometry()
   if(!is.null(area_sel)){
     dfC <- dfC %>% dplyr::filter(wria_number %in% area_sel)
   }
@@ -156,7 +156,7 @@ update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
 #' @return none
 #' @export
 update_map_selected_WRIA_polygons <- function(leaf_proxy, area_sel){
-  sfW <- sfWRIA %>% dplyr::filter(WRIA_NR %in% area_sel)
+  sfW <- wrias %>% dplyr::filter(WRIA_NR %in% area_sel)
 
   leaf_proxy %>%
     leaflet::clearGroup('selected_wria') %>%
@@ -180,12 +180,12 @@ update_map_selected_WRIA_polygons <- function(leaf_proxy, area_sel){
 update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_variable, highlight, barrier_ids){
   # set null variables for initial map draw
   if(is.null(color_variable)){color_variable <- 'none'} else {color_variable <- color_variable}
-  if(is.null(area_sel)){area_sel <- sfWRIA$WRIA_NR} else {area_sel <- area_sel}
+  if(is.null(area_sel)){area_sel <- wrias$WRIA_NR} else {area_sel <- area_sel}
   if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
   if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
 
   # filter culverts to selected wrias
-  sfC <- sfCulverts %>%
+  sfC <- culverts_cmb %>%
     dplyr::filter(wria_number %in% area_sel)
 
   # filter by owner class
@@ -214,7 +214,7 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_va
 
   # replace wria_number with name
   if(color_variable == 'wria_number'){
-    sfC <- replace_WRIA_number_with_name(sfC, sfWRIA)
+    sfC <- replace_WRIA_number_with_name(sfC, wrias)
   }
 
   # assign color variable to C
@@ -319,7 +319,7 @@ filter_and_format_culverts_for_histogram <- function(sfC, area_sel, owner_sel, c
 
   # this swaps wria_name if X = wria_number
   if(histogram_variable == 'wria_number' | color_variable == 'wria_number'){
-    sfC <- replace_WRIA_number_with_name(sfC, sfWRIA)
+    sfC <- replace_WRIA_number_with_name(sfC, wrias)
   }
 
   # this swaps owner names with code
@@ -391,7 +391,7 @@ filter_and_format_culverts_for_scatterplot <- function(sfC, area_sel, owner_sel,
 
   # this swaps wria_name if X = wria_number
   if(x_axis_variable == 'wria_number' | y_axis_variable == 'wria_number' | color_variable == 'wria_number'){
-    sfC <- replace_WRIA_number_with_name(sfC, sfWRIA)
+    sfC <- replace_WRIA_number_with_name(sfC, wrias)
   }
 
   # this swaps owner names with code
@@ -873,7 +873,7 @@ get_pretty_variable_name <- function(varName){
 #' @return string value of culvert site id closest to plot click coordinates or empty string if beyond maximum distance
 #' @export
 get_plot_click_site_id <- function(owner_sel, area_sel, x_axis_variable, y_axis_variable, plotClickX, plotClickY){
-  sfC <- sfCulverts
+  sfC <- culverts_cmb
 
   # get sites for selected owners
   cSiteIds <- c()

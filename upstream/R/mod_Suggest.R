@@ -16,8 +16,8 @@ mod_Suggest_ui <- function(id){
           inputId = ns("area_sel"),
           label = "Select Area",
           choices = setNames(
-            c(0, sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
-            nm = c('All WRIAs', sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
+            c(0, wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
+            nm = c('All WRIAs', wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
           ),
           selected = 0,
           width = '50%',

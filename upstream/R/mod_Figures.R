@@ -94,14 +94,13 @@ mod_Figures_server <- function(id, r){
     
     # run optimization on Suggest submit
     observeEvent(r$submit_suggest, {
-      soln <- solve_opt(sfCulverts, as.numeric(r$budget_suggest), D, as.integer(r$area_sel_suggest))
+      soln <- solve_opt(culverts_cmb, as.numeric(r$budget_suggest), D, as.integer(r$area_sel_suggest))
       map_leaflet_opt(
         leaflet::leafletProxy(ns('base_map')),
-        sfCulverts, #culverts
-        culvert_lines_sf, #lines with linestring geometries if glify = TRUE
+        culverts_cmb, #culverts
+        lines_simp, #lines with linestring geometries 
         soln, #output from solve_opt()
-        marginal_line_ids, #comids for all lines marginally upstream of each point
-        glify = TRUE
+        marginal_line_ids #comids for all lines marginally upstream of each point
       )
     })
 
@@ -116,17 +115,17 @@ mod_Figures_server <- function(id, r){
     store_plot <- eventReactive(c(r$tab_sel, r$submit_explore, r$submit_suggest, r$submit_custom, r$plot_brush), {
       # default plot for app is culvert count by WRIA
       #if(!user_plot()){
-      #  #getInitialExploreTabHistogram(sfCulverts, sfWRIA)
+      #  #getInitialExploreTabHistogram(culverts_cmb, wrias)
       #}
       # explore tab plots (scatter plot and histogram)
       if(user_plot()){
         if(r$tab_sel == "Explore"){
           if(r$plot_type_explore == 'Scatterplot'){
-            sfCulverts %>%
+            culverts_cmb %>%
               filter_and_format_culverts_for_scatterplot(r$area_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore) %>%
               figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore, r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax)
           } else if(r$plot_type_explore == 'Histogram'){
-            sfCulverts %>%
+            culverts_cmb %>%
               filter_and_format_culverts_for_histogram(r$area_sel_explore, r$owner_sel_explore, r$color_variable_explore, r$histogram_variable_explore) %>%
               figure_histogram(r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore, r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax)
           }

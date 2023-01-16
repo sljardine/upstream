@@ -16,9 +16,6 @@
 ## Dependencies ----
 ## Amend DESCRIPTION with dependencies read from package code parsing
 attachment::att_amend_desc()
-#usethis::use_package('leafgl')
-#usethis::use_package('ROI')
-#usethis::use_package('ROI.plugin.glpk')
 
 ## Add modules ----
 ## Create a module infrastructure in R/

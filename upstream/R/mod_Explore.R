@@ -16,8 +16,8 @@ mod_Explore_ui <- function(id){
           inputId = ns("area_sel"),
           label = "Select Area",
           choices = setNames(
-            c(0, sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
-            nm = c('All WRIAs', sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
+            c(0, wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
+            nm = c('All WRIAs', wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
           ),
           selected = 0,
           width = '50%',
@@ -211,11 +211,11 @@ mod_Explore_server <- function(id, r){
 
     # update barrier ids to filter to wria and owner
     observeEvent(c(input$area_sel, input$owner_sel), {
-      sfC <- sfCulverts %>% sf::st_drop_geometry()
+      sfC <- culverts_cmb %>% sf::st_drop_geometry()
 
       # get areas to filter by
       if('0' %in% input$area_sel){
-        cWRIA_NR <- sfWRIA %>% dplyr::pull(WRIA_NR)
+        cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         cWRIA_NR <- as.integer(input$area_sel)
       }
@@ -279,7 +279,7 @@ mod_Explore_server <- function(id, r){
     # update reactive values object with Explore inputs
     observeEvent(input$area_sel, {
       if('0' %in% input$area_sel){
-        r$area_sel_explore <- sfWRIA %>% dplyr::pull(WRIA_NR)
+        r$area_sel_explore <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         r$area_sel_explore <- input$area_sel
       }
