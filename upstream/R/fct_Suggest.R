@@ -56,28 +56,28 @@ map_leaflet_opt <- function(
   soln_wrias <- unique(points[soln, ]$wria_number)
   in_soln_wrias <- points$wria_number %in% soln_wrias
   #First get blocked/unblocked lines
-  blocked_lines <- marginal_line_ids[in_soln_wrias] %>% unlist()
-  leaflet_lines <- lines %>% filter(COMID %in% blocked_lines)
+  blocked_lines <- marginal_line_ids[in_soln_wrias] %>% base::unlist() 
+  leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
   #Defined blocked/unblocked
-  milp_stream_ids <- marginal_line_ids[soln] %>% unlist()
-  
+  milp_stream_ids <- marginal_line_ids[soln] %>% base::unlist()
+
   #Barrier color
   pal <- leaflet::colorNumeric(c("#b80000", "#179848"), 0 : 1)
-  
-  #Add lines  
-  leaf_proxy <- leaf_proxy %>% 
-    leafgl::addGlPolylines(data = leaflet_lines %>%  
-      filter(FCODE != 55800, !COMID %in% milp_stream_ids),
-      color = "#d46666", 
+
+  #Add lines
+  leaf_proxy <- leaf_proxy %>%
+    leafgl::addGlPolylines(data = leaflet_lines %>%
+      dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
+      color = "#d46666",
       opacity = 0.5
-      ) %>% 
+      ) %>%
       leafgl::addGlPolylines(
-        data = leaflet_lines %>% 
-          filter(COMID %in% milp_stream_ids),
-        color = "#3cdd78", 
+        data = leaflet_lines %>%
+          dplyr::filter(COMID %in% milp_stream_ids),
+        color = "#3cdd78",
         opacity = 0.5
-      ) 
-    
- 
+      )
+
+
   return(leaf_proxy)
 }
