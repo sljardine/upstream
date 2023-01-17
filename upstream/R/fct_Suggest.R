@@ -64,7 +64,7 @@ map_leaflet_opt <- function(
   #Barrier color
   pal <- leaflet::colorNumeric(c("#b80000", "#179848"), 0 : 1)
 
-  #Add lines
+  #Add lines 
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(data = leaflet_lines %>%
       dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
@@ -76,8 +76,36 @@ map_leaflet_opt <- function(
           dplyr::filter(COMID %in% milp_stream_ids),
         color = "#3cdd78",
         opacity = 0.5
-      )
+      ) 
 
-
+  #Add culverts
+  leaf_proxy <- leaf_proxy %>%  
+    leaflet::addCircleMarkers(
+      data = points,
+      lng = ~ site_longitude,
+      lat = ~ site_latitude,
+      radius = 5,
+      weight = 1.5,
+      color = ~pal(soln),
+      fillOpacity = 1,
+      opacity = 1,
+      clusterOptions = leaflet::markerClusterOptions(
+        iconCreateFunction = htmlwidgets::JS("function (cluster) {    
+          var childCount = cluster.getChildCount();  
+          if (childCount < 100) {  
+          c = 'rgba(204, 252, 255, 1.0);'
+          } else if (childCount < 1000) {  
+          c = 'rgba(237, 192, 181, 1);'  
+          } else { 
+          c = 'rgba(164, 164, 243, 1);'  
+          }    
+         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', 
+         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),  
+        spiderfyOnMaxZoom = FALSE,
+        disableClusteringAtZoom = 10
+      ),
+      popup = ~popup
+    )
+  
   return(leaf_proxy)
 }
