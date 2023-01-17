@@ -17,7 +17,8 @@ mod_Figures_ui <- function(id){
       #htmlOutput(ns("base_map")),
       tags$div(
         style = 'float: right; width: calc(100% - 15.9ch); height: calc(50vh - 100px); min-height: 500px; border: thin solid grey; margin-right: 5px;',
-        leaflet::leafletOutput(ns('base_map'), height = '100%'),
+        #leaflet::leafletOutput(ns('base_map'), height = '100%'),
+        leafgl::leafglOutput(ns('base_map'), height = '100%'),
         align = "center"
       )
       #)
@@ -54,57 +55,87 @@ mod_Figures_server <- function(id, r){
     })
 
     # map zoom event
-    observeEvent(input$base_map_zoom, {
-      update_map_WRIA_labels(leaflet::leafletProxy(ns('base_map')), input$base_map_zoom, r)
+    #observeEvent(input$base_map_zoom, {
+    #  update_map_WRIA_labels(leaflet::leafletProxy(ns('base_map')), input$base_map_zoom, r)
+    #})
+    
+    # tab events
+    observeEvent(r$tab_sel, {
+      if(r$tab_sel == 'Welcome'){
+        reset_map(leaflet::leafletProxy(ns('base_map')))
+        user_plot(FALSE)
+      } else if(r$tab_sel == 'Explore'){
+        reset_map(leaflet::leafletProxy(ns('base_map')))
+        user_plot(FALSE)
+      } else if(r$tab_sel == 'Suggest'){
+        reset_map(leaflet::leafletProxy(ns('base_map')))
+        user_plot(FALSE)
+      }
     })
 
     # explore submit button event for base_map
     observeEvent(r$submit_explore, {
-      update_map_selected_WRIA_polygons(leaflet::leafletProxy(ns('base_map')), r)
-      update_map_WRIA_labels(leaflet::leafletProxy(ns('base_map')), input$base_map_zoom, r)
-      update_map_culvert_markers(leaflet::leafletProxy(ns('base_map')), r)
+      update_map_selected_WRIA_polygons(leaflet::leafletProxy(ns('base_map')), r$area_sel_explore)
+      #update_map_WRIA_labels(leaflet::leafletProxy(ns('base_map')), input$base_map_zoom, r)
+      update_map_culvert_markers(leaflet::leafletProxy(ns('base_map')), r$area_sel_explore, r$owner_sel_explore, r$color_variable_explore, r$highlight_explore, r$barrier_ids_explore)
     })
 
     # fly to selected wrias on Explore submit
     observeEvent(r$submit_explore, {
-      if(r$rezoom_on_submit){
+      if(r$rezoom_on_submit_explore){
         # selected wria bounding box
-        bbox <- get_wria_bounding_box(r$area_sel)
+        bbox <- get_wria_bounding_box(r$area_sel_explore)
 
         # zoom map to selected wrias
         leaflet::leafletProxy(mapId = ns("base_map")) %>%
           leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
       }
     })
+    
+    # run optimization on Suggest submit
+    observeEvent(r$submit_suggest, {
+      soln <- solve_opt(culverts_cmb, as.numeric(r$budget_suggest), D, as.integer(r$area_sel_suggest))
+      map_leaflet_opt(
+        leaflet::leafletProxy(ns('base_map')),
+        culverts_cmb, #culverts
+        lines_simp, #lines with linestring geometries 
+        soln, #output from solve_opt()
+        marginal_line_ids #comids for all lines marginally upstream of each point
+      )
+    })
 
     # reset plot click text output
-    observeEvent(r$submit_explore, {r$plot_click_text_output <- ''})
+    observeEvent(r$submit_explore, {r$plot_click_text_output_explore <- ''})
 
     # initiates plot
     user_plot <- reactiveVal(FALSE)
     observeEvent(c(r$submit_explore, r$submit_suggest, r$submit_custom), user_plot(TRUE))
 
     # render plot on submit button events or brush event
-    store_plot <- eventReactive(c(r$submit_explore, r$submit_suggest, r$submit_custom, r$plot_brush), {
+    store_plot <- eventReactive(c(r$tab_sel, r$submit_explore, r$submit_suggest, r$submit_custom, r$plot_brush), {
       # default plot for app is culvert count by WRIA
       #if(!user_plot()){
-      #  #getInitialExploreTabHistogram(sfCulverts, sfWRIA)
+      #  #getInitialExploreTabHistogram(culverts_cmb, wrias)
       #}
       # explore tab plots (scatter plot and histogram)
       if(user_plot()){
         if(r$tab_sel == "Explore"){
-          if(r$plot_type == 'Scatterplot'){
-            sfCulverts %>%
-              filter_and_format_culverts_for_explore_tab_scatterplot(r) %>%
-              figure_explore_tab_scatterplot(r)
-          } else if(r$plot_type == 'Histogram'){
-            sfCulverts %>%
-              filter_and_format_culverts_for_histogram(r) %>%
-              figure_explore_tab_histogram(r)
+          if(r$plot_type_explore == 'Scatterplot'){
+            culverts_cmb %>%
+              filter_and_format_culverts_for_scatterplot(r$area_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore) %>%
+              figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore, r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax)
+          } else if(r$plot_type_explore == 'Histogram'){
+            culverts_cmb %>%
+              filter_and_format_culverts_for_histogram(r$area_sel_explore, r$owner_sel_explore, r$color_variable_explore, r$histogram_variable_explore) %>%
+              figure_histogram(r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore, r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax)
           }
         }
+      } else {
+        NULL
       }
     })
+    
+    # 
 
     output$logo <- renderImage({
       list(src = "inst/app/www/placeholder.png",
@@ -144,17 +175,22 @@ mod_Figures_server <- function(id, r){
 
     # plot click event to identify culvert
     observeEvent(input$plot_click, {
-      if(r$plot_type == 'histogram'){
-        r$plot_click_text_output <- ''
-      } else if(r$x_axis_variable %in% c('potential_species', 'owner_type_code') |
-         r$y_axis_variable %in% c('potential_species', 'owner_type_code')){
-        r$plot_click_text_output <- ''
-      } else {
-        get_plot_click_site_id(r, input$plot_click$x, input$plot_click$y)
+      if(r$tab_sel == 'Explore'){
+        if(r$plot_type_explore == 'histogram'){
+          r$plot_click_text_output <- ''
+        } else if(r$x_axis_variable_explore %in% c('potential_species', 'owner_type_code') | r$y_axis_variable_explore %in% c('potential_species', 'owner_type_code')){
+          r$plot_click_text_output_explore <- ''
+        } else {
+          r$plot_click_text_output_explore <- get_plot_click_site_id(r$owner_sel_explore, r$area_sel_explore, r$x_axis_variable_explore, r$y_axis_variable_explore, input$plot_click$x, input$plot_click$y)
+        }
       }
     })
 
     # render plot click text output
-    output$plot_click_text_output <- renderText(r$plot_click_text_output)
+    output$plot_click_text_output <- renderText({
+      if(r$tab_sel == 'Explore'){
+        r$plot_click_text_output_explore
+      }
+    })
   })
 }

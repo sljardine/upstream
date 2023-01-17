@@ -7,6 +7,9 @@ library(sf)
 
 sfCulverts <- read_sf('../../culverts_opt/data/processed/culverts_cmb.gpkg')
 
+# dub missing hmarg_net (use hfull_net for dev but be sure to change back!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
+sfCulverts <- sfCulverts %>% mutate(hmarg_net = hfull_net)
+
 # dub missing cost with linear model: cost ~ barrier_count
 lmCost <- lm(cost ~ barrier_count, data = sfCulverts)
 sfCulverts <- sfCulverts %>%
@@ -30,7 +33,7 @@ sfCulverts <- sfCulverts %>%
 # add wria_name
 sfCulverts <- sfCulverts %>%
   merge(
-    sf::read_sf('../../culverts_opt/data/processed/wrias_casearea/wrias_casearea.shp') %>%
+    sf::read_sf('../../culverts_opt/data/processed/wrias_casearea.gpkg') %>%
       sf::st_drop_geometry() %>%
       dplyr::select(WRIA_NR, WRIA_NM) %>%
       dplyr::rename(wria_number = WRIA_NR, wria_name = WRIA_NM),

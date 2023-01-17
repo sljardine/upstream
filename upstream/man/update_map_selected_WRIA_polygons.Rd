@@ -4,10 +4,10 @@
 \alias{update_map_selected_WRIA_polygons}
 \title{update map selected wria polygons}
 \usage{
-update_map_selected_WRIA_polygons(leafProxy, r)
+update_map_selected_WRIA_polygons(leaf_proxy, area_sel)
 }
 \arguments{
-\item{leafProxy}{leaflet proxy reference}
+\item{leaf_proxy}{leaflet proxy reference}
 
 \item{r}{reactive values object with app input values}
 }

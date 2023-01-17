@@ -4,10 +4,10 @@
 \alias{update_map_WRIA_labels}
 \title{update map WRIA labels}
 \usage{
-update_map_WRIA_labels(leafProxy, zoomLevel, r)
+update_map_WRIA_labels(leaf_proxy, zoom_level, area_sel, owner_sel)
 }
 \arguments{
-\item{leafProxy}{leaflet proxy reference}
+\item{leaf_proxy}{leaflet proxy reference}
 
 \item{zoomLevel}{zoom level for leaflet map}
 

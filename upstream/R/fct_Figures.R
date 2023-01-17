@@ -4,9 +4,9 @@
 #'
 #' @return A numeric vector of the bounding box for the provided WRIA simple features
 #' @export
-get_wria_bounding_box <- function(cWRIAs){
-  sfW <- sfWRIA %>%
-    dplyr::filter(WRIA_NR %in% cWRIAs)
+get_wria_bounding_box <- function(area_sel){
+  sfW <- wrias %>%
+    dplyr::filter(WRIA_NR %in% area_sel)
 
   bbox <- sfW %>%
     sf::st_bbox() %>%
@@ -20,10 +20,14 @@ get_wria_bounding_box <- function(cWRIAs){
 #' @return none
 #' @export
 get_leaflet_map <- function(){
-  sfWRIA %>%
+  # init the map
+  m <- wrias %>%
     leaflet::leaflet() %>%
     leaflet::addProviderTiles("CartoDB.Positron", group = "Grayscale", options = leaflet::providerTileOptions(minZoom = 7))  %>%
-    leaflet::addScaleBar("bottomleft") %>%
+    leaflet::addScaleBar("bottomleft")
+  
+  # add wria polygons
+  m <- m %>%
     leaflet::addPolygons(
       popup =  ~ paste0(
         "<b>WRIA Name:</b> ",
@@ -36,9 +40,12 @@ get_leaflet_map <- function(){
       opacity = 1,
       color = "#1c1cff",
       fillColor = "transparent"
-    ) %>%
+    )
+  
+  # add circle markers (could use addGlPoints maybe...)
+  m <- m %>%
     leaflet::addCircleMarkers(
-      data = sfCulverts,
+      data = culverts_cmb,
       group = 'culverts',
       radius = 5,
       weight = 1.5,
@@ -54,33 +61,61 @@ get_leaflet_map <- function(){
     )
 }
 
+reset_map <- function(leaf_proxy){
+  leaf_proxy %>%
+    leaflet::clearGroup('culverts') %>%
+    leaflet::clearGroup('selected_wria') %>%
+    leaflet::addCircleMarkers(
+      data = culverts_cmb,
+      group = 'culverts',
+      radius = 5,
+      weight = 1.5,
+      color = 'black',
+      opacity = 1,
+      fillColor = 'grey',
+      fillOpacity = 1,
+      clusterOptions = leaflet::markerClusterOptions(
+        spiderfyOnMaxZoom = FALSE,
+        disableClusteringAtZoom = 9
+      ),
+      popup = ~popup
+    )
+  
+  # selected wria bounding box
+  bbox <- get_wria_bounding_box(wrias$WRIA_NR)
+  
+  # zoom map to selected wrias
+  leaf_proxy %>%
+    leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+}
+
 #' @title update map WRIA labels
 #'
-#' @param leafProxy leaflet proxy reference
+#' @param leaf_proxy leaflet proxy reference
 #' @param zoomLevel zoom level for leaflet map
 #' @param r reactive values object with app input values
 #'
 #' @return none
 #' @export
-update_map_WRIA_labels <- function(leafProxy, zoomLevel, r){
+update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
   # get WRIA centroids
-  sfWC <- sfWRIA %>%
+  sfWC <- wrias %>%
     sf::st_drop_geometry() %>%
     dplyr::select(WRIA_NR, WRIA_NM) %>%
     dplyr::bind_cols(
-      sfWRIA %>%
+      wrias %>%
         dplyr::select() %>%
         sf::st_centroid() %>%
         sf::st_coordinates()
     )
 
   # summarize culvert count by WRIA
-  dfC <- sfCulverts %>% sf::st_drop_geometry()
-  if(!is.null(r$area_sel)){
-    dfC <- dfC %>% dplyr::filter(wria_number %in% r$area_sel)
+  dfC <- culverts_cmb %>% sf::st_drop_geometry()
+  if(!is.null(area_sel)){
+    dfC <- dfC %>% dplyr::filter(wria_number %in% area_sel)
   }
-  if(!is.null(r$owner_sel)){
-    dfC <- dfC %>% dplyr::filter(owner_type_code %in% r$owner_sel)
+  if(!is.null(owner_sel)){
+    dfC <- dfC %>% dplyr::filter(owner_type_code %in% owner_sel)
   }
 
   sfWC <- sfWC %>%
@@ -92,10 +127,10 @@ update_map_WRIA_labels <- function(leafProxy, zoomLevel, r){
     )
 
   # create label based on zoom
-  if(is.null(zoomLevel)){
+  if(is.null(zoom_level)){
     sfWC <- sfWC %>% dplyr::mutate(Label = Count)
   } else {
-    if(zoomLevel < 9){
+    if(zoom_level < 9){
       sfWC <- sfWC %>% dplyr::mutate(Label = Count)
     } else {
       sfWC <- sfWC %>% dplyr::mutate(Label = paste0(WRIA_NM, ' (', Count, ')'))
@@ -103,7 +138,7 @@ update_map_WRIA_labels <- function(leafProxy, zoomLevel, r){
   }
 
   # update map
-  leafProxy %>%
+  leaf_proxy %>%
     leaflet::clearGroup('wria') %>%
     leaflet::addLabelOnlyMarkers(
       data = sfWC, lat = ~Y, lng = ~X,
@@ -115,15 +150,15 @@ update_map_WRIA_labels <- function(leafProxy, zoomLevel, r){
 
 #' @title update map selected wria polygons
 #'
-#' @param leafProxy leaflet proxy reference
+#' @param leaf_proxy leaflet proxy reference
 #' @param r reactive values object with app input values
 #'
 #' @return none
 #' @export
-update_map_selected_WRIA_polygons <- function(leafProxy, r){
-  sfW <- sfWRIA %>% dplyr::filter(WRIA_NR %in% r$area_sel)
+update_map_selected_WRIA_polygons <- function(leaf_proxy, area_sel){
+  sfW <- wrias %>% dplyr::filter(WRIA_NR %in% area_sel)
 
-  leafProxy %>%
+  leaf_proxy %>%
     leaflet::clearGroup('selected_wria') %>%
     leaflet::addPolygons(
       data = sfW,
@@ -137,36 +172,36 @@ update_map_selected_WRIA_polygons <- function(leafProxy, r){
 
 #' @title update map culvert markers
 #'
-#' @param leafProxy leaflet proxy reference
+#' @param leaf_proxy leaflet proxy reference
 #' @param r reactive values object with app input values
 #'
 #' @return none
 #' @export
-update_map_culvert_markers <- function(leafProxy, r){
+update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_variable, highlight, barrier_ids){
   # set null variables for initial map draw
-  if(is.null(r$color_variable)){color_variable <- 'none'} else {color_variable <- r$color_variable}
-  if(is.null(r$area_sel)){area_sel <- sfWRIA$WRIA_NR} else {area_sel <- r$area_sel}
-  if(is.null(r$owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- r$owner_sel}
-  if(is.null(r$highlight)){highlight <- 0} else {highlight <- r$highlight}
+  if(is.null(color_variable)){color_variable <- 'none'} else {color_variable <- color_variable}
+  if(is.null(area_sel)){area_sel <- wrias$WRIA_NR} else {area_sel <- area_sel}
+  if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
+  if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
 
   # filter culverts to selected wrias
-  sfC <- sfCulverts %>%
+  sfC <- culverts_cmb %>%
     dplyr::filter(wria_number %in% area_sel)
 
   # filter by owner class
   cSiteIds <- c()
-  if('0' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::pull(site_id))}
-  if('1' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
-  if('2' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
-  if('3' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
-  if('4' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
-  if('5' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
-  if('6' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
-  if('7' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
-  if('8' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
-  if('9' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
-  if('11' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
-  if('12' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
+  if('0' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::pull(site_id))}
+  if('1' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
+  if('2' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
+  if('3' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
+  if('4' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
+  if('5' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
+  if('6' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
+  if('7' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
+  if('8' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
+  if('9' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
+  if('11' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
+  if('12' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   sfC <- sfC %>% dplyr::filter(site_id %in% cSiteIds)
 
   # replace owner_type_code with name
@@ -179,7 +214,7 @@ update_map_culvert_markers <- function(leafProxy, r){
 
   # replace wria_number with name
   if(color_variable == 'wria_number'){
-    sfC <- replaceWRIANumberWithName(sfC, sfWRIA)
+    sfC <- replace_WRIA_number_with_name(sfC, wrias)
   }
 
   # assign color variable to C
@@ -214,10 +249,10 @@ update_map_culvert_markers <- function(leafProxy, r){
   }
 
   # set barrier ids
-  if(is.null(r$barrier_ids) | highlight == 0){
+  if(is.null(barrier_ids) | highlight == 0){
     cBarrierIds <- ''
   } else {
-    cBarrierIds <- r$barrier_ids
+    cBarrierIds <- barrier_ids
   }
 
   # calculate highlighted variable in culverts data frame
@@ -229,13 +264,13 @@ update_map_culvert_markers <- function(leafProxy, r){
   strokePal <- leaflet::colorFactor(palette = c('#00ffff', 'black'), domain = c('Highlighted', 'Not Highlighted'), ordered = TRUE)
 
   # remove the culverts from the map
-  leafProxy %>% leaflet::clearGroup('culverts')
+  leaf_proxy %>% leaflet::clearGroup('culverts')
 
   # return if no culverts to draw
   if(nrow(sfC) == 0){return()}
 
   # add culverts to map if zoomed in enough
-  leafProxy %>%
+  leaf_proxy %>%
     leaflet::addCircleMarkers(
       data = sfC,
       group = 'culverts',
@@ -260,48 +295,48 @@ update_map_culvert_markers <- function(leafProxy, r){
 #'
 #' @return data frame of culvert data formatted to make histogram in ggplot
 #' @export
-filter_and_format_culverts_for_histogram <- function(sfC, r){
+filter_and_format_culverts_for_histogram <- function(sfC, area_sel, owner_sel, color_variable, histogram_variable){
   # filter by area
   sfC <- sfC %>%
     sf::st_drop_geometry() %>%
-    dplyr::filter(wria_number %in% as.integer(r$area_sel))
+    dplyr::filter(wria_number %in% as.integer(area_sel))
 
   # filter by owner class
   cSiteIds <- c()
-  if('0' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::pull(site_id))}
-  if('1' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
-  if('2' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
-  if('3' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
-  if('4' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
-  if('5' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
-  if('6' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
-  if('7' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
-  if('8' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
-  if('9' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
-  if('11' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
-  if('12' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
+  if('0' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::pull(site_id))}
+  if('1' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
+  if('2' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
+  if('3' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
+  if('4' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
+  if('5' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
+  if('6' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
+  if('7' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
+  if('8' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
+  if('9' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
+  if('11' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
+  if('12' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   sfC <- sfC %>% dplyr::filter(site_id %in% cSiteIds)
 
   # this swaps wria_name if X = wria_number
-  if(r$histogram_variable == 'wria_number' | r$color_variable == 'wria_number'){
-    sfC <- replaceWRIANumberWithName(sfC, sfWRIA)
+  if(histogram_variable == 'wria_number' | color_variable == 'wria_number'){
+    sfC <- replace_WRIA_number_with_name(sfC, wrias)
   }
 
   # this swaps owner names with code
-  if(r$histogram_variable == 'owner_type_code' | r$color_variable == 'owner_type_code'){
+  if(histogram_variable == 'owner_type_code' | color_variable == 'owner_type_code'){
     sfC <- sfC %>%
       dplyr::select(-owner_type_code) %>%
       dplyr::rename(owner_type_code = owner_type_name_short)
   }
 
   # create dummy variable if color variable is 'none'
-  if(r$color_variable == 'none'){
-    sfC[r$color_variable] <- 'none'
+  if(color_variable == 'none'){
+    sfC[color_variable] <- 'none'
   }
 
   # calculate new variables
-  sfC$X <- sfC %>% dplyr::pull(r$histogram_variable)
-  sfC$C <- sfC %>% dplyr::pull(r$color_variable)
+  sfC$X <- sfC %>% dplyr::pull(histogram_variable)
+  sfC$C <- sfC %>% dplyr::pull(color_variable)
 
   # select variables
   sfC <- sfC %>% dplyr::select(site_id, X, C)
@@ -318,7 +353,7 @@ filter_and_format_culverts_for_histogram <- function(sfC, r){
     })
   }
 
-  if(r$color_variable == 'barrier_count'){
+  if(color_variable == 'barrier_count'){
     sfC <- sfC %>% dplyr::mutate(C = as.factor(C))
   }
 
@@ -332,47 +367,47 @@ filter_and_format_culverts_for_histogram <- function(sfC, r){
 #'
 #' @return data frame of culvert data formatted to make scatterplot in ggplot
 #' @export
-filter_and_format_culverts_for_explore_tab_scatterplot <- function(sfC, r){
+filter_and_format_culverts_for_scatterplot <- function(sfC, area_sel, owner_sel, x_axis_variable, y_axis_variable, color_variable){
   # filter by area
   sfC <- sfC %>%
     sf::st_drop_geometry() %>%
-    dplyr::filter(wria_number %in% as.integer(r$area_sel))
+    dplyr::filter(wria_number %in% as.integer(area_sel))
 
   # filter by owner class
   cSiteIds <- c()
-  if('0' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::pull(site_id))}
-  if('1' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
-  if('2' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
-  if('3' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
-  if('4' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
-  if('5' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
-  if('6' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
-  if('7' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
-  if('8' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
-  if('9' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
-  if('11' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
-  if('12' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
+  if('0' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::pull(site_id))}
+  if('1' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
+  if('2' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
+  if('3' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
+  if('4' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
+  if('5' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
+  if('6' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
+  if('7' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
+  if('8' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
+  if('9' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
+  if('11' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
+  if('12' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   sfC <- sfC %>% dplyr::filter(site_id %in% cSiteIds)
 
   # this swaps wria_name if X = wria_number
-  if(r$x_axis_variable == 'wria_number' | r$y_axis_variable == 'wria_number' | r$color_variable == 'wria_number'){
-    sfC <- replaceWRIANumberWithName(sfC, sfWRIA)
+  if(x_axis_variable == 'wria_number' | y_axis_variable == 'wria_number' | color_variable == 'wria_number'){
+    sfC <- replace_WRIA_number_with_name(sfC, wrias)
   }
 
   # this swaps owner names with code
-  if(r$x_axis_variable == 'owner_type_code' | r$y_axis_variable == 'owner_type_code' | r$color_variable == 'owner_type_code'){
+  if(x_axis_variable == 'owner_type_code' | y_axis_variable == 'owner_type_code' | color_variable == 'owner_type_code'){
     sfC <- sfC %>%
       dplyr::select(-owner_type_code) %>%
       dplyr::rename(owner_type_code = owner_type_name_short)
   }
 
   # add dummy color variable if color_variable = 'none'
-  if(r$color_variable == 'none'){sfC[r$color_variable] <- 'none'}
+  if(color_variable == 'none'){sfC[color_variable] <- 'none'}
 
   # calculate new variables
-  sfC$X <- sfC %>% dplyr::pull(r$x_axis_variable)
-  sfC$Y <- sfC %>% dplyr::pull(r$y_axis_variable)
-  sfC$C <- sfC %>% dplyr::pull(r$color_variable)
+  sfC$X <- sfC %>% dplyr::pull(x_axis_variable)
+  sfC$Y <- sfC %>% dplyr::pull(y_axis_variable)
+  sfC$C <- sfC %>% dplyr::pull(color_variable)
 
   # select the variables
   sfC <- sfC %>% dplyr::select(site_id, X, Y, C)
@@ -413,17 +448,17 @@ filter_and_format_culverts_for_explore_tab_scatterplot <- function(sfC, r){
 #'
 #' @return ggplot object of culvert data scatterplot
 #' @export
-figure_explore_tab_scatterplot <- function(sfC, r){
+figure_scatterplot <- function(sfC, x_axis_variable, y_axis_variable, color_variable, x_jitter, y_jitter, highlight, barrier_ids, plot_xmin, plot_xmax, plot_ymin, plot_ymax){
   # set the barrier ids to '' if null
-  if(is.null(r$barrier_ids)){
+  if(is.null(barrier_ids)){
     cBarrierIds <- ''
   } else {
-    cBarrierIds <- r$barrier_ids
+    cBarrierIds <- barrier_ids
   }
 
   # calculate highlight variable
   sfC$IsHighlighted <- 'N'
-  if(r$highlight == 2){
+  if(highlight == 2){
     sfC <- sfC %>%
       dplyr::mutate(IsHighlighted = dplyr::case_when(site_id %in% cBarrierIds ~ 'Y', TRUE ~ 'N')) %>%
       dplyr::arrange(IsHighlighted)
@@ -432,12 +467,12 @@ figure_explore_tab_scatterplot <- function(sfC, r){
   # init the ggplot
   ggP <- sfC %>%
     ggplot2::ggplot(ggplot2::aes(x = X, y = Y, fill = C, color = IsHighlighted)) +
-    ggplot2::geom_jitter(width = r$x_jitter, height = r$y_jitter, alpha = .9, stroke = 1.3, size = 3.5, pch = 21) +
+    ggplot2::geom_jitter(width = x_jitter, height = y_jitter, alpha = .9, stroke = 1.3, size = 3.5, pch = 21) +
     #ggplot2::scale_y_continuous(labels = function(x) formatC(x, width = 10)) +
     ggplot2::scale_color_manual(values = c('N' = 'black', 'Y' = '#00ffff')) +
     ggplot2::guides(color = 'none') +
-    ggplot2::xlab(get_pretty_variable_name(r$x_axis_variable)) +
-    ggplot2::ylab(get_pretty_variable_name(r$y_axis_variable)) +
+    ggplot2::xlab(get_pretty_variable_name(x_axis_variable)) +
+    ggplot2::ylab(get_pretty_variable_name(y_axis_variable)) +
     ggplot2::theme_bw() +
     ggplot2::theme(
       text = ggplot2::element_text(size = 16, family = 'mono', face = 'bold'),
@@ -446,27 +481,27 @@ figure_explore_tab_scatterplot <- function(sfC, r){
     )
 
   # y axis variable
-  if(r$y_axis_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
+  if(y_axis_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
     ggP <- ggP + ggplot2::scale_y_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = '%10s'))
   } else {
     ggP <- ggP + ggplot2::scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ',', scientific = FALSE) %>% sprintf(fmt = '%10s'))
   }
 
   # x axis variable
-  if(r$x_axis_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
+  if(x_axis_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
     ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = '%10s'))
-  } else if(!r$x_axis_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
+  } else if(!x_axis_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
     ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ',', scientific = FALSE) %>% sprintf(fmt = '%10s'))
   }
 
   # color (fill) scale and legend
-  if(r$color_variable == 'none'){
+  if(color_variable == 'none'){
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c('none' = 'grey')) +
       ggplot2::theme(legend.position = 'none')
-  } else if (r$color_variable %in% c('owner_type_code', 'wria_number')) {
+  } else if (color_variable %in% c('owner_type_code', 'wria_number')) {
     # discrete variables
-    if(r$color_variable == 'owner_type_code'){
+    if(color_variable == 'owner_type_code'){
       # colorRampPalette(brewer.pal(10, 'Spectral'))(11)
       scaleFill <- ggplot2::scale_fill_manual(
         values = c(
@@ -485,7 +520,7 @@ figure_explore_tab_scatterplot <- function(sfC, r){
         ),
         drop = TRUE, limits = force
       )
-    } else if(r$color_variable == 'wria_number') {
+    } else if(color_variable == 'wria_number') {
       scaleFill <- ggplot2::scale_fill_manual(
         values = c(
           'Cedar - Sammamish' = '#9E0142',
@@ -540,7 +575,7 @@ figure_explore_tab_scatterplot <- function(sfC, r){
   }
 
   # x axis tick label orientation
-  if(r$x_axis_variable %in% c('wria_number', 'owner_type_code', 'potential_species')){
+  if(x_axis_variable %in% c('wria_number', 'owner_type_code', 'potential_species')){
     ggP <- ggP +
       ggplot2::theme(
         axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
@@ -548,11 +583,11 @@ figure_explore_tab_scatterplot <- function(sfC, r){
   }
 
   # ranges from brush plot
-  if(!is.null(r$plot_xmin)){
-    if(!(is.na(r$plot_xmin) & is.na(r$plot_xmax) & is.na(r$plot_ymin) & is.na(r$plot_ymax))){
+  if(!is.null(plot_xmin)){
+    if(!(is.na(plot_xmin) & is.na(plot_xmax) & is.na(plot_ymin) & is.na(plot_ymax))){
       ggP <- ggP + ggplot2::coord_cartesian(
-        xlim = c(r$plot_xmin, r$plot_xmax),
-        ylim = c(r$plot_ymin, r$plot_ymax),
+        xlim = c(plot_xmin, plot_xmax),
+        ylim = c(plot_ymin, plot_ymax),
         expand = FALSE
       )
     }
@@ -570,11 +605,11 @@ figure_explore_tab_scatterplot <- function(sfC, r){
 #'
 #' @return ggplot object of culvert data histogram
 #' @export
-figure_explore_tab_histogram <- function(sfC, r){
+figure_histogram <- function(sfC, x_axis_variable, y_axis_variable, color_variable, histogram_variable, histogram_nbins, highlight, barrier_ids, plot_xmin, plot_xmax, plot_ymin, plot_ymax){
   # init the ggplot
   ggP <- sfC %>%
     ggplot2::ggplot(ggplot2::aes(x = X, fill = C)) +
-    ggplot2::xlab(get_pretty_variable_name(r$histogram_variable)) +
+    ggplot2::xlab(get_pretty_variable_name(histogram_variable)) +
     ggplot2::guides(color = 'none') +
     ggplot2::theme_bw() +
     ggplot2::theme(
@@ -584,7 +619,7 @@ figure_explore_tab_histogram <- function(sfC, r){
 
   # use bins if numeric
   if(is.numeric(sfC$X)){
-    ggP <- ggP + ggplot2::geom_histogram(bins = r$histogram_nbins)
+    ggP <- ggP + ggplot2::geom_histogram(bins = histogram_nbins)
   } else {
     ggP <- ggP + ggplot2::geom_bar()
   }
@@ -593,21 +628,21 @@ figure_explore_tab_histogram <- function(sfC, r){
   ggP <- ggP + ggplot2::scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ',', scientific = FALSE) %>% sprintf(fmt = '%10s'))
 
   # x axis variable
-  if(r$histogram_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
+  if(histogram_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
     ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = '%10s'))
-  } else if(!r$histogram_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
+  } else if(!histogram_variable %in% c('owner_type_code', 'wria_number', 'potential_species')){
     ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ',', scientific = FALSE) %>% sprintf(fmt = '%10s'))
   }
 
   # color variable
   # color (fill) scale and legend
-  if(r$color_variable == 'none'){
+  if(color_variable == 'none'){
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c('none' = '#5b5b5b')) +
       ggplot2::theme(legend.position = 'none')
-  } else if (r$color_variable %in% c('owner_type_code', 'wria_number', 'barrier_count')) {
+  } else if (color_variable %in% c('owner_type_code', 'wria_number', 'barrier_count')) {
     # discrete variables
-    if(r$color_variable == 'owner_type_code'){
+    if(color_variable == 'owner_type_code'){
       # colorRampPalette(brewer.pal(10, 'Spectral'))(11)
       scaleFill <- ggplot2::scale_fill_manual(
         values = c(
@@ -626,7 +661,7 @@ figure_explore_tab_histogram <- function(sfC, r){
         ),
         drop = TRUE, limits = force
       )
-    } else if(r$color_variable == 'wria_number') {
+    } else if(color_variable == 'wria_number') {
       scaleFill <- ggplot2::scale_fill_manual(
         values = c(
           'Cedar - Sammamish' = '#9E0142',
@@ -655,7 +690,7 @@ figure_explore_tab_histogram <- function(sfC, r){
         ),
         drop = TRUE, limits = force
       )
-    } else if(r$color_variable == 'barrier_count'){
+    } else if(color_variable == 'barrier_count'){
       scaleFill <- ggplot2::scale_fill_manual(
         values = c(
           '1' = '#5E4FA2',
@@ -697,12 +732,12 @@ figure_explore_tab_histogram <- function(sfC, r){
   }
 
   # highlighted barriers
-  if(r$highlight == 2){
+  if(highlight == 2){
     # set the barrier ids to '' if null
-    if(is.null(r$barrier_ids)){
+    if(is.null(barrier_ids)){
       cBarrierIds <- ''
     } else {
-      cBarrierIds <- r$barrier_ids
+      cBarrierIds <- barrier_ids
     }
 
     # filter out highlighted barriers
@@ -714,7 +749,7 @@ figure_explore_tab_histogram <- function(sfC, r){
   }
 
   # x axis tick label orientation
-  if(r$histogram_variable %in% c('wria_number', 'owner_type_code', 'potential_species')){
+  if(histogram_variable %in% c('wria_number', 'owner_type_code', 'potential_species')){
     ggP <- ggP +
       ggplot2::theme(
         axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
@@ -722,11 +757,11 @@ figure_explore_tab_histogram <- function(sfC, r){
   }
 
   # ranges from brush plot
-  if(!is.null(r$plot_xmin)){
-    if(!(is.na(r$plot_xmin) & is.na(r$plot_xmax) & is.na(r$plot_ymin) & is.na(r$plot_ymax))){
+  if(!is.null(plot_xmin)){
+    if(!(is.na(plot_xmin) & is.na(plot_xmax) & is.na(plot_ymin) & is.na(plot_ymax))){
       ggP <- ggP + ggplot2::coord_cartesian(
-        xlim = c(r$plot_xmin, r$plot_xmax),
-        ylim = c(r$plot_ymin, r$plot_ymax),
+        xlim = c(plot_xmin, plot_xmax),
+        ylim = c(plot_ymin, plot_ymax),
         expand = FALSE
       )
     }
@@ -743,7 +778,7 @@ figure_explore_tab_histogram <- function(sfC, r){
 #'
 #' @return ggplot object of culvert count by WRIA
 #' @export
-figure_explore_tab_culvert_count_by_WRIA_histogram <- function(sfC, sfW){
+figure_culvert_count_by_WRIA_histogram <- function(sfC, sfW){
   sfC %>%
     replace_WRIA_number_with_name(sfW) %>%
     ggplot2::ggplot(ggplot2::aes(x = wria_number)) +
@@ -837,27 +872,27 @@ get_pretty_variable_name <- function(varName){
 #'
 #' @return string value of culvert site id closest to plot click coordinates or empty string if beyond maximum distance
 #' @export
-get_plot_click_site_id <- function(r, plotClickX, plotClickY){
-  sfC <- sfCulverts
+get_plot_click_site_id <- function(owner_sel, area_sel, x_axis_variable, y_axis_variable, plotClickX, plotClickY){
+  sfC <- culverts_cmb
 
   # get sites for selected owners
   cSiteIds <- c()
-  if('1' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
-  if('2' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
-  if('3' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
-  if('4' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
-  if('5' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
-  if('6' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
-  if('7' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
-  if('8' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
-  if('9' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
-  if('11' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
-  if('12' %in% r$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
+  if('1' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
+  if('2' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
+  if('3' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
+  if('4' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
+  if('5' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
+  if('6' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
+  if('7' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
+  if('8' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
+  if('9' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
+  if('11' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
+  if('12' %in% owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
 
   # filter by area and owner
   sfC <- sfC %>%
-    dplyr::filter(wria_number %in% r$area_sel & site_id %in% cSiteIds) %>%
-    dplyr::rename(X = r$x_axis_variable, Y = r$y_axis_variable)
+    dplyr::filter(wria_number %in% area_sel & site_id %in% cSiteIds) %>%
+    dplyr::rename(X = x_axis_variable, Y = y_axis_variable)
 
   sfC1 <- sfC %>%
     dplyr::mutate(RelX = X / max(sfC$X), RelY = Y / max(sfC$Y)) %>%
@@ -867,9 +902,9 @@ get_plot_click_site_id <- function(r, plotClickX, plotClickY){
     dplyr::select(site_id, X, Y, Diff)
 
   if(sfC1$Diff < .03){
-    siteId <- r$plot_click_text_output <- paste0('Site Id: ', sfC1$site_id)
+    siteId <- paste0('Site Id: ', sfC1$site_id)
   } else {
-    siteId <- r$plot_click_text_output <- ''
+    siteId <- ''
   }
 
   return(siteId)

@@ -4,10 +4,17 @@
 \alias{update_map_culvert_markers}
 \title{update map culvert markers}
 \usage{
-update_map_culvert_markers(leafProxy, r)
+update_map_culvert_markers(
+  leaf_proxy,
+  area_sel,
+  owner_sel,
+  color_variable,
+  highlight,
+  barrier_ids
+)
 }
 \arguments{
-\item{leafProxy}{leaflet proxy reference}
+\item{leaf_proxy}{leaflet proxy reference}
 
 \item{r}{reactive values object with app input values}
 }

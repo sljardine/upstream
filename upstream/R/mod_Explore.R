@@ -15,11 +15,9 @@ mod_Explore_ui <- function(id){
         selectizeInput(
           inputId = ns("area_sel"),
           label = "Select Area",
-          # TODO - Check - I will join by WRIA_NR to sfCulverts but should we use WRIA_ID instead (WRIA_ID is not in sfCulverts)?
-          # TODO - Pass as argument or add to r reactive function?
           choices = setNames(
-            c(0, sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
-            nm = c('All WRIAs', sfWRIA %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
+            c(0, wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
+            nm = c('All WRIAs', wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
           ),
           selected = 0,
           width = '50%',
@@ -30,8 +28,6 @@ mod_Explore_ui <- function(id){
         selectizeInput(
           inputId = ns("owner_sel"),
           label = "Select Ownership Type",
-          # TODO - Check - I looked up owner names for owner_type_code from https://geodataservices.wdfw.wa.gov/hp/fishpassage/index.html
-          # TODO - Pass as argument or add to r reactive function?
           choices = setNames(
             c(0:9, 11, 12),
             nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
@@ -215,11 +211,11 @@ mod_Explore_server <- function(id, r){
 
     # update barrier ids to filter to wria and owner
     observeEvent(c(input$area_sel, input$owner_sel), {
-      sfC <- sfCulverts %>% sf::st_drop_geometry()
+      sfC <- culverts_cmb %>% sf::st_drop_geometry()
 
       # get areas to filter by
       if('0' %in% input$area_sel){
-        cWRIA_NR <- sfWRIA %>% dplyr::pull(WRIA_NR)
+        cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         cWRIA_NR <- as.integer(input$area_sel)
       }
@@ -283,29 +279,29 @@ mod_Explore_server <- function(id, r){
     # update reactive values object with Explore inputs
     observeEvent(input$area_sel, {
       if('0' %in% input$area_sel){
-        r$area_sel <- sfWRIA %>% dplyr::pull(WRIA_NR)
+        r$area_sel_explore <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
-        r$area_sel <- input$area_sel
+        r$area_sel_explore <- input$area_sel
       }
     })
     observeEvent(input$owner_sel, {
       if('0' %in% input$owner_sel){
-        r$owner_sel <- c(1:9, 11, 12)
+        r$owner_sel_explore <- c(1:9, 11, 12)
       } else {
-        r$owner_sel <- input$owner_sel
+        r$owner_sel_explore <- input$owner_sel
       }
     })
-    observeEvent(input$plot_type, r$plot_type <- input$plot_type)
-    observeEvent(input$x_axis_variable, r$x_axis_variable <- input$x_axis_variable)
-    observeEvent(input$y_axis_variable, r$y_axis_variable <- input$y_axis_variable)
-    observeEvent(input$x_jitter, r$x_jitter <- input$x_jitter)
-    observeEvent(input$y_jitter, r$y_jitter <- input$y_jitter)
-    observeEvent(input$histogram_variable, r$histogram_variable <- input$histogram_variable)
-    observeEvent(input$histogram_nbins, r$histogram_nbins <- input$histogram_nbins)
-    observeEvent(input$color_variable, r$color_variable <- input$color_variable)
-    observeEvent(input$highlight, r$highlight <- input$highlight)
-    observeEvent(input$barrier_ids, r$barrier_ids <- input$barrier_ids, ignoreNULL = FALSE)
-    observeEvent(input$rezoom_on_submit, r$rezoom_on_submit <- input$rezoom_on_submit)
+    observeEvent(input$plot_type, r$plot_type_explore <- input$plot_type)
+    observeEvent(input$x_axis_variable, r$x_axis_variable_explore <- input$x_axis_variable)
+    observeEvent(input$y_axis_variable, r$y_axis_variable_explore <- input$y_axis_variable)
+    observeEvent(input$x_jitter, r$x_jitter_explore <- input$x_jitter)
+    observeEvent(input$y_jitter, r$y_jitter_explore <- input$y_jitter)
+    observeEvent(input$histogram_variable, r$histogram_variable_explore <- input$histogram_variable)
+    observeEvent(input$histogram_nbins, r$histogram_nbins_explore <- input$histogram_nbins)
+    observeEvent(input$color_variable, r$color_variable_explore <- input$color_variable)
+    observeEvent(input$highlight, r$highlight_explore <- input$highlight)
+    observeEvent(input$barrier_ids, r$barrier_ids_explore <- input$barrier_ids, ignoreNULL = FALSE)
+    observeEvent(input$rezoom_on_submit, r$rezoom_on_submit_explore <- input$rezoom_on_submit)
 
     # reset figures tab plot extent and triggers redraw
     observeEvent(input$submit, {
