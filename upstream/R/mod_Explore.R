@@ -30,7 +30,8 @@ mod_Explore_ui <- function(id){
           label = "Select Ownership Type",
           choices = setNames(
             c(0:9, 11, 12),
-            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
+            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 
+              'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
           ),
           selected = 0,
           width = '50%',

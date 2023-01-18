@@ -89,6 +89,20 @@ reset_map <- function(leaf_proxy){
     leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 }
 
+
+remove_map_points <- function(leaf_proxy){
+  leaf_proxy %>%
+    leaflet::clearGroup('culverts') 
+  
+  # selected wria bounding box
+  bbox <- get_wria_bounding_box(wrias$WRIA_NR)
+  
+  # zoom map to selected wrias
+  leaf_proxy %>%
+    leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+}
+
+
 #' @title update map WRIA labels
 #'
 #' @param leaf_proxy leaflet proxy reference
@@ -206,7 +220,6 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_va
 
   # replace owner_type_code with name
   if(color_variable == 'owner_type_code'){
-    #sfC <- replaceOwnerCodeWithName(sfC)
     sfC <- sfC %>%
       dplyr::select(-owner_type_code) %>%
       dplyr::rename(owner_type_code = owner_type_name_short)

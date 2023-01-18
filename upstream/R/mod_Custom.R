@@ -18,20 +18,22 @@ mod_Custom_ui <- function(id){
           selected = NULL)
         ),
         fluidRow(
-          textInput(
+          selectizeInput(
           inputId = ns("barrier_ids1"),
           label = "Enter ID(s) for Plan 1",
-          placeholder = "Enter WDFW Barrier IDs",
+          multiple = TRUE,
+          choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
           width = "100%")
          ),
       fluidRow(
         conditionalPanel(
           condition = "input.plans == 2 || input.plans == 3",
           ns = ns,
-            textInput(
+          selectizeInput(
             inputId = ns("barrier_ids2"),
             label = "Enter ID(s) for Plan 2",
-            placeholder = "Enter WDFW Barrier IDs",
+            multiple = TRUE,
+            choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
             width = "100%")
        )
       ),
@@ -39,10 +41,11 @@ mod_Custom_ui <- function(id){
         conditionalPanel(
           condition = "input.plans == 3",
           ns = ns,
-            textInput(
+          selectizeInput(
               inputId = ns("barrier_ids3"),
               label = "Enter ID(s) for Plan 3",
-              placeholder = "Enter WDFW Barrier IDs",
+              multiple = TRUE,
+              choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
               width = "100%")
         )
       ),
@@ -60,6 +63,7 @@ mod_Custom_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
+    # Custom tab submit event
     observeEvent(input$submit, {
       if(input$plans == 1 && input$barrier_ids1 != "")
       {r$submit_custom <- input$submit}
@@ -74,6 +78,12 @@ mod_Custom_server <- function(id, r){
       {showModal(modalDialog(title = "Warning!", 
       "Please enter at least one set of barrier IDs before you click the Submit button."))}
     })
+    
+    # update reactive values object with Explore inputs
+    observeEvent(input$barrier_ids1, r$barrier_ids1_custom <- input$barrier_ids1, ignoreNULL = FALSE)
+    observeEvent(input$barrier_ids2, r$barrier_ids2_custom <- input$barrier_ids2, ignoreNULL = FALSE)
+    observeEvent(input$barrier_ids3, r$barrier_ids3_custom <- input$barrier_ids3, ignoreNULL = FALSE)
+    
   })
 }
 
