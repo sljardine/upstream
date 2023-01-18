@@ -26,6 +26,7 @@ map_leaflet_custom <- function(
   #First get blocked/unblocked lines
   blocked_lines <- marginal_line_ids[in_cust_wrias] %>% unlist()
   leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
+  names(marginal_line_ids) <- points$site_id
   milp_stream_ids <- marginal_line_ids[prtf_cust[h_inc]] %>% unlist()
   
   #Barrier color
@@ -37,7 +38,7 @@ map_leaflet_custom <- function(
       dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
       color = "#d46666",
       opacity = 0.5
-      ) %>%
+      )  %>%
       leafgl::addGlPolylines(
         data = leaflet_lines %>%
           dplyr::filter(COMID %in% milp_stream_ids),
@@ -53,7 +54,7 @@ map_leaflet_custom <- function(
       lat = ~ site_latitude,
       radius = 5,
       weight = 1.5,
-      color = ~pal(soln),
+      color = ~pal(cust),
       fillOpacity = 1,
       opacity = 1,
       clusterOptions = leaflet::markerClusterOptions(

@@ -461,7 +461,20 @@ filter_and_format_culverts_for_scatterplot <- function(sfC, area_sel, owner_sel,
 #'
 #' @return ggplot object of culvert data scatterplot
 #' @export
-figure_scatterplot <- function(sfC, x_axis_variable, y_axis_variable, color_variable, x_jitter, y_jitter, highlight, barrier_ids, plot_xmin, plot_xmax, plot_ymin, plot_ymax){
+figure_scatterplot <- function(
+    sfC, 
+    x_axis_variable, 
+    y_axis_variable, 
+    color_variable, 
+    x_jitter, 
+    y_jitter, 
+    highlight, 
+    barrier_ids, 
+    plot_xmin, 
+    plot_xmax, 
+    plot_ymin, 
+    plot_ymax){
+  
   # set the barrier ids to '' if null
   if(is.null(barrier_ids)){
     cBarrierIds <- ''

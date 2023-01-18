@@ -90,7 +90,7 @@ mod_Figures_server <- function(id, r){
       }
     })
     
-    # Suggest submit button event for base_map
+    # Suggest submit button event 
     observeEvent(r$submit_suggest, {
       soln <- solve_opt(
         culverts_cmb, 
@@ -108,6 +108,19 @@ mod_Figures_server <- function(id, r){
       )
     })
 
+    # Custom submit button event 
+    observeEvent(r$submit_custom, {
+      remove_map_points(leaflet::leafletProxy(ns('base_map')))
+      map_leaflet_custom(
+        leaflet::leafletProxy(ns('base_map')),
+        culverts_cmb, #culverts
+        lines_simp, #lines with linestring geometries 
+        r$barrier_ids1_custom, #inputs from mod_Custom
+        E, #full connectivity matrix
+        marginal_line_ids #comids for all lines marginally upstream of each point
+      )
+    })
+    
     # reset plot click text output
     observeEvent(r$submit_explore, {r$plot_click_text_output_explore <- ''})
 

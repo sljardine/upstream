@@ -121,6 +121,7 @@ mod_Suggest_server <- function(id, r){
       updateNumericInput(session, 'w2', value = 1 - input$w1)
     })
 
+    # Suggest tab submit event
     observeEvent(input$submit, {
       if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
          !is.na(input$budget) && input$obj != 3 && input$cost != 2)
@@ -143,6 +144,30 @@ mod_Suggest_server <- function(id, r){
       else
       {showModal(modalDialog(title = "Warning!",
       "Please fill all the fields before you click the Submit button."))}
+    })
+    
+    # reset figures tab plot extent and triggers redraw
+    observeEvent(input$submit, {
+      r$plot_xmin <- NA
+      r$plot_xmax <- NA
+      r$plot_ymin <- NA
+      r$plot_ymax <- NA
+      r$plot_brush <- r$plot_brush + 1
+    })
+    
+    # reset figures tab plot extent
+    observeEvent(c(
+      input$area_sel,
+      input$owner_sel,
+      input$plot_type,
+      input$x_axis_variable,
+      input$y_axis_variable,
+      input$histogram_variable
+    ), {
+      r$plot_xmin <- NA
+      r$plot_xmax <- NA
+      r$plot_ymin <- NA
+      r$plot_ymax <- NA
     })
   })
 }

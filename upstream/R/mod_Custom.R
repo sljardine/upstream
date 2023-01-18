@@ -22,7 +22,7 @@ mod_Custom_ui <- function(id){
           inputId = ns("barrier_ids1"),
           label = "Enter ID(s) for Plan 1",
           multiple = TRUE,
-          choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+          choices = NULL,
           width = "100%")
          ),
       fluidRow(
@@ -33,7 +33,7 @@ mod_Custom_ui <- function(id){
             inputId = ns("barrier_ids2"),
             label = "Enter ID(s) for Plan 2",
             multiple = TRUE,
-            choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+            choices = NULL,
             width = "100%")
        )
       ),
@@ -45,7 +45,7 @@ mod_Custom_ui <- function(id){
               inputId = ns("barrier_ids3"),
               label = "Enter ID(s) for Plan 3",
               multiple = TRUE,
-              choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+              choices = NULL,
               width = "100%")
         )
       ),
@@ -78,6 +78,26 @@ mod_Custom_server <- function(id, r){
       {showModal(modalDialog(title = "Warning!", 
       "Please enter at least one set of barrier IDs before you click the Submit button."))}
     })
+    
+    # update input choices for barrier IDs
+    updateSelectizeInput(
+      session,
+      inputId = 'barrier_ids1',
+      choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      inputId = 'barrier_ids2',
+      choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      inputId = 'barrier_ids3',
+      choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+      server = TRUE
+    )
     
     # update reactive values object with Explore inputs
     observeEvent(input$barrier_ids1, r$barrier_ids1_custom <- input$barrier_ids1, ignoreNULL = FALSE)
