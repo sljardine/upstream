@@ -63,16 +63,43 @@ mod_Custom_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
+    # render leaflet output (DO I NEED THIS?)
+    output$base_map <- leaflet::renderLeaflet({
+      get_leaflet_map()
+    })
+    
+    # tab events
+    observeEvent(r$tab_sel, {
+      if(r$tab_sel == "Welcome"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      } else if(r$tab_sel == "Explore"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      } else if(r$tab_sel == "Suggest"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      }
+      else if(r$tab_sel == "Custom"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      }
+      else if(r$tab_sel == "Learn"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      }
+    })
+    
     # Custom tab submit event
     observeEvent(input$submit, {
-      if(input$plans == 1 && input$barrier_ids1 != "")
+      if(input$plans == 1 && !is.null(input$barrier_ids1))
       {r$submit_custom <- input$submit}
       else
-        if(input$plans == 2 && input$barrier_ids1 != "" && input$barrier_ids2 != "")
+        if(input$plans == 2 && !is.null(input$barrier_ids1) && !is.null(input$barrier_ids2))
         {r$submit_custom <- input$submit}
       else
-        if(input$plans == 3 && input$barrier_ids1 != "" && 
-           input$barrier_ids2 != "" && input$barrier_ids3 != "")
+        if(input$plans == 3 && !is.null(input$barrier_ids1) && 
+           !is.null(input$barrier_ids2) && !is.null(input$barrier_ids3))
         {r$submit_custom <- input$submit}
         else
       {showModal(modalDialog(title = "Warning!", 
@@ -82,19 +109,19 @@ mod_Custom_server <- function(id, r){
     # update input choices for barrier IDs
     updateSelectizeInput(
       session,
-      inputId = 'barrier_ids1',
+      inputId = "barrier_ids1",
       choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
       server = TRUE
     )
     updateSelectizeInput(
       session,
-      inputId = 'barrier_ids2',
+      inputId = "barrier_ids2",
       choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
       server = TRUE
     )
     updateSelectizeInput(
       session,
-      inputId = 'barrier_ids3',
+      inputId = "barrier_ids3",
       choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
       server = TRUE
     )

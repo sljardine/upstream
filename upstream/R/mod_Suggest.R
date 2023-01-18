@@ -112,15 +112,42 @@ mod_Suggest_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
+    
     observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
     observeEvent(input$owner_sel, r$owner_sel_suggest <- input$owner_sel)
     observeEvent(input$obj, r$obj_suggest <- input$obj)
     observeEvent(input$budget, r$budget_suggest <- input$budget)
-
     observeEvent(input$w1, {
-      updateNumericInput(session, 'w2', value = 1 - input$w1)
+      updateNumericInput(session, "w2", value = 1 - input$w1)
     })
 
+    # render leaflet output (DO I NEED THIS?)
+    output$base_map <- leaflet::renderLeaflet({
+      get_leaflet_map()
+    })
+    
+    # tab events
+    observeEvent(r$tab_sel, {
+      if(r$tab_sel == "Welcome"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      } else if(r$tab_sel == "Explore"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      } else if(r$tab_sel == "Suggest"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      }
+      else if(r$tab_sel == "Custom"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      }
+      else if(r$tab_sel == "Learn"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      }
+    })
+    
     # Suggest tab submit event
     observeEvent(input$submit, {
       if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
@@ -146,29 +173,7 @@ mod_Suggest_server <- function(id, r){
       "Please fill all the fields before you click the Submit button."))}
     })
     
-    # reset figures tab plot extent and triggers redraw
-    observeEvent(input$submit, {
-      r$plot_xmin <- NA
-      r$plot_xmax <- NA
-      r$plot_ymin <- NA
-      r$plot_ymax <- NA
-      r$plot_brush <- r$plot_brush + 1
-    })
     
-    # reset figures tab plot extent
-    observeEvent(c(
-      input$area_sel,
-      input$owner_sel,
-      input$plot_type,
-      input$x_axis_variable,
-      input$y_axis_variable,
-      input$histogram_variable
-    ), {
-      r$plot_xmin <- NA
-      r$plot_xmax <- NA
-      r$plot_ymin <- NA
-      r$plot_ymax <- NA
-    })
   })
 }
 

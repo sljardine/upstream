@@ -37,13 +37,15 @@ map_leaflet_custom <- function(
     leafgl::addGlPolylines(data = leaflet_lines %>%
       dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
       color = "#d46666",
-      opacity = 0.5
+      opacity = 0.5,
+      group = "blocked_lines"
       )  %>%
       leafgl::addGlPolylines(
         data = leaflet_lines %>%
           dplyr::filter(COMID %in% milp_stream_ids),
         color = "#3cdd78",
-        opacity = 0.5
+        opacity = 0.5,
+        group = "unblocked_lines"
       ) 
 
   #Add culverts
@@ -52,6 +54,7 @@ map_leaflet_custom <- function(
       data = points,
       lng = ~ site_longitude,
       lat = ~ site_latitude,
+      group = "selected_culverts",
       radius = 5,
       weight = 1.5,
       color = ~pal(cust),

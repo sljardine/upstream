@@ -46,18 +46,22 @@ mod_Figures_server <- function(id, r){
     
     # tab events
     observeEvent(r$tab_sel, {
-      if(r$tab_sel == 'Welcome'){
-        reset_map(leaflet::leafletProxy(ns('base_map')))
+      if(r$tab_sel == "Welcome"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
         user_plot(FALSE)
-      } else if(r$tab_sel == 'Explore'){
-        reset_map(leaflet::leafletProxy(ns('base_map')))
+      } else if(r$tab_sel == "Explore"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
         user_plot(FALSE)
-      } else if(r$tab_sel == 'Suggest'){
-        reset_map(leaflet::leafletProxy(ns('base_map')))
+      } else if(r$tab_sel == "Suggest"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
         user_plot(FALSE)
       }
-      else if(r$tab_sel == 'Custom'){
-        reset_map(leaflet::leafletProxy(ns('base_map')))
+      else if(r$tab_sel == "Custom"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        user_plot(FALSE)
+      }
+      else if(r$tab_sel == "Learn"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
         user_plot(FALSE)
       }
     })

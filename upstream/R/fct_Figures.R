@@ -54,8 +54,19 @@ get_leaflet_map <- function(){
       fillColor = 'grey',
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
-        spiderfyOnMaxZoom = FALSE,
-        disableClusteringAtZoom = 9
+          iconCreateFunction = htmlwidgets::JS("function (cluster) {    
+          var childCount = cluster.getChildCount();  
+          if (childCount < 100) {  
+          c = 'rgba(204, 252, 255, 1.0);'
+          } else if (childCount < 1000) {  
+          c = 'rgba(237, 192, 181, 1);'  
+          } else { 
+          c = 'rgba(164, 164, 243, 1);'  
+          }    
+         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', 
+         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),  
+          spiderfyOnMaxZoom = FALSE,
+          disableClusteringAtZoom = 10
       ),
       popup = ~popup
     )
@@ -65,6 +76,9 @@ reset_map <- function(leaf_proxy){
   leaf_proxy %>%
     leaflet::clearGroup('culverts') %>%
     leaflet::clearGroup('selected_wria') %>%
+    leaflet::clearGroup('blocked_lines') %>% 
+    leaflet::clearGroup('unblocked_lines') %>% 
+    leaflet::clearGroup('selected_culverts') %>% 
     leaflet::addCircleMarkers(
       data = culverts_cmb,
       group = 'culverts',
@@ -75,9 +89,20 @@ reset_map <- function(leaf_proxy){
       fillColor = 'grey',
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
+        iconCreateFunction = htmlwidgets::JS("function (cluster) {    
+          var childCount = cluster.getChildCount();  
+          if (childCount < 100) {  
+          c = 'rgba(204, 252, 255, 1.0);'
+          } else if (childCount < 1000) {  
+          c = 'rgba(237, 192, 181, 1);'  
+          } else { 
+          c = 'rgba(164, 164, 243, 1);'  
+          }    
+         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', 
+         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),  
         spiderfyOnMaxZoom = FALSE,
-        disableClusteringAtZoom = 9
-      ),
+        disableClusteringAtZoom = 10
+        ),
       popup = ~popup
     )
   
@@ -294,8 +319,19 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_va
       fillColor = ~pal(C),
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
+        iconCreateFunction = htmlwidgets::JS("function (cluster) {    
+          var childCount = cluster.getChildCount();  
+          if (childCount < 100) {  
+          c = 'rgba(204, 252, 255, 1.0);'
+          } else if (childCount < 1000) {  
+          c = 'rgba(237, 192, 181, 1);'  
+          } else { 
+          c = 'rgba(164, 164, 243, 1);'  
+          }    
+         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', 
+         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),  
         spiderfyOnMaxZoom = FALSE,
-        disableClusteringAtZoom = 9
+        disableClusteringAtZoom = 10
       ),
       popup = ~popup
     )
