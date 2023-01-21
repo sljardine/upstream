@@ -30,7 +30,8 @@ mod_Suggest_ui <- function(id){
           label = "Select Ownership Type",
           choices = setNames(
             c(0:9, 11, 12),
-            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
+            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 
+              'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
           ),
           selected = 0,
           width = '50%',
@@ -112,15 +113,23 @@ mod_Suggest_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
-    
-    observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
-    observeEvent(input$owner_sel, r$owner_sel_suggest <- input$owner_sel)
-    observeEvent(input$obj, r$obj_suggest <- input$obj)
-    observeEvent(input$budget, r$budget_suggest <- input$budget)
+    #ensure weights add to one
     observeEvent(input$w1, {
       updateNumericInput(session, "w2", value = 1 - input$w1)
     })
-
+    
+    # update reactive values object with Submit inputs
+    observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
+    observeEvent(input$obj, r$obj_suggest <- input$obj)
+    observeEvent(input$budget, r$budget_suggest <- input$budget)
+    observeEvent(input$owner_sel, {
+      if("0" %in% input$owner_sel){
+        r$owner_sel_suggest <- c(1:9, 11, 12)
+      } else {
+        r$owner_sel_suggest <- input$owner_sel
+      }
+    })
+    
     # render leaflet output (DO I NEED THIS?)
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()

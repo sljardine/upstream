@@ -1,3 +1,13 @@
+#Convert custom portfolio to TRUE/FALSE vector
+get_points_sel_custom <- function(
+    points, 
+    prtf_cust){
+  
+  points_sel <- points$site_id %in% prtf_cust
+  
+  return(points_sel)
+}
+
 # Map the custom solution
 map_leaflet_custom <- function(
     leaf_proxy,

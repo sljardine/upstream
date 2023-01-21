@@ -55,8 +55,7 @@ mod_Figures_server <- function(id, r){
       } else if(r$tab_sel == "Suggest"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
         user_plot(FALSE)
-      }
-      else if(r$tab_sel == "Custom"){
+      } else if(r$tab_sel == "Custom"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
         user_plot(FALSE)
       }
@@ -96,29 +95,39 @@ mod_Figures_server <- function(id, r){
     
     # Suggest submit button event 
     observeEvent(r$submit_suggest, {
-      soln <- solve_opt(
+      update_map_selected_WRIA_polygons(
+        leaflet::leafletProxy(ns('base_map')), 
+        r$area_sel_suggest
+      )
+      r$points_sel_suggest <- solve_opt(
         culverts_cmb, 
         as.numeric(r$budget_suggest), 
         D, 
-        as.integer(r$area_sel_suggest)
+        as.integer(r$area_sel_suggest),
+        r$owner_sel_suggest
         )
       remove_map_points(leaflet::leafletProxy(ns('base_map')))
       map_leaflet_opt(
         leaflet::leafletProxy(ns('base_map')),
         culverts_cmb, #culverts
         lines_simp, #lines with linestring geometries 
-        soln, #output from solve_opt()
+        r$points_sel_suggest, #output from solve_opt()
         marginal_line_ids #comids for all lines marginally upstream of each point
       )
+      # selected wria bounding box
+      bbox <- get_wria_bounding_box(r$area_sel_suggest)
+      # zoom map to selected wrias
+      leaflet::leafletProxy(mapId = ns("base_map")) %>%
+      leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
     })
 
     # Custom submit button event 
     observeEvent(r$submit_custom, {
-      remove_map_points(leaflet::leafletProxy(ns('base_map')))
+      remove_map_points(leaflet::leafletProxy(ns("base_map")))
       map_leaflet_custom(
-        leaflet::leafletProxy(ns('base_map')),
+        leaflet::leafletProxy(ns("base_map")),
         culverts_cmb, #culverts
-        lines_simp, #lines with linestring geometries 
+        lines_simp, #lines with linestring geometries
         r$barrier_ids1_custom, #inputs from mod_Custom
         E, #full connectivity matrix
         marginal_line_ids #comids for all lines marginally upstream of each point

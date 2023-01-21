@@ -20,6 +20,7 @@ mod_Welcome_ui <- function(id){
         column(6,
             tags$button(id = ns("explore_tab"), 
               class = "btn action-button",
+              style = "background-color:transparent",
               tags$img(src = "www/explore_placeholder.png",
                 width = "100%")
          )  
@@ -27,6 +28,7 @@ mod_Welcome_ui <- function(id){
         column(6,
           tags$button(id = ns("suggest_tab"), 
             class = "btn action-button",
+            style = "background-color:transparent",
             tags$img(src = "www/suggest_placeholder.png",
               width = "100%")
           )  
@@ -36,6 +38,7 @@ mod_Welcome_ui <- function(id){
         column(6,
           tags$button(id = ns("custom_tab"), 
             class = "btn action-button",
+            style = "background-color:transparent",
             tags$img(src = "www/custom_placeholder.png",
               width = "100%")
          )  
@@ -43,6 +46,7 @@ mod_Welcome_ui <- function(id){
         column(6,
           tags$button(id = ns("learn_tab"), 
             class = "btn action-button",
+            style = "background-color:transparent",
             tags$img(src = "www/learn_placeholder.png",
             width = "100%")
      )  
