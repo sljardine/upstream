@@ -46,7 +46,6 @@ golem::add_sass_file("custom")
 ## If you have data in your package
 usethis::use_data_raw( name = "my_dataset", open = FALSE )
 
-
 ## Tests ----
 ## Add one line by test you want to create
 usethis::use_test("app")

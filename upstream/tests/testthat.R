@@ -1,4 +1,4 @@
 library(testthat)
-#library(upstream)
+library(upstream)
 
 test_check("upstream")

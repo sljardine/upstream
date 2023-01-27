@@ -1,5 +1,4 @@
-library(here)
-load(here("data", "upstream_inputs.Rdata"))
+load("upstream_inputs.Rdata")
 
 usethis::use_data(culverts_cmb, overwrite = TRUE)
 usethis::use_data(D, overwrite = TRUE)
