@@ -29,9 +29,11 @@ golem::add_module(name = "Learn", with_test = TRUE)
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
-golem::add_fct("helpers", with_test = TRUE)
-golem::add_utils("helpers", with_test = TRUE)
+golem::add_utils("pipe", with_test = TRUE)
 golem::add_fct("Figures", with_test = TRUE)
+golem::add_fct("Custom", with_test = TRUE)
+golem::add_fct("Suggest", with_test = TRUE)
+golem::add_fct("Tables", with_test = TRUE)
 
 ## External resources
 ## Creates .js and .css files at inst/app/www
@@ -42,8 +44,7 @@ golem::add_sass_file("custom")
 
 ## Add internal datasets ----
 ## If you have data in your package
-usethis::use_data_raw(name = "sfCulverts", open = TRUE)
-usethis::use_data_raw(name = "sfWRIA", open = TRUE)
+usethis::use_data_raw( name = "my_dataset", open = FALSE )
 
 
 ## Tests ----
