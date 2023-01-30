@@ -2,7 +2,7 @@
 % Please edit documentation in R/fct_Figures.R
 \name{get_leaflet_map}
 \alias{get_leaflet_map}
-\title{get leaflet map}
+\title{Get a leaflet map including WRIAs and points}
 \usage{
 get_leaflet_map()
 }
@@ -10,5 +10,5 @@ get_leaflet_map()
 none
 }
 \description{
-get leaflet map
+Get a leaflet map including WRIAs and points
 }

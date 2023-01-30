@@ -16,7 +16,15 @@ update_map_culvert_markers(
 \arguments{
 \item{leaf_proxy}{leaflet proxy reference}
 
-\item{r}{reactive values object with app input values}
+\item{area_sel}{A vector of WRIA ID numbers of interest.}
+
+\item{owner_sel}{A vector of owner ID numbers of interest.}
+
+\item{color_variable}{An attribute in the points data that defines point color.}
+
+\item{highlight}{Set to NULL if there are no points to highlight.}
+
+\item{barrier_ids}{A vector of point ids to highlight.}
 }
 \value{
 none

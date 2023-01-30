@@ -4,10 +4,10 @@
 \alias{replace_WRIA_number_with_name}
 \title{replace WRIA number with name}
 \usage{
-replace_WRIA_number_with_name(sfC, sfW)
+replace_WRIA_number_with_name(points, sfW)
 }
 \arguments{
-\item{sfC}{simple features data frame of culvert data}
+\item{points}{simple features data frame of culvert data}
 
 \item{sfW}{simple features data frame of wria data}
 }

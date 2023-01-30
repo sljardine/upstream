@@ -17,6 +17,7 @@ Imports:
     golem (>= 0.3.2),
     here,
     htmltools,
+    htmlwidgets,
     leafgl,
     leaflet,
     magrittr,
@@ -25,6 +26,7 @@ Imports:
     ROI.plugin.glpk,
     sf,
     shiny (>= 1.7.1),
+    shinydashboard,
     tidyr
 Encoding: UTF-8
 LazyData: true

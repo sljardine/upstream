@@ -7,9 +7,9 @@
 update_map_selected_WRIA_polygons(leaf_proxy, area_sel)
 }
 \arguments{
-\item{leaf_proxy}{leaflet proxy reference}
+\item{leaf_proxy}{A leaflet proxy reference.}
 
-\item{r}{reactive values object with app input values}
+\item{area_sel}{A vector of WRIA ID numbers of interest.}
 }
 \value{
 none

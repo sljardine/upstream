@@ -16,6 +16,9 @@
 ## Dependencies ----
 ## Amend DESCRIPTION with dependencies read from package code parsing
 attachment::att_amend_desc()
+#it's possible that running attachment::att_amend_desc() again would add htmlwidgets
+usethis::use_package("htmlwidgets") 
+usethis::use_package("shinydashboard")
 
 ## Add modules ----
 ## Create a module infrastructure in R/
@@ -44,7 +47,7 @@ golem::add_sass_file("custom")
 
 ## Add internal datasets ----
 ## If you have data in your package
-usethis::use_data_raw( name = "my_dataset", open = FALSE )
+usethis::use_data_raw(name = "my_dataset", open = FALSE)
 
 ## Tests ----
 ## Add one line by test you want to create

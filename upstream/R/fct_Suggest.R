@@ -43,8 +43,7 @@ solve_opt <- function(
                   types = rep.int("B", nb),
                   maximum = TRUE)
   
-  sol <- ROI::ROI_solve(prob, "glpk",
-                         control = list("verbose" = TRUE, "presolve" = TRUE))
+  sol <- ROI::ROI_solve(prob, "glpk",  control = list("verbose" = TRUE, "presolve" = TRUE))
 
   soln <- as.logical(ROI::solution(sol))
   

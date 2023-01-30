@@ -5,7 +5,7 @@
 \title{figure explore tab histogram}
 \usage{
 figure_histogram(
-  sfC,
+  points,
   x_axis_variable,
   y_axis_variable,
   color_variable,
@@ -20,9 +20,7 @@ figure_histogram(
 )
 }
 \arguments{
-\item{sfC}{simple features data frame of culvert data}
-
-\item{r}{reactive values object with app input values}
+\item{points}{simple features data frame of culvert data}
 }
 \value{
 ggplot object of culvert data histogram
