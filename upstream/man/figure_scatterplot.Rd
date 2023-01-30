@@ -2,10 +2,10 @@
 % Please edit documentation in R/fct_Figures.R
 \name{figure_scatterplot}
 \alias{figure_scatterplot}
-\title{figure explore tab scatterplot}
+\title{Figure explore tab scatterplot}
 \usage{
 figure_scatterplot(
-  sfC,
+  points,
   x_axis_variable,
   y_axis_variable,
   color_variable,
@@ -20,13 +20,33 @@ figure_scatterplot(
 )
 }
 \arguments{
-\item{sfC}{simple features data frame of culvert data}
+\item{points}{simple features data frame of culvert data}
 
-\item{r}{reactive values object with app input values}
+\item{x_axis_variable}{A variable to go on the x axis.}
+
+\item{y_axis_variable}{A variable to go on the y axis.}
+
+\item{color_variable}{A variable defining color palate.}
+
+\item{x_jitter}{Level of jitter in the x dimension.}
+
+\item{y_jitter}{Level of jitter in the y dimention.}
+
+\item{highlight}{Whether to highlight some points.}
+
+\item{barrier_ids}{IDs of points to highlight.}
+
+\item{plot_xmin}{The minimum x value of the plot.}
+
+\item{plot_xmax}{The maximium x value of the plot.}
+
+\item{plot_ymin}{The minimum y value of the plot.}
+
+\item{plot_ymax}{The maximum y value of the plot.}
 }
 \value{
 ggplot object of culvert data scatterplot
 }
 \description{
-figure explore tab scatterplot
+Figure explore tab scatterplot
 }

@@ -4,10 +4,10 @@
 \alias{replace_owner_code_with_name}
 \title{replace owner code with name}
 \usage{
-replace_owner_code_with_name(sfC)
+replace_owner_code_with_name(points)
 }
 \arguments{
-\item{sfC}{simple features data frame of culvert data}
+\item{points}{simple features data frame of culvert data}
 }
 \value{
 data frame of culverts with owner name instead of owner type code

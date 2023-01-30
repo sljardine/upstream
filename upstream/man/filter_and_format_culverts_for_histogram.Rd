@@ -5,7 +5,7 @@
 \title{filter and format culverts for histogram}
 \usage{
 filter_and_format_culverts_for_histogram(
-  sfC,
+  points,
   area_sel,
   owner_sel,
   color_variable,
@@ -13,12 +13,18 @@ filter_and_format_culverts_for_histogram(
 )
 }
 \arguments{
-\item{sfC}{simple features data frame of culvert data}
+\item{points}{A simple features point data frame containing culvert locations and attributes.}
 
-\item{r}{reactive values object with app input values}
+\item{area_sel}{A vector of WRIA ID numbers of interest.}
+
+\item{owner_sel}{A vector of owner ID numbers of interest.}
+
+\item{color_variable}{A variable defining color palate.}
+
+\item{histogram_variable}{A variable to generate histogram from.}
 }
 \value{
-data frame of culvert data formatted to make histogram in ggplot
+A data frame of point data formatted to make histogram in ggplot.
 }
 \description{
 filter and format culverts for histogram

@@ -17,8 +17,6 @@ get_plot_click_site_id(
 \item{plotClickX}{x coordinate from plot click event}
 
 \item{plotClickY}{y coordinate from plot click event}
-
-\item{r}{reactive values object with app input values}
 }
 \value{
 string value of culvert site id closest to plot click coordinates or empty string if beyond maximum distance

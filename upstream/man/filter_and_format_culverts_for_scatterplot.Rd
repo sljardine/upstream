@@ -2,10 +2,10 @@
 % Please edit documentation in R/fct_Figures.R
 \name{filter_and_format_culverts_for_scatterplot}
 \alias{filter_and_format_culverts_for_scatterplot}
-\title{filter and format culverts for explore tab scatterplot}
+\title{Filter and format culverts for explore tab scatterplot}
 \usage{
 filter_and_format_culverts_for_scatterplot(
-  sfC,
+  points,
   area_sel,
   owner_sel,
   x_axis_variable,
@@ -14,13 +14,21 @@ filter_and_format_culverts_for_scatterplot(
 )
 }
 \arguments{
-\item{sfC}{simple features data frame of culvert data}
+\item{points}{A simple features point data frame containing culvert locations and attributes.}
 
-\item{r}{reactive values object with app input values}
+\item{area_sel}{A vector of WRIA ID numbers of interest.}
+
+\item{owner_sel}{A vector of owner ID numbers of interest.}
+
+\item{x_axis_variable}{Variable to go on the x axis.}
+
+\item{y_axis_variable}{Variable to go on the y axis.}
+
+\item{color_variable}{A variable defining color palate.}
 }
 \value{
 data frame of culvert data formatted to make scatterplot in ggplot
 }
 \description{
-filter and format culverts for explore tab scatterplot
+Filter and format culverts for explore tab scatterplot
 }

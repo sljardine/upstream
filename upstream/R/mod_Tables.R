@@ -14,7 +14,6 @@ mod_Tables_ui <- function(id){
       #shinydashboard::box(
         #width = 6,
         #solidHeader = TRUE, 
-        #DT::dataTableOutput(ns('data_table'))
       uiOutput(ns("data_table"))
       #)
     )
@@ -30,15 +29,38 @@ mod_Tables_server <- function(id, r){
     
     user_table <- reactiveVal(FALSE)
     
-    observeEvent(c(r$submit_suggest,
-      r$submit_custom),
-      user_table(TRUE))
-
-    store_table <- eventReactive(c(r$submit_suggest,
-      r$submit_custom),
-      {shinipsum::random_DT(5, 3, "numeric")}
+    observeEvent(
+      c(r$submit_suggest, r$submit_custom),
+      user_table(TRUE)
       )
 
+    store_table <- eventReactive(c(r$submit_suggest, r$submit_custom),
+      {
+        if(r$tab_sel == "Suggest"){
+          get_summary_table(culverts_cmb, r$points_sel_suggest)
+        }
+        else if(r$tab_sel == "Custom") {
+          points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids1_custom)
+          get_summary_table(culverts_cmb, points_sel_custom)
+        }
+      }
+    )
+    
+    # tab events
+    observeEvent(r$tab_sel, {
+      if(r$tab_sel == "Welcome"){
+        user_table(FALSE)
+      } else if(r$tab_sel == "Explore"){
+          user_table(FALSE)
+      } else if(r$tab_sel == "Suggest"){
+          user_table(FALSE)
+      } else if(r$tab_sel == "Custom"){
+        user_table(FALSE)
+      } else if(r$tab_sel == "Learn"){
+        user_table(FALSE)
+      }
+    })
+    
     output$logo <- renderImage({
       list(src = "inst/app/www/placeholder.png",
            width = "75%",
@@ -47,7 +69,7 @@ mod_Tables_server <- function(id, r){
     
     output$data_table <- renderUI({
       if(!user_table()){
-        imageOutput(ns("logo")) 
+        imageOutput(NULL) 
       } else {
         output$render_data_table <- DT::renderDataTable({store_table()})
         DT::dataTableOutput(ns("render_data_table"))}

@@ -4,10 +4,10 @@
 \alias{figure_culvert_count_by_WRIA_histogram}
 \title{figure explore tab culvert count by WRIA histogram}
 \usage{
-figure_culvert_count_by_WRIA_histogram(sfC, sfW)
+figure_culvert_count_by_WRIA_histogram(points, sfW)
 }
 \arguments{
-\item{sfC}{simple features data frame of culvert data}
+\item{points}{simple features data frame of culvert data}
 
 \item{sfW}{simple features data frame of wria data}
 }

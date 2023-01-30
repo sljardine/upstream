@@ -7,11 +7,13 @@
 update_map_WRIA_labels(leaf_proxy, zoom_level, area_sel, owner_sel)
 }
 \arguments{
-\item{leaf_proxy}{leaflet proxy reference}
+\item{leaf_proxy}{A leaflet proxy reference.}
 
-\item{zoomLevel}{zoom level for leaflet map}
+\item{zoom_level}{A zoom level for tge leaflet map.}
 
-\item{r}{reactive values object with app input values}
+\item{area_sel}{A vector of WRIA ID numbers of interest.}
+
+\item{owner_sel}{A vector of owner ID numbers of interest.}
 }
 \value{
 none

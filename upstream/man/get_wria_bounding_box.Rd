@@ -2,16 +2,16 @@
 % Please edit documentation in R/fct_Figures.R
 \name{get_wria_bounding_box}
 \alias{get_wria_bounding_box}
-\title{get bounding box for selected wrias}
+\title{Get a bounding box for selected WRIAS}
 \usage{
 get_wria_bounding_box(area_sel)
 }
 \arguments{
-\item{cWRIAs}{}
+\item{area_sel}{A vector of WRIA numbers of interest.}
 }
 \value{
-A numeric vector of the bounding box for the provided WRIA simple features
+A numeric vector of the bounding box for the provided WRIA simple features object.
 }
 \description{
-get bounding box for selected wrias
+Get a bounding box for selected WRIAS
 }
