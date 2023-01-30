@@ -1,33 +1,36 @@
 Package: Upstream
 Title: Upstream: A decision support tool for barrier culvert restoration
 Version: 0.0.0.9000
-Authors@R: 
-    person("Sunny", "Jardine", , "jardine@uw.edu", role = c("cre", "aut"))
-Description: A decision support tool for barrier culvert restoration
-    planning in Western Washington.  The tool enables exploration of
-    candidate project attributes, identification of cost-effective barrier
-    culvert restoration plans, and comparison of alternative customized
-    restoration plans.
+Authors@R: person('Sunny', 'Jardine', email = 'jardine@uw.edu', role = c('cre', 'aut'))
+Description: A decision support tool for barrier culvert restoration planning in Western Washington.
+  The tool enables exploration of candidate project attributes, identification of 
+  cost-effective barrier culvert restoration plans, and comparison of alternative 
+  customized restoration plans.
 License: MIT + file LICENSE
-Depends: 
-    R (>= 2.10)
 Imports: 
+    attempt,
     config (>= 0.3.1),
     dplyr,
     DT,
     ggplot2,
+    glue,
     golem (>= 0.3.2),
-    htmlwidgets,
+    here,
+    htmltools,
     leafgl,
     leaflet,
     magrittr,
     purrr,
-    ROI.plugin.glpk,
     ROI,
+    ROI.plugin.glpk,
     sf,
     shiny (>= 1.7.1),
-    shinydashboard
-Config/testthat/edition: 3
+    tidyr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Depends: 
+    R (>= 2.10)
