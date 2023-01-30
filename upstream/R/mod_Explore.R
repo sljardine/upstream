@@ -30,7 +30,8 @@ mod_Explore_ui <- function(id){
           label = "Select Ownership Type",
           choices = setNames(
             c(0:9, 11, 12),
-            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
+            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 
+              'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
           ),
           selected = 0,
           width = '50%',
@@ -214,7 +215,7 @@ mod_Explore_server <- function(id, r){
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
 
       # get areas to filter by
-      if('0' %in% input$area_sel){
+      if("0" %in% input$area_sel){
         cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         cWRIA_NR <- as.integer(input$area_sel)
@@ -241,7 +242,7 @@ mod_Explore_server <- function(id, r){
       # update select input choices
       updateSelectizeInput(
         session,
-        inputId = 'barrier_ids',
+        inputId = "barrier_ids",
         choices = sfC %>% dplyr::pull(site_id) %>% sort(),
         server = TRUE
       )
@@ -249,7 +250,7 @@ mod_Explore_server <- function(id, r){
 
     # update color variables for plot type
     observeEvent(c(input$plot_type, input$area_sel, input$owner_sel), {
-      if(input$plot_type == 'Scatterplot'){
+      if(input$plot_type == "Scatterplot"){
         cVars <- setNames(
           c('none', 'cost', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
           nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type')
@@ -278,14 +279,14 @@ mod_Explore_server <- function(id, r){
 
     # update reactive values object with Explore inputs
     observeEvent(input$area_sel, {
-      if('0' %in% input$area_sel){
+      if("0" %in% input$area_sel){
         r$area_sel_explore <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         r$area_sel_explore <- input$area_sel
       }
     })
     observeEvent(input$owner_sel, {
-      if('0' %in% input$owner_sel){
+      if("0" %in% input$owner_sel){
         r$owner_sel_explore <- c(1:9, 11, 12)
       } else {
         r$owner_sel_explore <- input$owner_sel

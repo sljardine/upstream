@@ -18,20 +18,22 @@ mod_Custom_ui <- function(id){
           selected = NULL)
         ),
         fluidRow(
-          textInput(
+          selectizeInput(
           inputId = ns("barrier_ids1"),
           label = "Enter ID(s) for Plan 1",
-          placeholder = "Enter WDFW Barrier IDs",
+          multiple = TRUE,
+          choices = NULL,
           width = "100%")
          ),
       fluidRow(
         conditionalPanel(
           condition = "input.plans == 2 || input.plans == 3",
           ns = ns,
-            textInput(
+          selectizeInput(
             inputId = ns("barrier_ids2"),
             label = "Enter ID(s) for Plan 2",
-            placeholder = "Enter WDFW Barrier IDs",
+            multiple = TRUE,
+            choices = NULL,
             width = "100%")
        )
       ),
@@ -39,10 +41,11 @@ mod_Custom_ui <- function(id){
         conditionalPanel(
           condition = "input.plans == 3",
           ns = ns,
-            textInput(
+          selectizeInput(
               inputId = ns("barrier_ids3"),
               label = "Enter ID(s) for Plan 3",
-              placeholder = "Enter WDFW Barrier IDs",
+              multiple = TRUE,
+              choices = NULL,
               width = "100%")
         )
       ),
@@ -60,20 +63,74 @@ mod_Custom_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
+    # render leaflet output (DO I NEED THIS?)
+    output$base_map <- leaflet::renderLeaflet({
+      get_leaflet_map()
+    })
+    
+    # tab events
+    observeEvent(r$tab_sel, {
+      if(r$tab_sel == "Welcome"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      } else if(r$tab_sel == "Explore"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      } else if(r$tab_sel == "Suggest"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      }
+      else if(r$tab_sel == "Custom"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      }
+      else if(r$tab_sel == "Learn"){
+        reset_map(leaflet::leafletProxy(ns("base_map")))
+        #user_plot(FALSE)
+      }
+    })
+    
+    # Custom tab submit event
     observeEvent(input$submit, {
-      if(input$plans == 1 && input$barrier_ids1 != "")
+      if(input$plans == 1 && !is.null(input$barrier_ids1))
       {r$submit_custom <- input$submit}
       else
-        if(input$plans == 2 && input$barrier_ids1 != "" && input$barrier_ids2 != "")
+        if(input$plans == 2 && !is.null(input$barrier_ids1) && !is.null(input$barrier_ids2))
         {r$submit_custom <- input$submit}
       else
-        if(input$plans == 3 && input$barrier_ids1 != "" && 
-           input$barrier_ids2 != "" && input$barrier_ids3 != "")
+        if(input$plans == 3 && !is.null(input$barrier_ids1) && 
+           !is.null(input$barrier_ids2) && !is.null(input$barrier_ids3))
         {r$submit_custom <- input$submit}
         else
       {showModal(modalDialog(title = "Warning!", 
       "Please enter at least one set of barrier IDs before you click the Submit button."))}
     })
+    
+    # update input choices for barrier IDs
+    updateSelectizeInput(
+      session,
+      inputId = "barrier_ids1",
+      choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      inputId = "barrier_ids2",
+      choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      inputId = "barrier_ids3",
+      choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+      server = TRUE
+    )
+    
+    # update reactive values object with Explore inputs
+    observeEvent(input$barrier_ids1, r$barrier_ids1_custom <- input$barrier_ids1, ignoreNULL = FALSE)
+    observeEvent(input$barrier_ids2, r$barrier_ids2_custom <- input$barrier_ids2, ignoreNULL = FALSE)
+    observeEvent(input$barrier_ids3, r$barrier_ids3_custom <- input$barrier_ids3, ignoreNULL = FALSE)
+    
   })
 }
 
