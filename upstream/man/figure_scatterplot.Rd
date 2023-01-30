@@ -22,25 +22,27 @@ figure_scatterplot(
 \arguments{
 \item{points}{simple features data frame of culvert data}
 
-\item{x_axis_variable}{}
+\item{x_axis_variable}{A variable to go on the x axis.}
 
-\item{y_axis_variable}{}
+\item{y_axis_variable}{A variable to go on the y axis.}
 
-\item{color_variable}{}
+\item{color_variable}{A variable defining color palate.}
 
-\item{x_jitter}{}
+\item{x_jitter}{Level of jitter in the x dimension.}
 
-\item{y_jitter}{}
+\item{y_jitter}{Level of jitter in the y dimention.}
 
-\item{highlight}{}
+\item{highlight}{Whether to highlight some points.}
 
-\item{barrier_ids}{}
+\item{barrier_ids}{IDs of points to highlight.}
 
-\item{plot_xmin}{}
+\item{plot_xmin}{The minimum x value of the plot.}
 
-\item{plot_xmax}{}
+\item{plot_xmax}{The maximium x value of the plot.}
 
-\item{plot_ymin}{}
+\item{plot_ymin}{The minimum y value of the plot.}
+
+\item{plot_ymax}{The maximum y value of the plot.}
 }
 \value{
 ggplot object of culvert data scatterplot

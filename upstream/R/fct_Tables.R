@@ -1,4 +1,8 @@
-# Summarize variables for select culverts
+#' @title Summarize variables for select culverts
+#' @param points A simple features point data frame containing culvert locations and attributes.
+#' @param points_sel A simple features point data frame containing selected culvert locations and attributes.
+#' @return A summary table
+#' @export
 get_summary_table <- function(
     points,
     points_sel

@@ -1,4 +1,8 @@
-#Convert custom portfolio to TRUE/FALSE vector
+#' @title Convert custom portfolio to TRUE/FALSE vector
+#' @param points A simple features point data frame containing culvert locations and attributes.
+#' @param prtf_cust A vector of point IDs for selected points.
+#' @return A simple features point data frame containing culvert location and attributes for selected points.
+#' @export
 get_points_sel_custom <- function(
     points, 
     prtf_cust){
@@ -8,7 +12,15 @@ get_points_sel_custom <- function(
   return(points_sel)
 }
 
-# Map the custom solution
+#' @title Map the custom solution
+#' @param leaf_proxy A basemap.
+#' @param points A simple features point data frame containing culvert locations and attributes.
+#' @param lines A simple features data frame with linestring geometries.
+#' @param prtf_cust A vector of point IDs for selected points.
+#' @param E A full connectivity matrix.
+#' @param marginal_line_ids A vector of line IDs for all lines marginally upstream of each point.
+#' @return A leaflet map.
+#' @export
 map_leaflet_custom <- function(
     leaf_proxy,
     points, #culverts

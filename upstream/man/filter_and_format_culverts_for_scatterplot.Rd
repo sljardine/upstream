@@ -19,6 +19,12 @@ filter_and_format_culverts_for_scatterplot(
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 
 \item{owner_sel}{A vector of owner ID numbers of interest.}
+
+\item{x_axis_variable}{Variable to go on the x axis.}
+
+\item{y_axis_variable}{Variable to go on the y axis.}
+
+\item{color_variable}{A variable defining color palate.}
 }
 \value{
 data frame of culvert data formatted to make scatterplot in ggplot

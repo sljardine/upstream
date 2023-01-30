@@ -1,4 +1,11 @@
-# Solve the optimization problem
+#' @title Solve the optimization problem
+#' @param points A simple features point data frame containing culvert locations and attributes.
+#' @param budget A number specifying the budget constraint.
+#' @param D A connectivity matrix.
+#' @param area_sel A vector of WRIA ID numbers of interest.
+#' @param owner_sel A vector of owner ID numbers of interest.
+#' @return A logical vector of TRUE/FALSE values.
+#' @export
 solve_opt <- function(
     #Inputs
   points, #points with variables: hmarg_net, cost, and wria_number
@@ -50,7 +57,15 @@ solve_opt <- function(
   return(soln)
 }
 
-# Map the optimization solution
+#' @title Map the optimization solution
+#' @param leaf_proxy A basemap.
+#' @param points A simple features point data frame containing culvert locations and attributes.
+#' @param lines A simple features data frame with linestring geometries.
+#' @param D A connectivity matrix.
+#' @param soln A logical vector of TRUE/FALSE values that is the output from solve_opt(.
+#' @param marginal_line_ids A vector of line IDs for all lines marginally upstream of each point.
+#' @return A leaflet map.
+#' @export
 map_leaflet_opt <- function(
     leaf_proxy,
     points, #culverts

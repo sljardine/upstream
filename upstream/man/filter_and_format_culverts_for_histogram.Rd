@@ -18,6 +18,10 @@ filter_and_format_culverts_for_histogram(
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 
 \item{owner_sel}{A vector of owner ID numbers of interest.}
+
+\item{color_variable}{A variable defining color palate.}
+
+\item{histogram_variable}{A variable to generate histogram from.}
 }
 \value{
 A data frame of point data formatted to make histogram in ggplot.
