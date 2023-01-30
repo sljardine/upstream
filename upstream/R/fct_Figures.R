@@ -343,8 +343,8 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_va
 #' @param points A simple features point data frame containing culvert locations and attributes.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
-#' @param color_variable
-#' @param histogram_variable
+#' @param color_variable A variable defining color palate.
+#' @param histogram_variable A variable to generate histogram from.
 #' @return A data frame of point data formatted to make histogram in ggplot.
 #' @export
 filter_and_format_culverts_for_histogram <- function(points, area_sel, owner_sel, color_variable, histogram_variable){
@@ -416,9 +416,9 @@ filter_and_format_culverts_for_histogram <- function(points, area_sel, owner_sel
 #' @param points A simple features point data frame containing culvert locations and attributes.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
-#' @param x_axis_variable
-#' @param y_axis_variable
-#' @param color_variable
+#' @param x_axis_variable Variable to go on the x axis.
+#' @param y_axis_variable Variable to go on the y axis.
+#' @param color_variable A variable defining color palate.
 #' @return data frame of culvert data formatted to make scatterplot in ggplot
 #' @export
 filter_and_format_culverts_for_scatterplot <- function(points, area_sel, owner_sel, x_axis_variable, y_axis_variable, color_variable){
@@ -497,17 +497,17 @@ filter_and_format_culverts_for_scatterplot <- function(points, area_sel, owner_s
 
 #' @title Figure explore tab scatterplot
 #' @param points simple features data frame of culvert data
-#' @param x_axis_variable 
-#' @param y_axis_variable 
-#' @param color_variable 
-#' @param x_jitter 
-#' @param y_jitter 
-#' @param highlight 
-#' @param barrier_ids 
-#' @param plot_xmin 
-#' @param plot_xmax 
-#' @param plot_ymin 
-#' @param plot_ymax
+#' @param x_axis_variable A variable to go on the x axis.
+#' @param y_axis_variable A variable to go on the y axis.
+#' @param color_variable A variable defining color palate.
+#' @param x_jitter Level of jitter in the x dimension.
+#' @param y_jitter Level of jitter in the y dimention.
+#' @param highlight Whether to highlight some points.
+#' @param barrier_ids IDs of points to highlight.
+#' @param plot_xmin The minimum x value of the plot.
+#' @param plot_xmax The maximium x value of the plot.
+#' @param plot_ymin The minimum y value of the plot.
+#' @param plot_ymax The maximum y value of the plot.
 #' @return ggplot object of culvert data scatterplot
 #' @export
 figure_scatterplot <- function(

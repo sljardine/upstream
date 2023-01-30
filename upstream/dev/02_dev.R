@@ -19,6 +19,7 @@ attachment::att_amend_desc()
 #it's possible that running attachment::att_amend_desc() again would add htmlwidgets
 usethis::use_package("htmlwidgets") 
 usethis::use_package("shinydashboard")
+usethis::use_package("ROI.plugin.glpk")
 
 ## Add modules ----
 ## Create a module infrastructure in R/
