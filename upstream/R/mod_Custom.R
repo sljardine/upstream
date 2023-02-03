@@ -14,8 +14,15 @@ mod_Custom_ui <- function(id){
       fluidRow(
         radioButtons(inputId = ns("plans"),
           label = "How Many Plans to Compare?",
-          choices = list("1" = 1, "2" = 2, "3" = 3),
-          selected = NULL)
+          choiceNames = list(
+            "1", 
+            tags$span(style = "color:#c0c0c0", "2"), 
+            tags$span(style = "color:#c0c0c0", "3")
+          ),
+          choiceValues = c(1, 2, 3),
+          selected = NULL,
+          inline = TRUE
+         )
         ),
         fluidRow(
           selectizeInput(

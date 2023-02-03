@@ -17,7 +17,7 @@ get_summary_table <- function(
       `Chum` = round(sum(hmarg_net * grepl("Chum", potential_species)), 2),
       `Coho` = round(sum(hmarg_net * grepl("Coho", potential_species)), 2),
       `Pink` = round(sum(hmarg_net * grepl("Pink", potential_species)), 2),
-      `Resident` = round(sum(hmarg_net * grepl("Resident", potential_species)), 2),
+      `Resident Trout` = round(sum(hmarg_net * grepl("Resident", potential_species)), 2),
       `Sockeye` = round(sum(hmarg_net * grepl("Sockeye", potential_species)), 2),
       `Steelhead` = round(sum(hmarg_net * grepl("Steelhead", potential_species)), 2),
       `SR Cutthroat` = round(sum(hmarg_net * grepl("Cutthroat", potential_species)), 2),
