@@ -66,6 +66,7 @@ mod_Suggest_ui <- function(id){
           selected = NULL
         )
       ),
+      hr(),
       fluidRow(
         radioButtons(inputId = ns("obj"),
           label = "Objective",
@@ -138,6 +139,7 @@ mod_Suggest_ui <- function(id){
       #       value = 0.5))
       #   )
       # ),
+      hr(),
       fluidRow(
         radioButtons(inputId = ns("cost"),
           label = "Cost",
@@ -153,12 +155,21 @@ mod_Suggest_ui <- function(id){
         conditionalPanel(
           condition = "input.cost == 2",
           ns = ns,
-          numericInput(inputId = ns("mean_cost"),
-            label = tags$span(style = "color:#c0c0c0", "Enter Mean Project Cost ($)"),
+          column(6,
+          numericInput(inputId = ns("mean_design_cost"),
+            label = tags$span(style = "color:#c0c0c0", "Mean Design Cost ($)"),
             min = 0,
             value = NULL)
+          ),
+          column(6,
+          numericInput(inputId = ns("mean_construction_cost"),
+            label = tags$span(style = "color:#c0c0c0", "Mean Construction Cost ($)"),
+            min = 0,
+            value = NULL)
+          )
         )
       ),
+      hr(),
       fluidRow(
         numericInput(inputId = ns("budget"),
                      label = "Enter Budget ($)",
@@ -187,6 +198,7 @@ mod_Suggest_ui <- function(id){
         #   )
         # )
       #),
+      hr(),
         fluidRow(
           actionButton(ns("submit"), "Submit")
       )
