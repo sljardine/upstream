@@ -39,66 +39,166 @@ mod_Suggest_ui <- function(id){
         )
       ),
       fluidRow(
-        radioButtons(inputId = ns("obj"),
-          label = "Objective",
-          choices = list("Habitat Quantity" = 1, "Weighted Attributes" = 2,
-            "Custom Barrier Scores" = 3)),
-        conditionalPanel(
-          condition = "input.obj == 2",
-          ns = ns,
-          column(2,  "Habitat Quantity"),
-          column(4,
-            numericInput(inputId = ns("w1"),
-              min = 0,
-              max = 1,
-              step = 0.01,
-              label = NULL,
-              value = 0.5)),
-          column(2, "Habitat Quality"),
-          column(4,
-            numericInput(inputId = ns("w2"),
-            min = 0,
-            max = 1,
-            step = 0.01,
-            label = NULL,
-            value = 0.5))
+        selectizeInput(
+          inputId = ns("species_sel"),
+          label = tags$span(style = "color:#c0c0c0", "Select Species of Interest"),
+          choices = setNames(
+            c(0 : 9),
+            nm = c("All", "Bull trout", "Chinook", "Chum", "Coho", 
+                   "Pink", "Resident trout", "Sockeye", 
+                   "Steelhead", "SR Cutthroad")
+          ),
+          selected = 0,
+          width = '50%',
+          multiple = TRUE
         )
       ),
       fluidRow(
+        radioButtons(inputId = ns("hq"),
+          label = "Select Habitat Quantity Definition",
+          choiceNames = list(
+            "Length", 
+            tags$span(style = "color:#c0c0c0", "Area"), 
+            tags$span(style = "color:#c0c0c0", "Volume")
+          ),
+          choiceValues = c("length", "area", "volume"),
+          inline = TRUE, 
+          selected = NULL
+        )
+      ),
+      hr(),
+      fluidRow(
+        radioButtons(inputId = ns("obj"),
+          label = "Objective",
+          choiceNames = list(
+            "Habitat Quantity", 
+            tags$span(style = "color:#c0c0c0", "Weighted Attributes")
+          ),
+          choiceValues = c(1 : 2)
+          ),
+        conditionalPanel(
+          condition = "input.obj == 2",
+          ns = ns,
+          column(2,  "HQ_LC1"),
+          column(4,
+                 numericInput(inputId = ns("w1"),
+                              min = 0,
+                              max = 1,
+                              step = 0.01,
+                              label = NULL,
+                              value = 0.25)),
+          column(2,  "HQ_LC2"),
+          column(4,
+                 numericInput(inputId = ns("w2"),
+                              min = 0,
+                              max = 1,
+                              step = 0.01,
+                              label = NULL,
+                              value = 0.25)),
+          column(2,  "HQ_LC3"),
+          column(4,
+                 numericInput(inputId = ns("w3"),
+                              min = 0,
+                              max = 1,
+                              step = 0.01,
+                              label = NULL,
+                              value = 0.25)),
+          column(2,  "Temp"),
+          column(4,
+                 numericInput(inputId = ns("w4"),
+                              min = -1,
+                              max = 1,
+                              step = 0.01,
+                              label = NULL,
+                              value = 0.25))
+        )
+      ),
+      # fluidRow(
+      #   radioButtons(inputId = ns("obj"),
+      #     label = "Objective",
+      #     choices = list("Habitat Quantity" = 1, "Weighted Attributes" = 2,
+      #       "Custom Barrier Scores" = 3)),
+      #   conditionalPanel(
+      #     condition = "input.obj == 2",
+      #     ns = ns,
+      #     column(2,  "Habitat Quantity"),
+      #     column(4,
+      #       numericInput(inputId = ns("w1"),
+      #         min = 0,
+      #         max = 1,
+      #         step = 0.01,
+      #         label = NULL,
+      #         value = 0.5)),
+      #     column(2, "Habitat Quality"),
+      #     column(4,
+      #       numericInput(inputId = ns("w2"),
+      #       min = 0,
+      #       max = 1,
+      #       step = 0.01,
+      #       label = NULL,
+      #       value = 0.5))
+      #   )
+      # ),
+      hr(),
+      fluidRow(
         radioButtons(inputId = ns("cost"),
           label = "Cost",
-          choices = list("Default Predictions" = 1, "Custom Cost Estimates" = 2),
+          choiceNames = list(
+            "Default Predictions", 
+            tags$span(style = "color:#c0c0c0", "Provide Mean Project Cost")
+          ),
+          choiceValues = c(1, 2),
+          inline = TRUE,
           selected = NULL)
       ),
+      fluidRow(
+        conditionalPanel(
+          condition = "input.cost == 2",
+          ns = ns,
+          column(6,
+          numericInput(inputId = ns("mean_design_cost"),
+            label = tags$span(style = "color:#c0c0c0", "Mean Design Cost ($)"),
+            min = 0,
+            value = NULL)
+          ),
+          column(6,
+          numericInput(inputId = ns("mean_construction_cost"),
+            label = tags$span(style = "color:#c0c0c0", "Mean Construction Cost ($)"),
+            min = 0,
+            value = NULL)
+          )
+        )
+      ),
+      hr(),
       fluidRow(
         numericInput(inputId = ns("budget"),
                      label = "Enter Budget ($)",
                      min = 0,
                      value = NULL)
       ),
-      fluidRow(
-        conditionalPanel(
-          condition = "input.obj == 3 && input.cost == 1",
-          ns = ns,
-          fileInput(inputId = ns("cust_score"), 'Choose xlsx file with: IDs and Scores',
-            accept = c(".xlsx")
-          )
-        ),
-        conditionalPanel(
-          condition = "input.obj != 3 && input.cost == 2",
-          ns = ns,
-          fileInput(inputId = ns("cust_cost"), 'Choose xlsx file with: IDs and Costs',
-            accept = c(".xlsx")
-          )
-        ),
-        conditionalPanel(
-          condition = "input.obj == 3 && input.cost == 2",
-          ns = ns,
-          fileInput(inputId = ns("cust_score_cost"), 'Choose xlsx file with: IDs, Scores, and Costs',
-                    accept = c(".xlsx")
-          )
-        )
-      ),
+        # conditionalPanel(
+        #   condition = "input.obj == 3 && input.cost == 1",
+        #   ns = ns,
+        #   fileInput(inputId = ns("cust_score"), 'Choose xlsx file with: IDs and Scores',
+        #     accept = c(".xlsx")
+        #   )
+        # ),
+        # conditionalPanel(
+        #   condition = "input.obj != 3 && input.cost == 2",
+        #   ns = ns,
+        #   fileInput(inputId = ns("cust_cost"), 'Choose xlsx file with: IDs and Costs',
+        #     accept = c(".xlsx")
+        #   )
+        # ),
+        # conditionalPanel(
+        #   condition = "input.obj == 3 && input.cost == 2",
+        #   ns = ns,
+        #   fileInput(inputId = ns("cust_score_cost"), 'Choose xlsx file with: IDs, Scores, and Costs',
+        #             accept = c(".xlsx")
+        #   )
+        # )
+      #),
+      hr(),
         fluidRow(
           actionButton(ns("submit"), "Submit")
       )
@@ -115,8 +215,23 @@ mod_Suggest_server <- function(id, r){
     
     #ensure weights add to one
     observeEvent(input$w1, {
-      updateNumericInput(session, "w2", value = 1 - input$w1)
+      remaining <- 1 - input$w1
+      updateNumericInput(session, "w2", max = remaining)
+      updateNumericInput(session, "w3", max = remaining)
+      updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
     })
+    
+    observeEvent(input$w2, {
+      remaining <- 1 - input$w1 - input$w2
+      updateNumericInput(session, "w3", max = remaining)
+      updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
+    })
+    
+    observeEvent(input$w3, {
+      remaining <- 1 - input$w1 - input$w2 - input$w3
+      updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
+    })
+    
     
     # update reactive values object with Submit inputs
     observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
