@@ -30,8 +30,8 @@ mod_Explore_ui <- function(id){
           label = "Select Ownership Type",
           choices = setNames(
             c(0:9, 11, 12),
-            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 
-              'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
+            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private',
+                   'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
           ),
           selected = 0,
           width = '50%',
@@ -44,8 +44,8 @@ mod_Explore_ui <- function(id){
           label = tags$span(style = "color:#c0c0c0", "Select Species of Interest"),
           choices = setNames(
             c(0 : 9),
-            nm = c("All", "Bull trout", "Chinook", "Chum", "Coho", 
-                   "Pink", "Resident trout", "Sockeye", 
+            nm = c("All", "Bull trout", "Chinook", "Chum", "Coho",
+                   "Pink", "Resident trout", "Sockeye",
                    "Steelhead", "SR Cutthroad")
           ),
           selected = 0,
@@ -57,12 +57,12 @@ mod_Explore_ui <- function(id){
         radioButtons(inputId = ns("hq"),
                      label = "Select Habitat Quantity Definition",
                      choiceNames = list(
-                       "Length", 
-                       tags$span(style = "color:#c0c0c0", "Area"), 
+                       "Length",
+                       tags$span(style = "color:#c0c0c0", "Area"),
                        tags$span(style = "color:#c0c0c0", "Volume")
                      ),
                      choiceValues = c("length", "area", "volume"),
-                     inline = TRUE, 
+                     inline = TRUE,
                      selected = NULL
         )
       ),
@@ -86,27 +86,27 @@ mod_Explore_ui <- function(id){
               label = "Variable on X axis",
               # TODO - Pass as argument or add to r reactive function?
               choices = setNames(
-                c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
-                nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type')
+                c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+                nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type', 'Passability')
               ),
               selected = "cost",
               width = "100%"),
-              offset = 0
+            offset = 0
           ),
           column(
             6,
             selectizeInput(
               inputId = ns("y_axis_variable"),
-                label = "Variable on Y axis",
-                # TODO - Pass as argument or add to r reactive function?
-                choices = setNames(
-                  c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
-                  nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type')
-                ),
-                selected = "hfull_net",
-                width = "100%"
-             ),
-             offset = 0
+              label = "Variable on Y axis",
+              # TODO - Pass as argument or add to r reactive function?
+              choices = setNames(
+                c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+                nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type','Passability')
+              ),
+              selected = "hfull_net",
+              width = "100%"
+            ),
+            offset = 0
           )
         ),
         fluidRow(
@@ -132,27 +132,27 @@ mod_Explore_ui <- function(id){
       ),
       conditionalPanel(
         "input.plot_type == 'Histogram'",
-         ns = ns,
-         selectInput(
-           inputId = ns("histogram_variable"),
-           label = "Variable to display",
-           # TODO - Pass as argument or add to r reactive function?
-           choices = setNames(
-             c('cost', 'potential_species', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
-             nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type')
-           )
-         ),
-         # number of bins for numerical vars
-         conditionalPanel(
-           "input.histogram_variable != 'potential_species'",
-           ns = ns,
-           sliderInput(
-             inputId = ns("histogram_nbins"),
-             label = "Number of bins",
-             min = 1, max = 100, value = 30,
-             ticks = FALSE
-           )
-         )
+        ns = ns,
+        selectInput(
+          inputId = ns("histogram_variable"),
+          label = "Variable to display",
+          # TODO - Pass as argument or add to r reactive function?
+          choices = setNames(
+            c('cost', 'potential_species', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+            nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability')
+          )
+        ),
+        # number of bins for numerical vars
+        conditionalPanel(
+          "input.histogram_variable != 'potential_species'",
+          ns = ns,
+          sliderInput(
+            inputId = ns("histogram_nbins"),
+            label = "Number of bins",
+            min = 1, max = 100, value = 30,
+            ticks = FALSE
+          )
+        )
       ),
       hr(),
       fluidRow(
@@ -208,20 +208,20 @@ mod_Explore_server <- function(id, r){
 
     # scatter plot variable choices
     cScatterPlotVariables <- setNames(
-      c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
-      nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type')
+      c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+      nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type','Passability')
     )
 
     # histogram choices
     cHistogramVariables <- setNames(
-      c('cost', 'potential_species', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
-      nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type')
+      c('cost', 'potential_species', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+      nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability')
     )
 
     # color choices
     cColorVariables <- setNames(
-      c('none', 'cost', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
-      nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type')
+      c('none', 'cost', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+      nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability')
     )
 
     # Explore tab submit event
@@ -280,8 +280,8 @@ mod_Explore_server <- function(id, r){
     observeEvent(c(input$plot_type, input$area_sel, input$owner_sel), {
       if(input$plot_type == "Scatterplot"){
         cVars <- setNames(
-          c('none', 'cost', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code'),
-          nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type')
+          c('none', 'cost', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+          nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability')
         )
       } else {
         cVars <- setNames(
