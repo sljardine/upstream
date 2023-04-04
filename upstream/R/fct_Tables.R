@@ -29,3 +29,25 @@ get_summary_table <- function(
   
   return(sum_tab)
 }
+
+#' @title Display a list of suggested projects
+#' @param points A simple features point data frame containing culvert locations and attributes.
+#' @param points_sel A simple features point data frame containing selected culvert locations and attributes.
+#' @return A dataframe listing suggested projects
+#' @export
+get_project_list <- function(
+  points,
+  points_sel
+){
+  
+  proj_list <- points %>% 
+    sf::st_drop_geometry() %>% 
+    dplyr::filter(points_sel) %>% 
+    dplyr::select(site_id, huc12name, cost) %>% 
+    dplyr::mutate(cost = round(cost, digits = 0)) %>% 
+    as.data.frame() %>% 
+    dplyr::arrange(huc12name) %>% 
+    dplyr::rename(`Culvert ID` = site_id, `HUC 12` = huc12name, `Estimated Cost` = cost) 
+
+  return(proj_list)
+}

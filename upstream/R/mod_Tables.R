@@ -12,8 +12,17 @@ mod_Tables_ui <- function(id){
   tagList(
     fluidRow(
       #shinydashboard::box(
+      #width = 6,
+      #solidHeader = TRUE, 
+      #h4("Project Plan"),
+      uiOutput(ns("project_list"))
+      #)
+    ),
+    fluidRow(
+      #shinydashboard::box(
         #width = 6,
         #solidHeader = TRUE, 
+      #h4("Plan Habitat Gains"),
       uiOutput(ns("data_table"))
       #)
     )
@@ -34,6 +43,18 @@ mod_Tables_server <- function(id, r){
       user_table(TRUE)
       )
 
+    store_list <- eventReactive(c(r$submit_suggest, r$submit_custom),
+      {
+        if(r$tab_sel == "Suggest"){
+          get_project_list(culverts_cmb, r$points_sel_suggest)
+        }
+          else if(r$tab_sel == "Custom") {
+            points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids1_custom)
+            get_project_list(culverts_cmb, points_sel_custom)
+        }
+      }
+    )
+    
     store_table <- eventReactive(c(r$submit_suggest, r$submit_custom),
       {
         if(r$tab_sel == "Suggest"){
@@ -46,18 +67,19 @@ mod_Tables_server <- function(id, r){
       }
     )
     
+    
     # tab events
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
-        user_table(FALSE)
+          user_table(FALSE)
       } else if(r$tab_sel == "Explore"){
           user_table(FALSE)
       } else if(r$tab_sel == "Suggest"){
           user_table(FALSE)
       } else if(r$tab_sel == "Custom"){
-        user_table(FALSE)
+          user_table(FALSE)
       } else if(r$tab_sel == "Learn"){
-        user_table(FALSE)
+          user_table(FALSE)
       }
     })
     
@@ -67,11 +89,34 @@ mod_Tables_server <- function(id, r){
            align = "center")
     }, deleteFile = FALSE)
     
+    
+    output$project_list <- renderUI({
+      if(!user_table()){
+        imageOutput(NULL) 
+      } else {
+        output$render_project_list <- DT::renderDataTable(
+          DT::datatable(
+            {store_list()}, 
+            caption = htmltools::tags$caption("Project Plan", 
+              style = "color: #1c1cff; font-weight: bold"),
+            options = list(pageLength = 10, lengthChange = FALSE)) %>% 
+            DT::formatCurrency("Estimated Cost")
+        )
+        DT::dataTableOutput(ns("render_project_list"))}
+    })
+    
     output$data_table <- renderUI({
       if(!user_table()){
         imageOutput(NULL) 
       } else {
-        output$render_data_table <- DT::renderDataTable({store_table()})
+        output$render_data_table <- DT::renderDataTable(
+          {store_table()}, 
+          caption = htmltools::tags$caption(
+            "Estimated Habitat Gains", 
+            style = "color: #1c1cff; font-weight: bold",
+            fontSize = "14px"),
+          options = list(pageLength = 10, lengthChange = FALSE)
+        )
         DT::dataTableOutput(ns("render_data_table"))}
     })
     

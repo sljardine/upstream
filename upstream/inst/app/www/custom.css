@@ -16,6 +16,12 @@
   background-color: #1c1cff;
 }
 
+/* Change header color */
+h4 {
+  color: #1c1cff;
+  font-weight: bold;
+}
+
 /* body */
 .content-wrapper, .right-side {
    background-color: #ffffff;
