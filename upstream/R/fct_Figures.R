@@ -22,7 +22,7 @@ get_leaflet_map <- function(){
     leaflet::leaflet() %>%
     leaflet::addProviderTiles("CartoDB.Positron", group = "Grayscale", options = leaflet::providerTileOptions(minZoom = 7))  %>%
     leaflet::addScaleBar("bottomleft")
-  
+
   # add wria polygons
   m <- m %>%
     leaflet::addPolygons(
@@ -38,7 +38,7 @@ get_leaflet_map <- function(){
       color = "#1c1cff",
       fillColor = "transparent"
     )
-  
+
   # add circle markers (could use addGlPoints maybe...)
   m <- m %>%
     leaflet::addCircleMarkers(
@@ -51,25 +51,25 @@ get_leaflet_map <- function(){
       fillColor = 'grey',
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
-          iconCreateFunction = htmlwidgets::JS("function (cluster) {    
-          var childCount = cluster.getChildCount();  
-          if (childCount < 100) {  
+        iconCreateFunction = htmlwidgets::JS("function (cluster) {
+          var childCount = cluster.getChildCount();
+          if (childCount < 100) {
           c = 'rgba(204, 252, 255, 1.0);'
-          } else if (childCount < 1000) {  
-          c = 'rgba(237, 192, 181, 1);'  
-          } else { 
-          c = 'rgba(164, 164, 243, 1);'  
-          }    
-         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', 
-         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),  
-          spiderfyOnMaxZoom = FALSE,
-          disableClusteringAtZoom = 10
+          } else if (childCount < 1000) {
+          c = 'rgba(237, 192, 181, 1);'
+          } else {
+          c = 'rgba(164, 164, 243, 1);'
+          }
+         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
+         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
+        spiderfyOnMaxZoom = FALSE,
+        disableClusteringAtZoom = 10
       ),
       popup = ~popup
     )
 }
 
-#' @title Reset the map 
+#' @title Reset the map
 #' @param leaf_proxy An leaflet map with groups to be cleared.
 #' @return none
 #' @export
@@ -77,9 +77,9 @@ reset_map <- function(leaf_proxy){
   leaf_proxy %>%
     leaflet::clearGroup('culverts') %>%
     leaflet::clearGroup('selected_wria') %>%
-    leaflet::clearGroup('blocked_lines') %>% 
-    leaflet::clearGroup('unblocked_lines') %>% 
-    leaflet::clearGroup('selected_culverts') %>% 
+    leaflet::clearGroup('blocked_lines') %>%
+    leaflet::clearGroup('unblocked_lines') %>%
+    leaflet::clearGroup('selected_culverts') %>%
     leaflet::addCircleMarkers(
       data = culverts_cmb,
       group = 'culverts',
@@ -90,42 +90,42 @@ reset_map <- function(leaf_proxy){
       fillColor = 'grey',
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
-        iconCreateFunction = htmlwidgets::JS("function (cluster) {    
-          var childCount = cluster.getChildCount();  
-          if (childCount < 100) {  
+        iconCreateFunction = htmlwidgets::JS("function (cluster) {
+          var childCount = cluster.getChildCount();
+          if (childCount < 100) {
           c = 'rgba(204, 252, 255, 1.0);'
-          } else if (childCount < 1000) {  
-          c = 'rgba(237, 192, 181, 1);'  
-          } else { 
-          c = 'rgba(164, 164, 243, 1);'  
-          }    
-         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', 
-         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),  
+          } else if (childCount < 1000) {
+          c = 'rgba(237, 192, 181, 1);'
+          } else {
+          c = 'rgba(164, 164, 243, 1);'
+          }
+         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
+         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
         spiderfyOnMaxZoom = FALSE,
         disableClusteringAtZoom = 10
-        ),
+      ),
       popup = ~popup
     )
-  
+
   # selected wria bounding box
   bbox <- get_wria_bounding_box(wrias$WRIA_NR)
-  
+
   # zoom map to selected wrias
   leaf_proxy %>%
     leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 }
 
-#' @title Remove map points 
+#' @title Remove map points
 #' @param leaf_proxy An leaflet map with culverts to be cleared.
 #' @return none
 #' @export
 remove_map_points <- function(leaf_proxy){
   leaf_proxy %>%
-    leaflet::clearGroup('culverts') 
-  
+    leaflet::clearGroup('culverts')
+
   # selected wria bounding box
   bbox <- get_wria_bounding_box(wrias$WRIA_NR)
-  
+
   # zoom map to selected wrias
   leaf_proxy %>%
     leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
@@ -321,17 +321,17 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_va
       fillColor = ~pal(C),
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
-        iconCreateFunction = htmlwidgets::JS("function (cluster) {    
-          var childCount = cluster.getChildCount();  
-          if (childCount < 100) {  
+        iconCreateFunction = htmlwidgets::JS("function (cluster) {
+          var childCount = cluster.getChildCount();
+          if (childCount < 100) {
           c = 'rgba(204, 252, 255, 1.0);'
-          } else if (childCount < 1000) {  
-          c = 'rgba(237, 192, 181, 1);'  
-          } else { 
-          c = 'rgba(164, 164, 243, 1);'  
-          }    
-         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', 
-         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),  
+          } else if (childCount < 1000) {
+          c = 'rgba(237, 192, 181, 1);'
+          } else {
+          c = 'rgba(164, 164, 243, 1);'
+          }
+         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
+         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
         spiderfyOnMaxZoom = FALSE,
         disableClusteringAtZoom = 10
       ),
@@ -511,19 +511,19 @@ filter_and_format_culverts_for_scatterplot <- function(points, area_sel, owner_s
 #' @return ggplot object of culvert data scatterplot
 #' @export
 figure_scatterplot <- function(
-    points, 
-    x_axis_variable, 
-    y_axis_variable, 
-    color_variable, 
-    x_jitter, 
-    y_jitter, 
-    highlight, 
-    barrier_ids, 
-    plot_xmin, 
-    plot_xmax, 
-    plot_ymin, 
+    points,
+    x_axis_variable,
+    y_axis_variable,
+    color_variable,
+    x_jitter,
+    y_jitter,
+    highlight,
+    barrier_ids,
+    plot_xmin,
+    plot_xmax,
+    plot_ymin,
     plot_ymax){
-  
+
   # set the barrier ids to '' if null
   if(is.null(barrier_ids)){
     cBarrierIds <- ''
@@ -924,6 +924,8 @@ get_pretty_variable_name <- function(varName){
     prettyName <- 'WRIA'
   } else if(varName == 'owner_type_code'){
     prettyName <- 'Owner Type'
+  } else if(varName == 'percent_fish_passable_code'){
+    prettyName <- 'Passability'
   }
 
   return(prettyName)
