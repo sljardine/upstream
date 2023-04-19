@@ -4,6 +4,7 @@
 #' @param D A connectivity matrix.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
+#' @param barrier_idP A vector of already planned culvert IDs
 #' @return A logical vector of TRUE/FALSE values.
 #' @export
 solve_opt <- function(
@@ -12,7 +13,8 @@ solve_opt <- function(
   budget, #budget constraint
   D, #connectivity matrix
   wria_sel, #wria to run the optimization problem on
-  owner_sel
+  owner_sel,
+  barrier_idP #planned barrier IDs
 ){
 
   # set benefit to zero if not in the wria of interest (wria_sel)
@@ -25,10 +27,16 @@ solve_opt <- function(
   if(! 0 %in% owner_sel){
     points <- points %>%
       dplyr::mutate(hmarg_net = ifelse(
-        grepl(paste(owner_sel, collapse = "|"), unique_owner_type_code), 
+        grepl(paste(owner_sel, collapse = "|"), unique_owner_type_code),
         hmarg_net, 0))
   }
-  
+
+  # set benefit to zero if barrier is already planned by user
+  if(! 0 %in% barrier_idP){
+    points <- points %>%
+      dplyr::mutate(hmarg_net = ifelse(site_id %in% barrier_idP, 0, hmarg_net))
+  }
+
   # inputs
   v <- points %>% dplyr::pull(hmarg_net)
   brc <- points %>% dplyr::pull(cost)
@@ -49,11 +57,11 @@ solve_opt <- function(
                   bounds = ROI::V_bound(li = 1 : nb, lb = rep.int(0, nb), ui = 1 : nb, ub = rep.int(1, nb)),
                   types = rep.int("B", nb),
                   maximum = TRUE)
-  
+
   sol <- ROI::ROI_solve(prob, "glpk",  control = list("verbose" = TRUE, "presolve" = TRUE))
 
   soln <- as.logical(ROI::solution(sol))
-  
+
   return(soln)
 }
 
@@ -69,17 +77,17 @@ solve_opt <- function(
 map_leaflet_opt <- function(
     leaf_proxy,
     points, #culverts
-    lines, #lines with linestring geometries 
+    lines, #lines with linestring geometries
     soln, #output from solve_opt()
     marginal_line_ids #comids for all lines marginally upstream of each point
   ){
-  
+
 
   #Crop lines to wrias in solution
   soln_wrias <- unique(points[soln, ]$wria_number)
   in_soln_wrias <- points$wria_number %in% soln_wrias
   #First get blocked/unblocked lines
-  blocked_lines <- marginal_line_ids[in_soln_wrias] %>% base::unlist() 
+  blocked_lines <- marginal_line_ids[in_soln_wrias] %>% base::unlist()
   leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
   #Defined blocked/unblocked
   milp_stream_ids <- marginal_line_ids[soln] %>% base::unlist()
@@ -87,7 +95,7 @@ map_leaflet_opt <- function(
   #Barrier color
   pal <- leaflet::colorNumeric(c("#b80000", "#179848"), 0 : 1)
 
-  #Add lines 
+  #Add lines
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(data = leaflet_lines %>%
       dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
@@ -101,10 +109,10 @@ map_leaflet_opt <- function(
         color = "#3cdd78",
         opacity = 0.5,
         group = "unblocked_lines"
-      ) 
+      )
 
   #Add culverts
-  leaf_proxy <- leaf_proxy %>%  
+  leaf_proxy <- leaf_proxy %>%
     leaflet::addCircleMarkers(
       data = points,
       lng = ~ site_longitude,
@@ -116,22 +124,22 @@ map_leaflet_opt <- function(
       fillOpacity = 1,
       opacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
-        iconCreateFunction = htmlwidgets::JS("function (cluster) {    
-          var childCount = cluster.getChildCount();  
-          if (childCount < 100) {  
+        iconCreateFunction = htmlwidgets::JS("function (cluster) {
+          var childCount = cluster.getChildCount();
+          if (childCount < 100) {
           c = 'rgba(204, 252, 255, 1.0);'
-          } else if (childCount < 1000) {  
-          c = 'rgba(237, 192, 181, 1);'  
-          } else { 
-          c = 'rgba(164, 164, 243, 1);'  
-          }    
-         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', 
-         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),  
+          } else if (childCount < 1000) {
+          c = 'rgba(237, 192, 181, 1);'
+          } else {
+          c = 'rgba(164, 164, 243, 1);'
+          }
+         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
+         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
         spiderfyOnMaxZoom = FALSE,
         disableClusteringAtZoom = 10
       ),
       popup = ~popup
     )
-  
+
   return(leaf_proxy)
 }

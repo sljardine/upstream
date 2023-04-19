@@ -30,7 +30,7 @@ mod_Suggest_ui <- function(id){
           label = "Select Ownership Type",
           choices = setNames(
             c(0:9, 11, 12),
-            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 
+            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private',
               'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
           ),
           selected = 0,
@@ -40,12 +40,21 @@ mod_Suggest_ui <- function(id){
       ),
       fluidRow(
         selectizeInput(
+          inputId = ns("barrier_idP"),
+          label = "Already Planned / Will Complete",
+          selected = 0,
+          multiple = TRUE,
+          choices = NULL,
+          width = "50%")
+      ),
+      fluidRow(
+        selectizeInput(
           inputId = ns("species_sel"),
           label = tags$span(style = "color:#c0c0c0", "Select Species of Interest"),
           choices = setNames(
             c(0 : 9),
-            nm = c("All", "Bull trout", "Chinook", "Chum", "Coho", 
-                   "Pink", "Resident trout", "Sockeye", 
+            nm = c("All", "Bull trout", "Chinook", "Chum", "Coho",
+                   "Pink", "Resident trout", "Sockeye",
                    "Steelhead", "SR Cutthroad")
           ),
           selected = 0,
@@ -57,12 +66,12 @@ mod_Suggest_ui <- function(id){
         radioButtons(inputId = ns("hq"),
           label = "Select Habitat Quantity Definition",
           choiceNames = list(
-            "Length", 
-            tags$span(style = "color:#c0c0c0", "Area"), 
+            "Length",
+            tags$span(style = "color:#c0c0c0", "Area"),
             tags$span(style = "color:#c0c0c0", "Volume")
           ),
           choiceValues = c("length", "area", "volume"),
-          inline = TRUE, 
+          inline = TRUE,
           selected = NULL
         )
       ),
@@ -71,7 +80,7 @@ mod_Suggest_ui <- function(id){
         radioButtons(inputId = ns("obj"),
           label = "Objective",
           choiceNames = list(
-            "Habitat Quantity", 
+            "Habitat Quantity",
             tags$span(style = "color:#c0c0c0", "Weighted Attributes")
           ),
           choiceValues = c(1 : 2)
@@ -144,7 +153,7 @@ mod_Suggest_ui <- function(id){
         radioButtons(inputId = ns("cost"),
           label = "Cost",
           choiceNames = list(
-            "Default Predictions", 
+            "Default Predictions",
             tags$span(style = "color:#c0c0c0", "Provide Mean Project Cost")
           ),
           choiceValues = c(1, 2),
@@ -212,7 +221,7 @@ mod_Suggest_ui <- function(id){
 mod_Suggest_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
-    
+
     #ensure weights add to one
     observeEvent(input$w1, {
       remaining <- 1 - input$w1
@@ -220,22 +229,23 @@ mod_Suggest_server <- function(id, r){
       updateNumericInput(session, "w3", max = remaining)
       updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
     })
-    
+
     observeEvent(input$w2, {
       remaining <- 1 - input$w1 - input$w2
       updateNumericInput(session, "w3", max = remaining)
       updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
     })
-    
+
     observeEvent(input$w3, {
       remaining <- 1 - input$w1 - input$w2 - input$w3
       updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
     })
-    
-    
+
+
     # update reactive values object with Submit inputs
     observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
     observeEvent(input$obj, r$obj_suggest <- input$obj)
+    observeEvent(input$barrier_idP, r$barrier_idP_suggest <- input$barrier_idP)
     observeEvent(input$budget, r$budget_suggest <- input$budget)
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
@@ -244,12 +254,26 @@ mod_Suggest_server <- function(id, r){
         r$owner_sel_suggest <- input$owner_sel
       }
     })
-    
+
+    updateSelectizeInput(
+      session,
+      inputId = "barrier_idP",
+      #choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
+      choices = setNames(
+        c(0,culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort()),
+        nm = c(0,culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort())
+      ),
+      selected = 0,
+      server = TRUE
+    )
+
+
+
     # render leaflet output (DO I NEED THIS?)
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()
     })
-    
+
     # tab events
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
@@ -271,7 +295,7 @@ mod_Suggest_server <- function(id, r){
         #user_plot(FALSE)
       }
     })
-    
+
     # Suggest tab submit event
     observeEvent(input$submit, {
       if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
@@ -296,8 +320,9 @@ mod_Suggest_server <- function(id, r){
       {showModal(modalDialog(title = "Warning!",
       "Please fill all the fields before you click the Submit button."))}
     })
-    
-    
+
+
+
   })
 }
 
