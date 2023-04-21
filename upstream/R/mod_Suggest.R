@@ -40,7 +40,7 @@ mod_Suggest_ui <- function(id){
       ),
       fluidRow(
         selectizeInput(
-          inputId = ns("barrier_idP"),
+          inputId = ns("barrier_idp"),
           label = "Already Planned / Will Complete",
           selected = 0,
           multiple = TRUE,
@@ -245,7 +245,7 @@ mod_Suggest_server <- function(id, r){
     # update reactive values object with Submit inputs
     observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
     observeEvent(input$obj, r$obj_suggest <- input$obj)
-    observeEvent(input$barrier_idP, r$barrier_idP_suggest <- input$barrier_idP)
+    observeEvent(input$barrier_idp, r$barrier_idp_suggest <- input$barrier_idp)
     observeEvent(input$budget, r$budget_suggest <- input$budget)
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
@@ -257,11 +257,11 @@ mod_Suggest_server <- function(id, r){
 
     updateSelectizeInput(
       session,
-      inputId = "barrier_idP",
+      inputId = "barrier_idp",
       #choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
       choices = setNames(
         c(0,culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort()),
-        nm = c(0,culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort())
+        nm = c('none', culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort())
       ),
       selected = 0,
       server = TRUE

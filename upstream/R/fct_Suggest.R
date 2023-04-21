@@ -4,7 +4,7 @@
 #' @param D A connectivity matrix.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
-#' @param barrier_idP A vector of already planned culvert IDs
+#' @param barrier_idp A vector of already planned culvert IDs
 #' @return A logical vector of TRUE/FALSE values.
 #' @export
 solve_opt <- function(
@@ -14,7 +14,7 @@ solve_opt <- function(
   D, #connectivity matrix
   wria_sel, #wria to run the optimization problem on
   owner_sel,
-  barrier_idP #planned barrier IDs
+  barrier_idp #planned barrier IDs
 ){
 
   # set benefit to zero if not in the wria of interest (wria_sel)
@@ -32,9 +32,9 @@ solve_opt <- function(
   }
 
   # set benefit to zero if barrier is already planned by user
-  if(! 0 %in% barrier_idP){
+  if(! 0 %in% barrier_idp){
     points <- points %>%
-      dplyr::mutate(hmarg_net = ifelse(site_id %in% barrier_idP, 0, hmarg_net))
+      dplyr::mutate(hmarg_net = ifelse(site_id %in% barrier_idp, 0, hmarg_net))
   }
 
   # inputs
