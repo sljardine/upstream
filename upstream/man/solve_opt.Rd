@@ -4,7 +4,7 @@
 \alias{solve_opt}
 \title{Solve the optimization problem}
 \usage{
-solve_opt(points, budget, D, wria_sel, owner_sel)
+solve_opt(points, budget, D, wria_sel, owner_sel, barrier_idp)
 }
 \arguments{
 \item{points}{A simple features point data frame containing culvert locations and attributes.}
@@ -14,6 +14,8 @@ solve_opt(points, budget, D, wria_sel, owner_sel)
 \item{D}{A connectivity matrix.}
 
 \item{owner_sel}{A vector of owner ID numbers of interest.}
+
+\item{barrier_idp}{A vector of already planned culvert IDs}
 
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 }
