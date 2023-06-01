@@ -136,6 +136,7 @@ remove_map_points <- function(leaf_proxy){
 #' @param zoom_level A zoom level for tge leaflet map.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
+#' @param barrier_idp A vector of planned culvert IDs
 #' @return none
 #' @export
 update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){

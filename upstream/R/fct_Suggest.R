@@ -4,7 +4,7 @@
 #' @param D A connectivity matrix.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
-#' @param barrier_idp A vector of already planned culvert IDs
+#' @param barrier_idp A vector of planned culvert IDs
 #' @return A logical vector of TRUE/FALSE values.
 #' @export
 solve_opt <- function(

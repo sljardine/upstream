@@ -15,7 +15,7 @@ solve_opt(points, budget, D, wria_sel, owner_sel, barrier_idp)
 
 \item{owner_sel}{A vector of owner ID numbers of interest.}
 
-\item{barrier_idp}{A vector of already planned culvert IDs}
+\item{barrier_idp}{A vector of planned culvert IDs}
 
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 }

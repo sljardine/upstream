@@ -106,6 +106,7 @@ mod_Figures_server <- function(id, r){
         r$barrier_idp_suggest
         )
       remove_map_points(leaflet::leafletProxy(ns('base_map')))
+      reset_map(leaflet::leafletProxy(ns('base_map')))
       map_leaflet_opt(
         leaflet::leafletProxy(ns('base_map')),
         culverts_cmb, #culverts
