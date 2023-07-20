@@ -917,9 +917,9 @@ get_pretty_variable_name <- function(varName){
     prettyName <-  'Downstream Barrier (count)'
   } else if(varName ==  'potential_species'){
     prettyName <-  'Potential Species'
-  } else if(varName ==  'hmarg_net'){
+  } else if(varName ==  'hmarg'){
     prettyName <-  'Marginal Habitat Length (km)'
-  } else if(varName ==  'hfull_net'){
+  } else if(varName ==  'hfull'){
     prettyName <-  'Full Habitat Length (km)'
   } else if(varName == 'wria_number'){
     prettyName <- 'WRIA'
@@ -927,6 +927,10 @@ get_pretty_variable_name <- function(varName){
     prettyName <- 'Owner Type'
   } else if(varName == 'percent_fish_passable_code'){
     prettyName <- 'Passability'
+  }else if(varName == 'corrected_dn_WSDOT'){
+    prettyName <- 'WSDOT Downstream Corrections'
+  }else if(varName == 'corrected_dn_nWSDOT'){
+    prettyName <- 'non-WSDOT Downstream Corrections'
   }
 
   return(prettyName)

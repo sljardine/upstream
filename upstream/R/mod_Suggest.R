@@ -258,10 +258,10 @@ mod_Suggest_server <- function(id, r){
     updateSelectizeInput(
       session,
       inputId = "barrier_idp",
-      #choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
       choices = setNames(
         c(0,culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort()),
-        nm = c('None', culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort())
+        nm = c('None',
+               culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort())
       ),
       selected = 0,
       server = TRUE
