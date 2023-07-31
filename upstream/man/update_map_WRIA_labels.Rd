@@ -14,6 +14,8 @@ update_map_WRIA_labels(leaf_proxy, zoom_level, area_sel, owner_sel)
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 
 \item{owner_sel}{A vector of owner ID numbers of interest.}
+
+\item{barrier_idp}{A vector of planned culvert IDs}
 }
 \value{
 none
