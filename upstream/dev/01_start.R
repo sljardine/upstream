@@ -22,8 +22,8 @@ golem::fill_desc(
   pkg_name = "Upstream", # The Name of the package containing the App
   pkg_title = "Upstream: A decision support tool for barrier culvert restoration", # The Title of the package containing the App
   pkg_description = "A decision support tool for barrier culvert restoration planning in Western Washington.
-  The tool enables exploration of candidate project attributes, identification of 
-  cost-effective barrier culvert restoration plans, and comparison of alternative 
+  The tool enables exploration of candidate project attributes, identification of
+  cost-effective barrier culvert restoration plans, and comparison of alternative
   customized restoration plans.", # The Description of the package containing the App
   author_first_name = "Sunny", # Your First Name
   author_last_name = "Jardine", # Your Last Name
@@ -53,7 +53,7 @@ golem::use_recommended_tests()
 
 ## Favicon ----
 # If you want to change the favicon (default is golem's one)
-golem::use_favicon() # path = "path/to/ico". Can be an online file.
+golem::use_favicon(path = "inst/app/www/upstream_favicon.ico") # path = "path/to/ico". Can be an online file.
 # golem::remove_favicon() # Uncomment to remove the default favicon
 
 ## Add helper functions ----
