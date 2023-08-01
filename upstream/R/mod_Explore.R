@@ -263,6 +263,7 @@ mod_Explore_server <- function(id, r){
 
       # filter hucs
       options_hucs <- huc12_wrias %>%
+        sf::st_drop_geometry() %>%
         dplyr::filter(WRIA_NR %in% cWRIA_NR) %>%
         dplyr::group_by(huc_number) %>%
         dplyr::summarize(
@@ -285,6 +286,7 @@ mod_Explore_server <- function(id, r){
 
     # update barrier ids to filter to wria and owner
     observeEvent(c(input$area_sel, input$subarea_sel, input$owner_sel), {
+
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
 
       # get areas to filter by
@@ -317,7 +319,7 @@ mod_Explore_server <- function(id, r){
       if('12' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
 
       # filter sites
-      sfC <- sfC %>% dplyr::filter(wria_number %in% cWRIA_NR & site_id %in% cSiteIds)
+      sfC <- sfC %>% dplyr::filter(wria_number %in% cWRIA_NR & huc_number %in% choice_huc_number & site_id %in% cSiteIds)
 
       # update select input choices
       updateSelectizeInput(
