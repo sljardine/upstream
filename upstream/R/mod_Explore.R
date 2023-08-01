@@ -26,6 +26,19 @@ mod_Explore_ui <- function(id){
       ),
       fluidRow(
         selectizeInput(
+        inputId = ns("subarea_sel"),
+        label = "Select Subarea",
+        choices = setNames(
+          c(0, huc12 %>% dplyr::pull(huc_number)),
+          nm = c("All HUC 12s in selected WRIA(s)", huc12 %>% dplyr::pull(huc_name))
+        ),
+        selected = 0,
+        width = '50%',
+        multiple = TRUE
+       )
+      ),
+      fluidRow(
+        selectizeInput(
           inputId = ns("owner_sel"),
           label = "Select Ownership Type",
           choices = setNames(
@@ -238,8 +251,40 @@ mod_Explore_server <- function(id, r){
                              "Please fill all the fields before you click the Submit button."))}
     })
 
+    # update huc options
+    observeEvent(c(input$area_sel), {
+
+      # get areas to filter by
+      if("0" %in% input$area_sel){
+        cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
+      } else {
+        cWRIA_NR <- as.integer(input$area_sel)
+      }
+
+      # filter hucs
+      options_hucs <- huc12_wrias %>%
+        dplyr::filter(WRIA_NR %in% cWRIA_NR) %>%
+        dplyr::group_by(huc_number) %>%
+        dplyr::summarize(
+          huc_number = dplyr::first(huc_number),
+          huc_name = dplyr::first(huc_name)
+        )
+
+      # update select input choices
+      updateSelectizeInput(
+        session,
+        inputId = "subarea_sel",
+        choices = setNames(
+          c(0, options_hucs %>% dplyr::pull(huc_number)),
+          nm = c("All HUC 12s in selected WRIA(s)", options_hucs %>% dplyr::pull(huc_name))
+        ),
+        selected = 0,
+        server = TRUE
+      )
+    })
+
     # update barrier ids to filter to wria and owner
-    observeEvent(c(input$area_sel, input$owner_sel), {
+    observeEvent(c(input$area_sel, input$subarea_sel, input$owner_sel), {
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
 
       # get areas to filter by
@@ -247,6 +292,13 @@ mod_Explore_server <- function(id, r){
         cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         cWRIA_NR <- as.integer(input$area_sel)
+      }
+
+      # get subareas to filter by
+      if("0" %in% input$subarea_sel){
+        choice_huc_number <- huc12 %>% dplyr::pull(huc_number)
+      } else {
+        choice_huc_number <- as.integer(input$subarea_sel)
       }
 
       # get site ids for owner types to filter by
@@ -274,6 +326,7 @@ mod_Explore_server <- function(id, r){
         choices = sfC %>% dplyr::pull(site_id) %>% sort(),
         server = TRUE
       )
+
     })
 
     # update color variables for plot type
