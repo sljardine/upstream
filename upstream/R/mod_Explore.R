@@ -259,8 +259,6 @@ mod_Explore_server <- function(id, r){
 
       # filter hucs
       options_hucs <- huc12_wrias %>%
-        dplyr::filter(WRIA_NR %in% cWRIA_NR) %>%
-        dplyr::group_by(huc_number) %>%
         dplyr::filter(wria_number %in% cWRIA_NR)
 
       # update select input choices
