@@ -360,6 +360,23 @@ mod_Explore_server <- function(id, r){
         r$area_sel_explore <- input$area_sel
       }
     })
+
+    observeEvent(c(input$area_sel, input$subarea_sel), {
+
+      # get areas to filter by
+      if("0" %in% input$area_sel){
+        cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
+      } else {
+        cWRIA_NR <- as.integer(input$area_sel)
+      }
+
+      if("0" %in% input$subarea_sel){
+        r$subarea_sel_explore <- huc12_wrias %>% dplyr::filter(wria_number %in% cWRIA_NR) %>% dplyr::pull(huc_number)
+      } else {
+        r$subarea_sel_explore <- input$subarea_sel
+      }
+    })
+
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
         r$owner_sel_explore <- c(1:9, 11, 12)

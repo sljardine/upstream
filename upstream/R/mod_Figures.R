@@ -43,7 +43,7 @@ mod_Figures_server <- function(id, r){
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()
     })
-    
+
     # tab events
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
@@ -68,15 +68,16 @@ mod_Figures_server <- function(id, r){
     # Explore submit button event for base_map
     observeEvent(r$submit_explore, {
       update_map_selected_WRIA_polygons(
-        leaflet::leafletProxy(ns('base_map')), 
+        leaflet::leafletProxy(ns('base_map')),
         r$area_sel_explore
         )
       update_map_culvert_markers(
-        leaflet::leafletProxy(ns('base_map')), 
-        r$area_sel_explore, 
-        r$owner_sel_explore, 
-        r$color_variable_explore, 
-        r$highlight_explore, 
+        leaflet::leafletProxy(ns('base_map')),
+        r$area_sel_explore,
+        r$subarea_sel_explore,
+        r$owner_sel_explore,
+        r$color_variable_explore,
+        r$highlight_explore,
         r$barrier_ids_explore
         )
     })
@@ -92,17 +93,17 @@ mod_Figures_server <- function(id, r){
         leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
       }
     })
-    
-    # Suggest submit button event 
+
+    # Suggest submit button event
     observeEvent(r$submit_suggest, {
       update_map_selected_WRIA_polygons(
-        leaflet::leafletProxy(ns('base_map')), 
+        leaflet::leafletProxy(ns('base_map')),
         r$area_sel_suggest
       )
       r$points_sel_suggest <- solve_opt(
-        culverts_cmb, 
-        as.numeric(r$budget_suggest), 
-        D, 
+        culverts_cmb,
+        as.numeric(r$budget_suggest),
+        D,
         as.integer(r$area_sel_suggest),
         r$owner_sel_suggest
         )
@@ -110,7 +111,7 @@ mod_Figures_server <- function(id, r){
       map_leaflet_opt(
         leaflet::leafletProxy(ns('base_map')),
         culverts_cmb, #culverts
-        lines_simp, #lines with linestring geometries 
+        lines_simp, #lines with linestring geometries
         r$points_sel_suggest, #output from solve_opt()
         marginal_line_ids #comids for all lines marginally upstream of each point
       )
@@ -121,7 +122,7 @@ mod_Figures_server <- function(id, r){
       leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
     })
 
-    # Custom submit button event 
+    # Custom submit button event
     observeEvent(r$submit_custom, {
       remove_map_points(leaflet::leafletProxy(ns("base_map")))
       map_leaflet_custom(
@@ -133,7 +134,7 @@ mod_Figures_server <- function(id, r){
         marginal_line_ids #comids for all lines marginally upstream of each point
       )
     })
-    
+
     # reset plot click text output
     observeEvent(r$submit_explore, {r$plot_click_text_output_explore <- ''})
 
@@ -143,7 +144,7 @@ mod_Figures_server <- function(id, r){
 
     # render plot on submit button events or brush event
     store_plot <- eventReactive(
-      c(r$tab_sel, r$submit_explore, r$submit_suggest, r$submit_custom, r$plot_brush), 
+      c(r$tab_sel, r$submit_explore, r$submit_suggest, r$submit_custom, r$plot_brush),
       {
       # explore tab plots (scatter plot and histogram)
       if(user_plot()){
@@ -151,22 +152,22 @@ mod_Figures_server <- function(id, r){
           if(r$plot_type_explore == 'Scatterplot'){
             culverts_cmb %>%
               filter_and_format_culverts_for_scatterplot(
-                r$area_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore, 
+                r$area_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
                 r$y_axis_variable_explore, r$color_variable_explore) %>%
-              figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore, 
-                r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore, 
-                r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, 
+              figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore,
+                r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
+                r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
                 r$plot_ymin, r$plot_ymax
                 )
           } else if(r$plot_type_explore == 'Histogram'){
             culverts_cmb %>%
               filter_and_format_culverts_for_histogram(
-                r$area_sel_explore, r$owner_sel_explore, r$color_variable_explore, 
+                r$area_sel_explore, r$owner_sel_explore, r$color_variable_explore,
                 r$histogram_variable_explore
                 ) %>%
               figure_histogram(
-                r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore, 
-                r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore, 
+                r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore,
+                r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore,
                 r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax
                 )
           }
@@ -176,7 +177,7 @@ mod_Figures_server <- function(id, r){
       }
     }
     )
-    
+
     # logo (not being used)
     output$logo <- renderImage({
       list(src = "inst/app/www/placeholder.png",
@@ -223,7 +224,7 @@ mod_Figures_server <- function(id, r){
           r$plot_click_text_output_explore <- ''
         } else {
           r$plot_click_text_output_explore <- get_plot_click_site_id(
-            r$owner_sel_explore, r$area_sel_explore, r$x_axis_variable_explore, 
+            r$owner_sel_explore, r$area_sel_explore, r$x_axis_variable_explore,
             r$y_axis_variable_explore, input$plot_click$x, input$plot_click$y
             )
         }

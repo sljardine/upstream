@@ -218,16 +218,18 @@ update_map_selected_WRIA_polygons <- function(leaf_proxy, area_sel){
 #' @param barrier_ids A vector of point ids to highlight.
 #' @return none
 #' @export
-update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_variable, highlight, barrier_ids){
+update_map_culvert_markers <- function(leaf_proxy, area_sel, subarea_sel, owner_sel, color_variable, highlight, barrier_ids){
   # set null variables for initial map draw
   if(is.null(color_variable)){color_variable <- 'none'} else {color_variable <- color_variable}
   if(is.null(area_sel)){area_sel <- wrias$WRIA_NR} else {area_sel <- area_sel}
+  if(is.null(subarea_sel)){subarea_sel <- huc12_wrias %>% dplyr::select(huc_number) %>% dplyr::distinct()} else {subarea_sel <- subarea_sel}
   if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
   if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
 
   # filter culverts to selected wrias
   points <- culverts_cmb %>%
-    dplyr::filter(wria_number %in% area_sel)
+    #dplyr::filter(wria_number %in% area_sel)
+    dplyr::filter(huc_number %in% subarea_sel)
 
   # filter by owner class
   cSiteIds <- c()
