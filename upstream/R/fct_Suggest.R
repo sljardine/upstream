@@ -11,14 +11,18 @@ solve_opt <- function(
   points, #points with variables: hmarg, cost, and wria_number
   budget, #budget constraint
   D, #connectivity matrix
-  wria_sel, #wria to run the optimization problem on
+  wria_sel, #wria(s) to run the optimization problem on
+  huc_sel, #huc(s) to run the optimization problem on
   owner_sel
 ){
 
   # set benefit to zero if not in the wria of interest (wria_sel)
-  if(! 0 %in% wria_sel){
+  if(! 0 %in% wria_sel && ! 0 %in% huc_sel){
     points <- points %>%
-      dplyr::mutate(hmarg = ifelse(wria_number %in% wria_sel, hmarg, 0))
+      dplyr::mutate(
+        hmarg = ifelse(wria_number %in% wria_sel, hmarg, 0),
+        hmarg = ifelse(huc_number %in% huc_sel, hmarg, 0)
+        )
   }
 
   # set benefit to zero if not owned by the owner of interest (owner_sel)

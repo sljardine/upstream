@@ -97,15 +97,17 @@ mod_Figures_server <- function(id, r){
 
     # Suggest submit button event
     observeEvent(r$submit_suggest, {
-      update_map_selected_WRIA_polygons(
+      update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
-        r$area_sel_suggest
+        r$area_sel_suggest,
+        r$subarea_sel_suggest
       )
       r$points_sel_suggest <- solve_opt(
         culverts_cmb,
         as.numeric(r$budget_suggest),
         D,
         as.integer(r$area_sel_suggest),
+        as.integer(r$subarea_sel_suggest),
         r$owner_sel_suggest
         )
       remove_map_points(leaflet::leafletProxy(ns('base_map')))

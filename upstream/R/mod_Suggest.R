@@ -26,11 +26,20 @@ mod_Suggest_ui <- function(id){
       ),
       fluidRow(
         selectizeInput(
+          inputId = ns("subarea_sel"),
+          label = "Select Subarea",
+          choices = NULL,
+          width = '50%',
+          multiple = TRUE
+        )
+      ),
+      fluidRow(
+        selectizeInput(
           inputId = ns("owner_sel"),
           label = "Select Ownership Type",
           choices = setNames(
             c(0:9, 11, 12),
-            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private', 
+            nm = c('All Ownership Types','City', 'County', 'Federal', 'Private',
               'State', 'Tribal', 'Other', 'Port', 'Drainage District', 'Irrigation District', 'Unknown')
           ),
           selected = 0,
@@ -44,8 +53,8 @@ mod_Suggest_ui <- function(id){
           label = tags$span(style = "color:#c0c0c0", "Select Species of Interest"),
           choices = setNames(
             c(0 : 9),
-            nm = c("All", "Bull trout", "Chinook", "Chum", "Coho", 
-                   "Pink", "Resident trout", "Sockeye", 
+            nm = c("All", "Bull trout", "Chinook", "Chum", "Coho",
+                   "Pink", "Resident trout", "Sockeye",
                    "Steelhead", "SR Cutthroad")
           ),
           selected = 0,
@@ -57,12 +66,12 @@ mod_Suggest_ui <- function(id){
         radioButtons(inputId = ns("hq"),
           label = "Select Habitat Quantity Definition",
           choiceNames = list(
-            "Length", 
-            tags$span(style = "color:#c0c0c0", "Area"), 
+            "Length",
+            tags$span(style = "color:#c0c0c0", "Area"),
             tags$span(style = "color:#c0c0c0", "Volume")
           ),
           choiceValues = c("length", "area", "volume"),
-          inline = TRUE, 
+          inline = TRUE,
           selected = NULL
         )
       ),
@@ -71,7 +80,7 @@ mod_Suggest_ui <- function(id){
         radioButtons(inputId = ns("obj"),
           label = "Objective",
           choiceNames = list(
-            "Habitat Quantity", 
+            "Habitat Quantity",
             tags$span(style = "color:#c0c0c0", "Weighted Attributes")
           ),
           choiceValues = c(1 : 2)
@@ -144,7 +153,7 @@ mod_Suggest_ui <- function(id){
         radioButtons(inputId = ns("cost"),
           label = "Cost",
           choiceNames = list(
-            "Default Predictions", 
+            "Default Predictions",
             tags$span(style = "color:#c0c0c0", "Provide Mean Project Cost")
           ),
           choiceValues = c(1, 2),
@@ -212,7 +221,7 @@ mod_Suggest_ui <- function(id){
 mod_Suggest_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
-    
+
     #ensure weights add to one
     observeEvent(input$w1, {
       remaining <- 1 - input$w1
@@ -220,23 +229,66 @@ mod_Suggest_server <- function(id, r){
       updateNumericInput(session, "w3", max = remaining)
       updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
     })
-    
+
     observeEvent(input$w2, {
       remaining <- 1 - input$w1 - input$w2
       updateNumericInput(session, "w3", max = remaining)
       updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
     })
-    
+
     observeEvent(input$w3, {
       remaining <- 1 - input$w1 - input$w2 - input$w3
       updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
     })
-    
-    
-    # update reactive values object with Submit inputs
+
+
+    # update huc options ----
+    observeEvent(c(input$area_sel), {
+
+      # get areas to filter by
+      if("0" %in% input$area_sel){
+        cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
+      } else {
+        cWRIA_NR <- as.integer(input$area_sel)
+      }
+
+      # filter hucs
+      options_hucs <- huc12_wrias %>%
+        dplyr::filter(wria_number %in% cWRIA_NR)
+
+      # update select input choices
+      updateSelectizeInput(
+        session,
+        inputId = "subarea_sel",
+        choices = setNames(
+          c(0, options_hucs %>% dplyr::pull(huc_number)),
+          nm = c("All HUC 12s in selected WRIA(s)", options_hucs %>% dplyr::pull(huc_name))
+        ),
+        selected = 0,
+        server = TRUE
+      )
+    })
+
+    # update reactive values object with Submit inputs ----
+    ##area_sel ----
     observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
-    observeEvent(input$obj, r$obj_suggest <- input$obj)
-    observeEvent(input$budget, r$budget_suggest <- input$budget)
+    ##subarea_sel ----
+    observeEvent(c(input$area_sel, input$subarea_sel), {
+
+      # get areas to filter by
+      if("0" %in% input$area_sel){
+        cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
+      } else {
+        cWRIA_NR <- as.integer(input$area_sel)
+      }
+
+      if("0" %in% input$subarea_sel){
+        r$subarea_sel_suggest <- huc12_wrias %>% dplyr::filter(wria_number %in% cWRIA_NR) %>% dplyr::pull(huc_number)
+      } else {
+        r$subarea_sel_suggest<- input$subarea_sel
+      }
+    })
+    ##owner_sel ----
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
         r$owner_sel_suggest <- c(1:9, 11, 12)
@@ -244,13 +296,17 @@ mod_Suggest_server <- function(id, r){
         r$owner_sel_suggest <- input$owner_sel
       }
     })
-    
-    # render leaflet output (DO I NEED THIS?)
+    ##obj (objective function) ----
+    observeEvent(input$obj, r$obj_suggest <- input$obj)
+    ##budget ----
+    observeEvent(input$budget, r$budget_suggest <- input$budget)
+
+    # render leaflet output (DO I NEED THIS?) ----
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()
     })
-    
-    # tab events
+
+    # tab events ----
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
@@ -271,24 +327,24 @@ mod_Suggest_server <- function(id, r){
         #user_plot(FALSE)
       }
     })
-    
-    # Suggest tab submit event
+
+    # Suggest tab submit event ----
     observeEvent(input$submit, {
-      if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
          !is.na(input$budget) && input$obj != 3 && input$cost != 2)
       {r$submit_suggest <- input$submit}
       else
-        if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
            !is.na(input$budget) && input$obj == 3 &&
            !is.null(input$cust_score) && input$cost != 2)
         {r$submit_suggest <- input$submit}
       else
-        if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
            !is.na(input$budget) && input$obj != 3 &&
            input$cost == 2 && !is.null(input$cust_cost))
         {r$submit_suggest <- input$submit}
       else
-        if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
            !is.na(input$budget) && input$obj == 3 &&
            input$cost == 2 && !is.null(input$cust_score_cost))
         {r$submit_suggest <- input$submit}
@@ -296,8 +352,8 @@ mod_Suggest_server <- function(id, r){
       {showModal(modalDialog(title = "Warning!",
       "Please fill all the fields before you click the Submit button."))}
     })
-    
-    
+
+
   })
 }
 

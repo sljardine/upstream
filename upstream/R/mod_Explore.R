@@ -353,6 +353,7 @@ mod_Explore_server <- function(id, r){
     })
 
     # update reactive values object with Explore inputs
+    ##area_sel
     observeEvent(input$area_sel, {
       if("0" %in% input$area_sel){
         r$area_sel_explore <- wrias %>% dplyr::pull(WRIA_NR)
@@ -361,6 +362,7 @@ mod_Explore_server <- function(id, r){
       }
     })
 
+    ##subarea_sel
     observeEvent(c(input$area_sel, input$subarea_sel), {
 
       # get areas to filter by

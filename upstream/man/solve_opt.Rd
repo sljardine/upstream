@@ -4,7 +4,7 @@
 \alias{solve_opt}
 \title{Solve the optimization problem}
 \usage{
-solve_opt(points, budget, D, wria_sel, owner_sel)
+solve_opt(points, budget, D, wria_sel, huc_sel, owner_sel)
 }
 \arguments{
 \item{points}{A simple features point data frame containing culvert locations and attributes.}
