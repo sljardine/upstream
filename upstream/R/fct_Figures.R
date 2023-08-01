@@ -192,21 +192,43 @@ update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
 #' @title update map selected wria polygons
 #' @param leaf_proxy A leaflet proxy reference.
 #' @param area_sel A vector of WRIA ID numbers of interest.
+#' @param subarea_sel A vector of HUC 12 numbers of interest.
 #' @return none
 #' @export
-update_map_selected_WRIA_polygons <- function(leaf_proxy, area_sel){
-  sfW <- wrias %>% dplyr::filter(WRIA_NR %in% area_sel)
+update_map_selected_polygons <- function(leaf_proxy, area_sel, subarea_sel){
+
+  if(length(area_sel) > 1){
+  selected_wrias <- wrias %>% dplyr::filter(WRIA_NR %in% area_sel)
 
   leaf_proxy %>%
-    leaflet::clearGroup('selected_wria') %>%
+    leaflet::clearGroup("selected_wria") %>%
     leaflet::addPolygons(
-      data = sfW,
-      group = 'selected_wria',
+      data = selected_wrias,
+      group = "selected_wria",
       weight = 5,
       opacity = 1,
       color = "#1c1cff",
       fillColor = "transparent"
     )
+  } else {
+
+  selected_hucs <- huc12 %>% dplyr::filter(huc_number %in% subarea_sel)
+
+  leaf_proxy %>%
+    leaflet::clearGroup("selected_wria") %>%
+    leaflet::clearGroup("selected_huc") %>%
+    leaflet::addPolygons(
+      data = selected_hucs,
+      group = "selected_huc",
+      weight = 5,
+      opacity = 1,
+      color = "#1c1cff",
+      fillColor = "transparent",
+      popup =  ~ paste0(
+        "<b>HUC 12 Name:</b> ",
+        huc_name)
+    )
+  }
 }
 
 #' @title update map culvert markers

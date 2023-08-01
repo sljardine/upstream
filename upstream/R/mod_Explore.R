@@ -235,11 +235,11 @@ mod_Explore_server <- function(id, r){
 
     # Explore tab submit event
     observeEvent(input$submit, {
-      if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
          input$highlight == 1)
       {r$submit_explore <- input$submit}
       else
-        if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
            input$highlight == 2)
         {r$submit_explore <- input$submit}
       else

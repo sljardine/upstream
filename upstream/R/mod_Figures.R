@@ -67,9 +67,10 @@ mod_Figures_server <- function(id, r){
 
     # Explore submit button event for base_map
     observeEvent(r$submit_explore, {
-      update_map_selected_WRIA_polygons(
+      update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
-        r$area_sel_explore
+        r$area_sel_explore,
+        r$subarea_sel_explore
         )
       update_map_culvert_markers(
         leaflet::leafletProxy(ns('base_map')),
