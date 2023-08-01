@@ -152,7 +152,7 @@ mod_Figures_server <- function(id, r){
           if(r$plot_type_explore == 'Scatterplot'){
             culverts_cmb %>%
               filter_and_format_culverts_for_scatterplot(
-                r$area_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
                 r$y_axis_variable_explore, r$color_variable_explore) %>%
               figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore,
                 r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
@@ -162,7 +162,7 @@ mod_Figures_server <- function(id, r){
           } else if(r$plot_type_explore == 'Histogram'){
             culverts_cmb %>%
               filter_and_format_culverts_for_histogram(
-                r$area_sel_explore, r$owner_sel_explore, r$color_variable_explore,
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
                 r$histogram_variable_explore
                 ) %>%
               figure_histogram(

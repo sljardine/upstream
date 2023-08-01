@@ -228,7 +228,6 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, subarea_sel, owner_
 
   # filter culverts to selected wrias
   points <- culverts_cmb %>%
-    #dplyr::filter(wria_number %in% area_sel)
     dplyr::filter(huc_number %in% subarea_sel)
 
   # filter by owner class
@@ -349,11 +348,11 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, subarea_sel, owner_
 #' @param histogram_variable A variable to generate histogram from.
 #' @return A data frame of point data formatted to make histogram in ggplot.
 #' @export
-filter_and_format_culverts_for_histogram <- function(points, area_sel, owner_sel, color_variable, histogram_variable){
-  # filter by area
+filter_and_format_culverts_for_histogram <- function(points, area_sel, subarea_sel, owner_sel, color_variable, histogram_variable){
+  # filter by subarea
   points <- points %>%
     sf::st_drop_geometry() %>%
-    dplyr::filter(wria_number %in% as.integer(area_sel))
+    dplyr::filter(huc_number %in% subarea_sel)
 
   # filter by owner class
   cSiteIds <- c()
@@ -423,11 +422,11 @@ filter_and_format_culverts_for_histogram <- function(points, area_sel, owner_sel
 #' @param color_variable A variable defining color palate.
 #' @return data frame of culvert data formatted to make scatterplot in ggplot
 #' @export
-filter_and_format_culverts_for_scatterplot <- function(points, area_sel, owner_sel, x_axis_variable, y_axis_variable, color_variable){
-  # filter by area
+filter_and_format_culverts_for_scatterplot <- function(points, area_sel, subarea_sel, owner_sel, x_axis_variable, y_axis_variable, color_variable){
+  # filter by subarea
   points <- points %>%
     sf::st_drop_geometry() %>%
-    dplyr::filter(wria_number %in% as.integer(area_sel))
+    dplyr::filter(huc_number %in% subarea_sel)
 
   # filter by owner class
   cSiteIds <- c()
