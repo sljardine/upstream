@@ -28,11 +28,7 @@ mod_Explore_ui <- function(id){
         selectizeInput(
         inputId = ns("subarea_sel"),
         label = "Select Subarea",
-        choices = setNames(
-          c(0, huc12 %>% dplyr::pull(huc_number)),
-          nm = c("All HUC 12s in selected WRIA(s)", huc12 %>% dplyr::pull(huc_name))
-        ),
-        selected = 0,
+        choices = NULL,
         width = '50%',
         multiple = TRUE
        )
@@ -263,13 +259,9 @@ mod_Explore_server <- function(id, r){
 
       # filter hucs
       options_hucs <- huc12_wrias %>%
-        sf::st_drop_geometry() %>%
         dplyr::filter(WRIA_NR %in% cWRIA_NR) %>%
         dplyr::group_by(huc_number) %>%
-        dplyr::summarize(
-          huc_number = dplyr::first(huc_number),
-          huc_name = dplyr::first(huc_name)
-        )
+        dplyr::filter(wria_number %in% cWRIA_NR)
 
       # update select input choices
       updateSelectizeInput(
@@ -298,7 +290,9 @@ mod_Explore_server <- function(id, r){
 
       # get subareas to filter by
       if("0" %in% input$subarea_sel){
-        choice_huc_number <- huc12 %>% dplyr::pull(huc_number)
+        choice_huc_number <- huc12_wrias %>%
+          dplyr::filter(wria_number %in% cWRIA_NR) %>%
+          dplyr::pull(huc_number)
       } else {
         choice_huc_number <- as.integer(input$subarea_sel)
       }
