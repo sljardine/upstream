@@ -86,7 +86,7 @@ mod_Explore_ui <- function(id){
               label = "Variable on X axis",
               # TODO - Pass as argument or add to r reactive function?
               choices = setNames(
-                c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+                c('cost', 'barrier_count', 'potential_species', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
                 nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type', 'Passability')
               ),
               selected = "cost",
@@ -100,10 +100,10 @@ mod_Explore_ui <- function(id){
               label = "Variable on Y axis",
               # TODO - Pass as argument or add to r reactive function?
               choices = setNames(
-                c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+                c('cost', 'barrier_count', 'potential_species', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
                 nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type','Passability')
               ),
-              selected = "hfull_net",
+              selected = "hfull",
               width = "100%"
             ),
             offset = 0
@@ -138,7 +138,7 @@ mod_Explore_ui <- function(id){
           label = "Variable to display",
           # TODO - Pass as argument or add to r reactive function?
           choices = setNames(
-            c('cost', 'potential_species', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+            c('cost', 'potential_species', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
             nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability')
           )
         ),
@@ -208,19 +208,19 @@ mod_Explore_server <- function(id, r){
 
     # scatter plot variable choices
     cScatterPlotVariables <- setNames(
-      c('cost', 'barrier_count', 'potential_species', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+      c('cost', 'barrier_count', 'potential_species', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
       nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type','Passability')
     )
 
     # histogram choices
     cHistogramVariables <- setNames(
-      c('cost', 'potential_species', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+      c('cost', 'potential_species', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
       nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability')
     )
 
     # color choices
     cColorVariables <- setNames(
-      c('none', 'cost', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+      c('none', 'cost', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
       nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability')
     )
 
@@ -280,7 +280,7 @@ mod_Explore_server <- function(id, r){
     observeEvent(c(input$plot_type, input$area_sel, input$owner_sel), {
       if(input$plot_type == "Scatterplot"){
         cVars <- setNames(
-          c('none', 'cost', 'barrier_count', 'hmarg_net', 'hfull_net', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
+          c('none', 'cost', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code'),
           nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability')
         )
       } else {
