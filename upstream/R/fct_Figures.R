@@ -939,7 +939,7 @@ get_pretty_variable_name <- function(varName){
     prettyName <-  'Downstream Barrier (count)'
   } else if(varName ==  'potential_species'){
     prettyName <-  'Potential Species'
-  } else if(varName ==  'hmarg'){
+  } else if(varName ==  'hmarg_length'){
     prettyName <-  'Marginal Habitat Length (km)'
   } else if(varName ==  'hfull'){
     prettyName <-  'Full Habitat Length (km)'

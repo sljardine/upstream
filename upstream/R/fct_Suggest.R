@@ -8,7 +8,7 @@
 #' @export
 solve_opt <- function(
     #Inputs
-  points, #points with variables: hmarg, cost, and wria_number
+  points, #points with variables: hmarg_length, hmarg_area, hmarg_volume, cost, and wria_number
   budget, #budget constraint
   D, #connectivity matrix
   wria_sel, #wria(s) to run the optimization problem on
@@ -20,8 +20,8 @@ solve_opt <- function(
   if(! 0 %in% wria_sel && ! 0 %in% huc_sel){
     points <- points %>%
       dplyr::mutate(
-        hmarg = ifelse(wria_number %in% wria_sel, hmarg, 0),
-        hmarg = ifelse(huc_number %in% huc_sel, hmarg, 0)
+        hmarg = ifelse(wria_number %in% wria_sel, hmarg_length, 0),
+        hmarg = ifelse(huc_number %in% huc_sel, hmarg_length, 0)
         )
   }
 
