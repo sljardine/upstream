@@ -4,6 +4,11 @@
 #' @param D A connectivity matrix.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
+#' @param obj An indicator for whether objective function is to max quant (obj = 1) or max weighted sum of attributes (obj = 2)
+#' @param w_urb A weight on urban habitat quantity
+#' @param w_ag A weight on agricultural habitat quantity
+#' @param w_nat A weight on natural habitat quantity
+#' @param w_temp A weight on ideal temperature
 #' @return A logical vector of TRUE/FALSE values.
 #' @export
 solve_opt <- function(
@@ -13,7 +18,12 @@ solve_opt <- function(
   D, #connectivity matrix
   wria_sel, #wria(s) to run the optimization problem on
   huc_sel, #huc(s) to run the optimization problem on
-  owner_sel
+  owner_sel, #owner(s) to run the optimization problem on
+  obj, #indicator for whether objective function is to max quant (1) or max weighted sum of attributes (2)
+  w_urb, #weight on urban habitat quantity
+  w_ag, #weight on agricultural habitat quantity
+  w_nat, #weight on natural habitat quantity
+  w_temp #weight on temperature
 ){
 
   points <- points %>% dplyr::mutate(hmarg = hmarg_length)
@@ -36,7 +46,18 @@ solve_opt <- function(
   }
 
   # inputs
-  v <- points %>% dplyr::pull(hmarg)
+  h <- points %>% dplyr::pull(hmarg)
+  urb_per <- points %>% dplyr::pull(hmarg_length_urb_nlcd_percent)
+  ag_per <- points %>% dplyr::pull(hmarg_length_agri_nlcd_percent)
+  nat_per <- points %>% dplyr::pull(hmarg_length_natural_percent)
+  temp <- points %>% dplyr::pull(hmarg_length_TempVMM08)
+
+  if(obj == 1){
+  v <- h
+  } else {
+  v <- w_urb * urb_per * h + w_ag *  ag_per * h + w_nat * nat_per * h + w_temp * temp
+  v[is.na(v)] <- 0
+  }
   brc <- points %>% dplyr::pull(cost)
   nb <- length(v)
   di <- colSums(D)

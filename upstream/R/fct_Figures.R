@@ -197,7 +197,7 @@ update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
 #' @export
 update_map_selected_polygons <- function(leaf_proxy, area_sel, subarea_sel){
 
-  if(length(area_sel) > 1){
+  if(length(area_sel) > 1 || area_sel == 0){
   selected_wrias <- wrias %>% dplyr::filter(WRIA_NR %in% area_sel)
 
   leaf_proxy %>%

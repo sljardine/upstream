@@ -92,36 +92,36 @@ mod_Suggest_ui <- function(id){
             style = 'padding-bottom:10px;'),
           column(3,  "Urban habitat quantity"),
           column(3,
-                 numericInput(inputId = ns("w1"),
+                 numericInput(inputId = ns("w_urb"),
                               min = 0,
                               max = 1,
                               step = 0.01,
                               label = NULL,
-                              value = 0.25)),
+                              value = 0.33)),
           column(3,  "Agricultural habitat quantity"),
           column(3,
-                 numericInput(inputId = ns("w2"),
+                 numericInput(inputId = ns("w_ag"),
                               min = 0,
                               max = 1,
-                              step = 0.01,
+                              #step = 0.01,
                               label = NULL,
-                              value = 0.25)),
+                              value = 0.33)),
           column(3,  "Natural habitat quantity"),
           column(3,
-                 numericInput(inputId = ns("w3"),
+                 numericInput(inputId = ns("w_nat"),
                               min = 0,
                               max = 1,
-                              step = 0.01,
+                              #step = 0.01,
                               label = NULL,
-                              value = 0.25)),
+                              value = 0.34)),
           column(3,  "Ideal habitat temperature"),
           column(3,
-                 numericInput(inputId = ns("w4"),
+                 numericInput(inputId = ns("w_temp"),
                               min = -1,
                               max = 1,
-                              step = 0.01,
+                              #step = 0.01,
                               label = NULL,
-                              value = 0.25))
+                              value = 0))
         )
       ),
       hr(),
@@ -176,25 +176,6 @@ mod_Suggest_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
-
-    # #ensure weights add to one
-    # observeEvent(input$w1, {
-    #   remaining <- 1 - input$w1
-    #   updateNumericInput(session, "w2", max = remaining)
-    #   updateNumericInput(session, "w3", max = remaining)
-    #   updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
-    # })
-    #
-    # observeEvent(input$w2, {
-    #   remaining <- 1 - input$w1 - input$w2
-    #   updateNumericInput(session, "w3", max = remaining)
-    #   updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
-    # })
-    #
-    # observeEvent(input$w3, {
-    #   remaining <- 1 - input$w1 - input$w2 - input$w3
-    #   updateNumericInput(session, "w4", value = 1 - input$w1 - input$w2 - input$w3)
-    # })
 
 
     # update huc options ----
@@ -253,13 +234,20 @@ mod_Suggest_server <- function(id, r){
     })
     ##obj (objective function) ----
     observeEvent(input$obj, r$obj_suggest <- input$obj)
+    ##weights ----
+    observeEvent(input$w_urb, r$w_urb_suggest <- input$w_urb)
+    observeEvent(input$w_ag, r$w_ag_suggest <- input$w_ag)
+    observeEvent(input$w_nat, r$w_nat_suggest <- input$w_nat)
+    observeEvent(input$w_temp, r$w_temp_suggest <- input$w_temp)
     ##budget ----
     observeEvent(input$budget, r$budget_suggest <- input$budget)
+
 
     # render leaflet output (DO I NEED THIS?) ----
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()
     })
+
 
     # tab events ----
     observeEvent(r$tab_sel, {
@@ -283,6 +271,7 @@ mod_Suggest_server <- function(id, r){
       }
     })
 
+
     # Suggest tab submit event ----
     observeEvent(input$submit, {
       #selected an owner, selected an area, selected a subarea, entered a budget, maximizes quantity, uses default costs
@@ -292,7 +281,7 @@ mod_Suggest_server <- function(id, r){
       else
       #selected an owner, selected an area, selected a subarea, entered a budget, maximizes weighted attributes with weights summing to one, uses default costs
       if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
-          !is.na(input$budget) && input$obj == 2 && input$cost != 2 && sum(input$w1, input$w2, input$w3, input$w4) == 1)
+          !is.na(input$budget) && input$obj == 2 && input$cost != 2 && sum(input$w_urb, input$w_ag, input$w_nat, input$w_temp) == 1)
       {r$submit_suggest <- input$submit}
       else
       #selected an owner, selected an area, selected a subarea, entered a budget, maximizes quantity, custom costs with mean entered
@@ -303,7 +292,7 @@ mod_Suggest_server <- function(id, r){
       else
       #selected an owner, selected an area, selected a subarea, entered a budget, maximizes weighted attributes with weights summing to one, custom costs with mean entered
       if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
-         !is.na(input$budget) && input$obj == 2 && sum(input$w1, input$w2, input$w3, input$w4) == 1  && input$cost == 2 && !is.null(input$cust_cost))
+         !is.na(input$budget) && input$obj == 2 && sum(input$w_urb, input$w_ag, input$w_nat, input$w_temp) == 1  && input$cost == 2 && !is.null(input$cust_cost))
       {r$submit_suggest <- input$submit}
       else
       {showModal(modalDialog(title = "Warning!",
