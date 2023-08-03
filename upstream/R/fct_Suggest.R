@@ -16,12 +16,14 @@ solve_opt <- function(
   owner_sel
 ){
 
+  points <- points %>% dplyr::mutate(hmarg = hmarg_length)
+
   # set benefit to zero if not in the wria of interest (wria_sel)
   if(! 0 %in% wria_sel && ! 0 %in% huc_sel){
     points <- points %>%
       dplyr::mutate(
-        hmarg = ifelse(wria_number %in% wria_sel, hmarg_length, 0),
-        hmarg = ifelse(huc_number %in% huc_sel, hmarg_length, 0)
+        hmarg = ifelse(wria_number %in% wria_sel, hmarg, 0),
+        hmarg = ifelse(huc_number %in% huc_sel, hmarg, 0)
         )
   }
 
