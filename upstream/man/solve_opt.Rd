@@ -15,7 +15,8 @@ solve_opt(
   w_urb,
   w_ag,
   w_nat,
-  w_temp
+  w_temp,
+  hq
 )
 }
 \arguments{

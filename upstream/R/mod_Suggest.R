@@ -67,10 +67,10 @@ mod_Suggest_ui <- function(id){
           label = "Select Habitat Quantity Definition",
           choiceNames = list(
             "Length",
-            tags$span(style = "color:#c0c0c0", "Area"),
-            tags$span(style = "color:#c0c0c0", "Volume")
+            "Area",
+            "Volume"
           ),
-          choiceValues = c("length", "area", "volume"),
+          choiceValues = c(1 : 3),
           inline = TRUE,
           selected = NULL
         )
@@ -81,7 +81,7 @@ mod_Suggest_ui <- function(id){
           label = "Objective",
           choiceNames = list(
             "Habitat Quantity",
-            tags$span(style = "color:#c0c0c0", "Weighted Attributes")
+            "Weighted Attributes"
           ),
           choiceValues = c(1 : 2)
           ),
@@ -234,6 +234,8 @@ mod_Suggest_server <- function(id, r){
     })
     ##obj (objective function) ----
     observeEvent(input$obj, r$obj_suggest <- input$obj)
+    ##habitat quality definition ----
+    observeEvent(input$hq, r$hq_suggest <- input$hq)
     ##weights ----
     observeEvent(input$w_urb, r$w_urb_suggest <- input$w_urb)
     observeEvent(input$w_ag, r$w_ag_suggest <- input$w_ag)

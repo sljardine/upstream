@@ -23,10 +23,35 @@ solve_opt <- function(
   w_urb, #weight on urban habitat quantity
   w_ag, #weight on agricultural habitat quantity
   w_nat, #weight on natural habitat quantity
-  w_temp #weight on temperature
+  w_temp, #weight on temperature
+  hq
 ){
 
-  points <- points %>% dplyr::mutate(hmarg = hmarg_length)
+  if(hq == 1){
+  points <- points %>%
+    dplyr::mutate(
+      hmarg = hmarg_length,
+      hmarg_urb_nlcd_percent = hmarg_length_urb_nlcd_percent,
+      hmarg_agri_nlcd_percent = hmarg_length_agri_nlcd_percent,
+      hmarg_natural_percent = hmarg_length_natural_percent,
+      hmarg_TempVMM08 = hmarg_length_TempVMM08)
+  } else if(hq == 2){
+    points <- points %>%
+      dplyr::mutate(
+        hmarg = hmarg_area,
+        hmarg_urb_nlcd_percent = hmarg_area_urb_nlcd_percent,
+        hmarg_agri_nlcd_percent = hmarg_area_agri_nlcd_percent,
+        hmarg_natural_percent = hmarg_area_natural_percent,
+        hmarg_TempVMM08 = hmarg_area_TempVMM08)
+  } else {
+    points <- points %>%
+      dplyr::mutate(
+        hmarg = hmarg_volume,
+        hmarg_urb_nlcd_percent = hmarg_volume_urb_nlcd_percent,
+        hmarg_agri_nlcd_percent = hmarg_volume_agri_nlcd_percent,
+        hmarg_natural_percent = hmarg_volume_natural_percent,
+        hmarg_TempVMM08 = hmarg_volume_TempVMM08)
+  }
 
   # set benefit to zero if not in the wria of interest (wria_sel)
   if(! 0 %in% wria_sel && ! 0 %in% huc_sel){
@@ -47,16 +72,16 @@ solve_opt <- function(
 
   # inputs
   h <- points %>% dplyr::pull(hmarg)
-  urb_per <- points %>% dplyr::pull(hmarg_length_urb_nlcd_percent)
-  ag_per <- points %>% dplyr::pull(hmarg_length_agri_nlcd_percent)
-  nat_per <- points %>% dplyr::pull(hmarg_length_natural_percent)
-  temp <- points %>% dplyr::pull(hmarg_length_TempVMM08)
+  urb_per <- points %>% dplyr::pull(hmarg_urb_nlcd_percent)
+  ag_per <- points %>% dplyr::pull(hmarg_agri_nlcd_percent)
+  nat_per <- points %>% dplyr::pull(hmarg_natural_percent)
+  temp <- points %>% dplyr::pull(hmarg_TempVMM08)
 
   if(obj == 1){
   v <- h
   } else {
   v <- w_urb * urb_per * h + w_ag *  ag_per * h + w_nat * nat_per * h + w_temp * temp
-  v[is.na(v)] <- 0
+  v[is.na(v)] <- 0 #HOT FIX
   }
   brc <- points %>% dplyr::pull(cost)
   nb <- length(v)
