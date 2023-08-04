@@ -53,15 +53,15 @@ get_leaflet_map <- function(){
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
           var childCount = cluster.getChildCount();
-          if (childCount < 100) {
-          c = 'rgba(204, 252, 255, 1.0);'
+          if (childCount < 500) {
+          c = 'rgba(241, 226, 185, 255);'
           } else if (childCount < 1000) {
-          c = 'rgba(237, 192, 181, 1);'
+          c = 'rgba(197, 247, 244, 255);'
           } else {
-          c = 'rgba(164, 164, 243, 1);'
+          c = 'rgba(232, 169, 157, 255);'
           }
          return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
-         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
+           className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
         spiderfyOnMaxZoom = FALSE,
         disableClusteringAtZoom = 10
       ),
@@ -92,12 +92,12 @@ reset_map <- function(leaf_proxy){
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
           var childCount = cluster.getChildCount();
-          if (childCount < 100) {
-          c = 'rgba(204, 252, 255, 1.0);'
+          if (childCount < 500) {
+          c = 'rgba(241, 226, 185, 255);'
           } else if (childCount < 1000) {
-          c = 'rgba(237, 192, 181, 1);'
+          c = 'rgba(197, 247, 244, 255);'
           } else {
-          c = 'rgba(164, 164, 243, 1);'
+          c = 'rgba(232, 169, 157, 255);'
           }
          return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
          className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
@@ -346,12 +346,12 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, subarea_sel, owner_
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
           var childCount = cluster.getChildCount();
-          if (childCount < 100) {
-          c = 'rgba(204, 252, 255, 1.0);'
+          if (childCount < 500) {
+          c = 'rgba(241, 226, 185, 255);'
           } else if (childCount < 1000) {
-          c = 'rgba(237, 192, 181, 1);'
+          c = 'rgba(197, 247, 244, 255);'
           } else {
-          c = 'rgba(164, 164, 243, 1);'
+          c = 'rgba(232, 169, 157, 255);'
           }
          return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
          className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),

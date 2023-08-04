@@ -155,20 +155,20 @@ map_leaflet_opt <- function(
   milp_stream_ids <- marginal_line_ids[soln] %>% base::unlist()
 
   #Barrier color
-  pal <- leaflet::colorNumeric(c("#b80000", "#179848"), 0 : 1)
+  pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
 
   #Add lines
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(data = leaflet_lines %>%
       dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
-      color = "#d46666",
+      color = "#cf6e7d",
       opacity = 0.5,
       group = "blocked_lines"
       ) %>%
       leafgl::addGlPolylines(
         data = leaflet_lines %>%
           dplyr::filter(COMID %in% milp_stream_ids),
-        color = "#3cdd78",
+        color = "#2739c7",
         opacity = 0.5,
         group = "unblocked_lines"
       )
@@ -188,15 +188,15 @@ map_leaflet_opt <- function(
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
           var childCount = cluster.getChildCount();
-          if (childCount < 100) {
-          c = 'rgba(204, 252, 255, 1.0);'
+          if (childCount < 500) {
+          c = 'rgba(241, 226, 185, 255);'
           } else if (childCount < 1000) {
-          c = 'rgba(237, 192, 181, 1);'
+          c = 'rgba(197, 247, 244, 255);'
           } else {
-          c = 'rgba(164, 164, 243, 1);'
+          c = 'rgba(232, 169, 157, 255);'
           }
          return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
-         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
+           className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
         spiderfyOnMaxZoom = FALSE,
         disableClusteringAtZoom = 10
       ),
