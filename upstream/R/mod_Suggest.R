@@ -50,14 +50,12 @@ mod_Suggest_ui <- function(id){
       fluidRow(
         selectizeInput(
           inputId = ns("species_sel"),
-          label = tags$span(style = "color:#c0c0c0", "Select Species of Interest"),
+          label = "Select Species of Interest",
           choices = setNames(
-            c(0 : 9),
-            nm = c("All", "Bull trout", "Chinook", "Chum", "Coho",
-                   "Pink", "Resident trout", "Sockeye",
-                   "Steelhead", "SR Cutthroad")
+            c("all", "chinook", "chum", "coho", "pink", "sockeye", "steelhead"),
+          nm = c("All", "Chinook", "Chum", "Coho", "Pink", "Sockeye", "Steelhead")
           ),
-          selected = 0,
+          selected = "all",
           width = '50%',
           multiple = TRUE
         )
@@ -232,11 +230,14 @@ mod_Suggest_server <- function(id, r){
         r$owner_sel_suggest <- input$owner_sel
       }
     })
+
+    ##species_sel ----
+    observeEvent(input$species_sel, r$species_sel_suggest <- input$species_sel)
+    ##hq (habitat quality definition) ----
+    observeEvent(input$hq, r$hq_suggest <- input$hq)
     ##obj (objective function) ----
     observeEvent(input$obj, r$obj_suggest <- input$obj)
-    ##habitat quality definition ----
-    observeEvent(input$hq, r$hq_suggest <- input$hq)
-    ##weights ----
+    ##weights (habitat quality) ----
     observeEvent(input$w_urb, r$w_urb_suggest <- input$w_urb)
     observeEvent(input$w_ag, r$w_ag_suggest <- input$w_ag)
     observeEvent(input$w_nat, r$w_nat_suggest <- input$w_nat)

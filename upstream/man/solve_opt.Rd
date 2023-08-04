@@ -16,7 +16,8 @@ solve_opt(
   w_ag,
   w_nat,
   w_temp,
-  hq
+  hq,
+  species_sel
 )
 }
 \arguments{
@@ -28,15 +29,17 @@ solve_opt(
 
 \item{owner_sel}{A vector of owner ID numbers of interest.}
 
-\item{obj}{An indicator for whether objective function is to max quant (obj = 1) or max weighted sum of attributes (obj = 2)}
+\item{obj}{An indicator for whether objective function is to max quant (obj = 1) or max weighted sum of attributes (obj = 2).}
 
-\item{w_urb}{A weight on urban habitat quantity}
+\item{w_urb}{A weight on urban habitat quantity.}
 
-\item{w_ag}{A weight on agricultural habitat quantity}
+\item{w_ag}{A weight on agricultural habitat quantity.}
 
-\item{w_nat}{A weight on natural habitat quantity}
+\item{w_nat}{A weight on natural habitat quantity.}
 
-\item{w_temp}{A weight on ideal temperature}
+\item{w_temp}{A weight on ideal temperature.}
+
+\item{species_sel}{A vector of species ID numbers of interest.}
 
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 }

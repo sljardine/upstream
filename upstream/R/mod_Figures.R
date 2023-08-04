@@ -114,7 +114,8 @@ mod_Figures_server <- function(id, r){
         as.numeric(r$w_ag_suggest),
         as.numeric(r$w_nat_suggest),
         as.numeric(r$w_temp_suggest),
-        as.integer(r$hq_suggest)
+        as.integer(r$hq_suggest),
+        r$species_sel_suggest
         )
       remove_map_points(leaflet::leafletProxy(ns('base_map')))
       map_leaflet_opt(
