@@ -20,7 +20,7 @@ get_leaflet_map <- function(){
   # initalize the map
   m <- wrias %>%
     leaflet::leaflet() %>%
-    leaflet::addProviderTiles("CartoDB.Positron", group = "Grayscale", options = leaflet::providerTileOptions(minZoom = 7))  %>%
+    leaflet::addProviderTiles("CartoDB.Positron", group = "Grayscale", options = leaflet::providerTileOptions(minZoom = 6.5))  %>%
     leaflet::addScaleBar("bottomleft")
 
   # add wria polygons

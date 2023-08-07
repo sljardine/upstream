@@ -188,7 +188,8 @@ map_leaflet_opt <- function(
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
           var childCount = cluster.getChildCount();
-          if (childCount < 500) {
+          var c = ' marker-cluster-';
+          if (childCount < 100) {
           c = 'rgba(241, 226, 185, 255);'
           } else if (childCount < 1000) {
           c = 'rgba(197, 247, 244, 255);'
