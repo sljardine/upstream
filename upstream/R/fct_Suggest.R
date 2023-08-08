@@ -4,12 +4,14 @@
 #' @param D A connectivity matrix.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
+
 #' @param obj An indicator for whether objective function is to max quant (obj = 1) or max weighted sum of attributes (obj = 2).
 #' @param w_urb A weight on urban habitat quantity.
 #' @param w_ag A weight on agricultural habitat quantity.
 #' @param w_nat A weight on natural habitat quantity.
 #' @param w_temp A weight on ideal temperature.
 #' @param species_sel A vector of species ID numbers of interest.
+#' @param barrier_idp A vector of planned culvert IDs
 #' @return A logical vector of TRUE/FALSE values.
 #' @export
 solve_opt <- function(
@@ -27,6 +29,8 @@ solve_opt <- function(
   w_temp, #weight on temperature
   hq, #habitat quantity definition
   species_sel #species to run the optimization problem on
+  barrier_idp #planned barrier IDs
+
 ){
 
   #habitat quantity definition
@@ -72,10 +76,18 @@ solve_opt <- function(
   # huc 12 selection: set benefit to zero if not owned by the owner of interest (owner_sel)
   if(! 0 %in% owner_sel){
     points <- points %>%
+
       dplyr::mutate(hmarg = ifelse(
         grepl(paste(owner_sel, collapse = "|"), unique_owner_type_code),
         hmarg, 0))
   }
+    
+  # set benefit to zero if barrier is already planned by user
+  if(! 0 %in% barrier_idp){
+    points <- points %>%
+      dplyr::mutate(hmarg_net = ifelse(site_id %in% barrier_idp, 0, hmarg))
+  }
+
 
   # species selection: set benefit to zero if not providing habitat for a species of interest (species_sel)
   if(! "all" %in% species_sel){
@@ -101,6 +113,7 @@ solve_opt <- function(
   v <- w_urb * urb_per * h + w_ag *  ag_per * h + w_nat * nat_per * h + w_temp * temp
   v[is.na(v)] <- 0 #HOT FIX
   }
+
   brc <- points %>% dplyr::pull(cost)
   nb <- length(v)
   di <- colSums(D)
@@ -198,6 +211,7 @@ map_leaflet_opt <- function(
           }
          return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
            className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
+
         spiderfyOnMaxZoom = FALSE,
         disableClusteringAtZoom = 10
       ),

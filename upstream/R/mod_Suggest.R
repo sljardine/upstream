@@ -49,6 +49,15 @@ mod_Suggest_ui <- function(id){
       ),
       fluidRow(
         selectizeInput(
+          inputId = ns("barrier_idp"),
+          label = "Already Planned / Will Complete",
+          selected = 0,
+          multiple = TRUE,
+          choices = NULL,
+          width = "50%")
+      ),
+      fluidRow(
+        selectizeInput(
           inputId = ns("species_sel"),
           label = "Select Species of Interest",
           choices = setNames(
@@ -174,8 +183,6 @@ mod_Suggest_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
-
-
     # update huc options ----
     observeEvent(c(input$area_sel), {
 
@@ -206,6 +213,9 @@ mod_Suggest_server <- function(id, r){
     # update reactive values object with Submit inputs ----
     ##area_sel ----
     observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
+    observeEvent(input$obj, r$obj_suggest <- input$obj)
+    observeEvent(input$barrier_idp, r$barrier_idp_suggest <- input$barrier_idp)
+    observeEvent(input$budget, r$budget_suggest <- input$budget)
     ##subarea_sel ----
     observeEvent(c(input$area_sel, input$subarea_sel), {
 
@@ -222,6 +232,7 @@ mod_Suggest_server <- function(id, r){
         r$subarea_sel_suggest<- input$subarea_sel
       }
     })
+    
     ##owner_sel ----
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
@@ -231,6 +242,20 @@ mod_Suggest_server <- function(id, r){
       }
     })
 
+
+    updateSelectizeInput(
+      session,
+      inputId = "barrier_idp",
+      choices = setNames(
+        c(0,culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort()),
+        nm = c('None',
+               culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort())
+      ),
+      selected = 0,
+      server = TRUE
+    )
+
+    # render leaflet output (DO I NEED THIS?)
     ##species_sel ----
     observeEvent(input$species_sel, r$species_sel_suggest <- input$species_sel)
     ##hq (habitat quality definition) ----
@@ -246,13 +271,12 @@ mod_Suggest_server <- function(id, r){
     observeEvent(input$budget, r$budget_suggest <- input$budget)
 
 
-    # render leaflet output (DO I NEED THIS?) ----
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()
     })
 
-
     # tab events ----
+
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
@@ -273,7 +297,6 @@ mod_Suggest_server <- function(id, r){
         #user_plot(FALSE)
       }
     })
-
 
     # Suggest tab submit event ----
     observeEvent(input$submit, {
@@ -301,7 +324,6 @@ mod_Suggest_server <- function(id, r){
       {showModal(modalDialog(title = "Warning!",
       "Please fill all the fields, and ensure weights sum to one (if applicable), before you click the Submit button."))}
     })
-
 
   })
 }

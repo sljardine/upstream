@@ -24,8 +24,6 @@ mod_Figures_ui <- function(id){
   )
 }
 
-
-
 #' Figures Server Functions
 #'
 #' @noRd
@@ -67,6 +65,7 @@ mod_Figures_server <- function(id, r){
 
     # Explore submit button event for base_map
     observeEvent(r$submit_explore, {
+
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_explore,
@@ -116,8 +115,11 @@ mod_Figures_server <- function(id, r){
         as.numeric(r$w_temp_suggest),
         as.integer(r$hq_suggest),
         r$species_sel_suggest
+        r$owner_sel_suggest,
+        r$barrier_idp_suggest
         )
       remove_map_points(leaflet::leafletProxy(ns('base_map')))
+      reset_map(leaflet::leafletProxy(ns('base_map')))
       map_leaflet_opt(
         leaflet::leafletProxy(ns('base_map')),
         culverts_cmb, #culverts

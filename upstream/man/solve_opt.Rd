@@ -4,6 +4,7 @@
 \alias{solve_opt}
 \title{Solve the optimization problem}
 \usage{
+
 solve_opt(
   points,
   budget,
@@ -11,6 +12,7 @@ solve_opt(
   wria_sel,
   huc_sel,
   owner_sel,
+  barrier_idp
   obj,
   w_urb,
   w_ag,
@@ -19,6 +21,7 @@ solve_opt(
   hq,
   species_sel
 )
+
 }
 \arguments{
 \item{points}{A simple features point data frame containing culvert locations and attributes.}
@@ -40,6 +43,8 @@ solve_opt(
 \item{w_temp}{A weight on ideal temperature.}
 
 \item{species_sel}{A vector of species ID numbers of interest.}
+           
+\item{barrier_idp}{A vector of planned culvert IDs}
 
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 }
