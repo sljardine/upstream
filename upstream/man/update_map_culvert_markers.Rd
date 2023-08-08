@@ -7,6 +7,7 @@
 update_map_culvert_markers(
   leaf_proxy,
   area_sel,
+  subarea_sel,
   owner_sel,
   color_variable,
   highlight,

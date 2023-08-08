@@ -7,6 +7,7 @@
 filter_and_format_culverts_for_scatterplot(
   points,
   area_sel,
+  subarea_sel,
   owner_sel,
   x_axis_variable,
   y_axis_variable,

@@ -7,6 +7,7 @@
 filter_and_format_culverts_for_histogram(
   points,
   area_sel,
+  subarea_sel,
   owner_sel,
   color_variable,
   histogram_variable

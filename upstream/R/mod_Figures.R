@@ -65,13 +65,16 @@ mod_Figures_server <- function(id, r){
 
     # Explore submit button event for base_map
     observeEvent(r$submit_explore, {
-      update_map_selected_WRIA_polygons(
+
+      update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
-        r$area_sel_explore
+        r$area_sel_explore,
+        r$subarea_sel_explore
         )
       update_map_culvert_markers(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_explore,
+        r$subarea_sel_explore,
         r$owner_sel_explore,
         r$color_variable_explore,
         r$highlight_explore,
@@ -93,15 +96,25 @@ mod_Figures_server <- function(id, r){
 
     # Suggest submit button event
     observeEvent(r$submit_suggest, {
-      update_map_selected_WRIA_polygons(
+      update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
-        r$area_sel_suggest
+        r$area_sel_suggest,
+        r$subarea_sel_suggest
       )
       r$points_sel_suggest <- solve_opt(
         culverts_cmb,
         as.numeric(r$budget_suggest),
         D,
         as.integer(r$area_sel_suggest),
+        as.integer(r$subarea_sel_suggest),
+        as.integer(r$owner_sel_suggest),
+        as.integer(r$obj_suggest),
+        as.numeric(r$w_urb_suggest),
+        as.numeric(r$w_ag_suggest),
+        as.numeric(r$w_nat_suggest),
+        as.numeric(r$w_temp_suggest),
+        as.integer(r$hq_suggest),
+        r$species_sel_suggest
         r$owner_sel_suggest,
         r$barrier_idp_suggest
         )
@@ -151,7 +164,7 @@ mod_Figures_server <- function(id, r){
           if(r$plot_type_explore == 'Scatterplot'){
             culverts_cmb %>%
               filter_and_format_culverts_for_scatterplot(
-                r$area_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
                 r$y_axis_variable_explore, r$color_variable_explore) %>%
               figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore,
                 r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
@@ -161,7 +174,7 @@ mod_Figures_server <- function(id, r){
           } else if(r$plot_type_explore == 'Histogram'){
             culverts_cmb %>%
               filter_and_format_culverts_for_histogram(
-                r$area_sel_explore, r$owner_sel_explore, r$color_variable_explore,
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
                 r$histogram_variable_explore
                 ) %>%
               figure_histogram(

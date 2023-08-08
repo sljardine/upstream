@@ -4,41 +4,116 @@
 #' @param D A connectivity matrix.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
+
+#' @param obj An indicator for whether objective function is to max quant (obj = 1) or max weighted sum of attributes (obj = 2).
+#' @param w_urb A weight on urban habitat quantity.
+#' @param w_ag A weight on agricultural habitat quantity.
+#' @param w_nat A weight on natural habitat quantity.
+#' @param w_temp A weight on ideal temperature.
+#' @param species_sel A vector of species ID numbers of interest.
 #' @param barrier_idp A vector of planned culvert IDs
 #' @return A logical vector of TRUE/FALSE values.
 #' @export
 solve_opt <- function(
     #Inputs
-  points, #points with variables: hmarg_net, cost, and wria_number
+  points, #points with variables: hmarg_length, hmarg_area, hmarg_volume, cost, and wria_number
   budget, #budget constraint
   D, #connectivity matrix
-  wria_sel, #wria to run the optimization problem on
-  owner_sel,
+  wria_sel, #wria(s) to run the optimization problem on
+  huc_sel, #huc(s) to run the optimization problem on
+  owner_sel, #owner(s) to run the optimization problem on
+  obj, #indicator for whether objective function is to max quant (1) or max weighted sum of attributes (2)
+  w_urb, #weight on urban habitat quantity
+  w_ag, #weight on agricultural habitat quantity
+  w_nat, #weight on natural habitat quantity
+  w_temp, #weight on temperature
+  hq, #habitat quantity definition
+  species_sel #species to run the optimization problem on
   barrier_idp #planned barrier IDs
+
 ){
 
-  # set benefit to zero if not in the wria of interest (wria_sel)
-  if(! 0 %in% wria_sel){
+  #habitat quantity definition
+  ##length
+  if(hq == 1){
+  points <- points %>%
+    dplyr::mutate(
+      hmarg = hmarg_length,
+      hmarg_urb_nlcd_percent = hmarg_length_urb_nlcd_percent,
+      hmarg_agri_nlcd_percent = hmarg_length_agri_nlcd_percent,
+      hmarg_natural_percent = hmarg_length_natural_percent,
+      hmarg_TempVMM08 = hmarg_length_TempVMM08)
+  ##area
+  } else if(hq == 2){
     points <- points %>%
-      dplyr::mutate(hmarg_net = ifelse(wria_number %in% wria_sel, hmarg_net, 0))
+      dplyr::mutate(
+        hmarg = hmarg_area,
+        hmarg_urb_nlcd_percent = hmarg_area_urb_nlcd_percent,
+        hmarg_agri_nlcd_percent = hmarg_area_agri_nlcd_percent,
+        hmarg_natural_percent = hmarg_area_natural_percent,
+        hmarg_TempVMM08 = hmarg_area_TempVMM08)
+  ##volume
+  } else {
+    points <- points %>%
+      dplyr::mutate(
+        hmarg = hmarg_volume,
+        hmarg_urb_nlcd_percent = hmarg_volume_urb_nlcd_percent,
+        hmarg_agri_nlcd_percent = hmarg_volume_agri_nlcd_percent,
+        hmarg_natural_percent = hmarg_volume_natural_percent,
+        hmarg_TempVMM08 = hmarg_volume_TempVMM08)
   }
 
-  # set benefit to zero if not owned by the owner of interest (owner_sel)
+
+  # wria selection: set benefit to zero if not in the wria of interest (wria_sel)
+  if(! 0 %in% wria_sel && ! 0 %in% huc_sel){
+    points <- points %>%
+      dplyr::mutate(
+        hmarg = ifelse(wria_number %in% wria_sel, hmarg, 0),
+        hmarg = ifelse(huc_number %in% huc_sel, hmarg, 0)
+        )
+  }
+
+  # huc 12 selection: set benefit to zero if not owned by the owner of interest (owner_sel)
   if(! 0 %in% owner_sel){
     points <- points %>%
-      dplyr::mutate(hmarg_net = ifelse(
-        grepl(paste(owner_sel, collapse = "|"), unique_owner_type_code),
-        hmarg_net, 0))
-  }
 
+      dplyr::mutate(hmarg = ifelse(
+        grepl(paste(owner_sel, collapse = "|"), unique_owner_type_code),
+        hmarg, 0))
+  }
+    
   # set benefit to zero if barrier is already planned by user
   if(! 0 %in% barrier_idp){
     points <- points %>%
-      dplyr::mutate(hmarg_net = ifelse(site_id %in% barrier_idp, 0, hmarg_net))
+      dplyr::mutate(hmarg_net = ifelse(site_id %in% barrier_idp, 0, hmarg))
   }
 
-  # inputs
-  v <- points %>% dplyr::pull(hmarg_net)
+
+  # species selection: set benefit to zero if not providing habitat for a species of interest (species_sel)
+  if(! "all" %in% species_sel){
+  points <- points %>%
+    dplyr::mutate(
+      species_of_interest = grepl(
+        paste(species_sel, collapse = "|"), potential_species, ignore.case = TRUE
+        ),
+      hmarg = hmarg * species_of_interest
+    )
+  }
+
+  # objective function inputs
+  h <- points %>% dplyr::pull(hmarg)
+  urb_per <- points %>% dplyr::pull(hmarg_urb_nlcd_percent)
+  ag_per <- points %>% dplyr::pull(hmarg_agri_nlcd_percent)
+  nat_per <- points %>% dplyr::pull(hmarg_natural_percent)
+  temp <- points %>% dplyr::pull(hmarg_TempVMM08)
+
+  if(obj == 1){
+  v <- h
+  } else {
+  v <- w_urb * urb_per * h + w_ag *  ag_per * h + w_nat * nat_per * h + w_temp * temp
+  v[is.na(v)] <- 0 #HOT FIX
+  }
+
   brc <- points %>% dplyr::pull(cost)
   nb <- length(v)
   di <- colSums(D)
@@ -93,20 +168,20 @@ map_leaflet_opt <- function(
   milp_stream_ids <- marginal_line_ids[soln] %>% base::unlist()
 
   #Barrier color
-  pal <- leaflet::colorNumeric(c("#b80000", "#179848"), 0 : 1)
+  pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
 
   #Add lines
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(data = leaflet_lines %>%
       dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
-      color = "#d46666",
+      color = "#cf6e7d",
       opacity = 0.5,
       group = "blocked_lines"
       ) %>%
       leafgl::addGlPolylines(
         data = leaflet_lines %>%
           dplyr::filter(COMID %in% milp_stream_ids),
-        color = "#3cdd78",
+        color = "#2739c7",
         opacity = 0.5,
         group = "unblocked_lines"
       )
@@ -126,15 +201,17 @@ map_leaflet_opt <- function(
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
           var childCount = cluster.getChildCount();
+          var c = ' marker-cluster-';
           if (childCount < 100) {
-          c = 'rgba(204, 252, 255, 1.0);'
+          c = 'rgba(241, 226, 185, 255);'
           } else if (childCount < 1000) {
-          c = 'rgba(237, 192, 181, 1);'
+          c = 'rgba(197, 247, 244, 255);'
           } else {
-          c = 'rgba(164, 164, 243, 1);'
+          c = 'rgba(232, 169, 157, 255);'
           }
          return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
-         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
+           className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
+
         spiderfyOnMaxZoom = FALSE,
         disableClusteringAtZoom = 10
       ),

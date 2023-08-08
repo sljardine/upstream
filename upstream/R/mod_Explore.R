@@ -26,6 +26,15 @@ mod_Explore_ui <- function(id){
       ),
       fluidRow(
         selectizeInput(
+        inputId = ns("subarea_sel"),
+        label = "Select Subarea",
+        choices = NULL,
+        width = '50%',
+        multiple = TRUE
+       )
+      ),
+      fluidRow(
+        selectizeInput(
           inputId = ns("owner_sel"),
           label = "Select Ownership Type",
           choices = setNames(
@@ -86,8 +95,10 @@ mod_Explore_ui <- function(id){
               label = "Variable on X axis",
               # TODO - Pass as argument or add to r reactive function?
               choices = setNames(
-                c('cost', 'barrier_count', 'potential_species', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
+
+                c('cost', 'barrier_count', 'potential_species', 'hmarg_length', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
                 nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type', 'Passability','WSDOT Downstream Corrections','non-WSDOT Downstream Corrections')
+
               ),
               selected = "cost",
               width = "100%"),
@@ -100,8 +111,10 @@ mod_Explore_ui <- function(id){
               label = "Variable on Y axis",
               # TODO - Pass as argument or add to r reactive function?
               choices = setNames(
-                c('cost', 'barrier_count', 'potential_species', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
+
+                c('cost', 'barrier_count', 'potential_species', 'hmarg_length', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
                 nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type','Passability','WSDOT Downstream Corrections','non-WSDOT Downstream Corrections')
+
               ),
               selected = "hfull",
               width = "100%"
@@ -138,7 +151,7 @@ mod_Explore_ui <- function(id){
           label = "Variable to display",
           # TODO - Pass as argument or add to r reactive function?
           choices = setNames(
-            c('cost', 'potential_species', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
+            c('cost', 'potential_species', 'barrier_count', 'hmarg_length_length', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
             nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability','WSDOT Downstream Corrections','non-WSDOT Downstream Corrections')
           )
         ),
@@ -208,29 +221,29 @@ mod_Explore_server <- function(id, r){
 
     # scatter plot variable choices
     cScatterPlotVariables <- setNames(
-      c('cost', 'barrier_count', 'potential_species', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
+      c('cost', 'barrier_count', 'potential_species', 'hmarg_length', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
       nm = c('Cost', 'Downstream Barriers', 'Potential Species', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Owner Type','Passability','WSDOT Downstream Corrections','non-WSDOT Downstream Corrections')
     )
 
     # histogram choices
     cHistogramVariables <- setNames(
-      c('cost', 'potential_species', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
+      c('cost', 'potential_species', 'barrier_count', 'hmarg_length', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
       nm = c('Cost', 'Potential Species', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability','WSDOT Downstream Corrections','non-WSDOT Downstream Corrections')
     )
 
     # color choices
     cColorVariables <- setNames(
-      c('none', 'cost', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
+      c('none', 'cost', 'barrier_count', 'hmarg_length', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
       nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability','WSDOT Downstream Corrections','non-WSDOT Downstream Corrections')
     )
 
     # Explore tab submit event
     observeEvent(input$submit, {
-      if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
          input$highlight == 1)
       {r$submit_explore <- input$submit}
       else
-        if(!is.null(input$owner_sel) && !is.null(input$area_sel) &&
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
            input$highlight == 2)
         {r$submit_explore <- input$submit}
       else
@@ -238,8 +251,36 @@ mod_Explore_server <- function(id, r){
                              "Please fill all the fields before you click the Submit button."))}
     })
 
+    # update huc options
+    observeEvent(c(input$area_sel), {
+
+      # get areas to filter by
+      if("0" %in% input$area_sel){
+        cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
+      } else {
+        cWRIA_NR <- as.integer(input$area_sel)
+      }
+
+      # filter hucs
+      options_hucs <- huc12_wrias %>%
+        dplyr::filter(wria_number %in% cWRIA_NR)
+
+      # update select input choices
+      updateSelectizeInput(
+        session,
+        inputId = "subarea_sel",
+        choices = setNames(
+          c(0, options_hucs %>% dplyr::pull(huc_number)),
+          nm = c("All HUC 12s in selected WRIA(s)", options_hucs %>% dplyr::pull(huc_name))
+        ),
+        selected = 0,
+        server = TRUE
+      )
+    })
+
     # update barrier ids to filter to wria and owner
-    observeEvent(c(input$area_sel, input$owner_sel), {
+    observeEvent(c(input$area_sel, input$subarea_sel, input$owner_sel), {
+
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
 
       # get areas to filter by
@@ -247,6 +288,15 @@ mod_Explore_server <- function(id, r){
         cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         cWRIA_NR <- as.integer(input$area_sel)
+      }
+
+      # get subareas to filter by
+      if("0" %in% input$subarea_sel){
+        choice_huc_number <- huc12_wrias %>%
+          dplyr::filter(wria_number %in% cWRIA_NR) %>%
+          dplyr::pull(huc_number)
+      } else {
+        choice_huc_number <- as.integer(input$subarea_sel)
       }
 
       # get site ids for owner types to filter by
@@ -265,7 +315,7 @@ mod_Explore_server <- function(id, r){
       if('12' %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
 
       # filter sites
-      sfC <- sfC %>% dplyr::filter(wria_number %in% cWRIA_NR & site_id %in% cSiteIds)
+      sfC <- sfC %>% dplyr::filter(wria_number %in% cWRIA_NR & huc_number %in% choice_huc_number & site_id %in% cSiteIds)
 
       # update select input choices
       updateSelectizeInput(
@@ -274,13 +324,14 @@ mod_Explore_server <- function(id, r){
         choices = sfC %>% dplyr::pull(site_id) %>% sort(),
         server = TRUE
       )
+
     })
 
     # update color variables for plot type
     observeEvent(c(input$plot_type, input$area_sel, input$owner_sel), {
       if(input$plot_type == "Scatterplot"){
         cVars <- setNames(
-          c('none', 'cost', 'barrier_count', 'hmarg', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
+          c('none', 'cost', 'barrier_count', 'hmarg_length', 'hfull', 'wria_number', 'owner_type_code','percent_fish_passable_code','corrected_dn_WSDOT','corrected_dn_nWSDOT'),
           nm = c('None', 'Cost', 'Downstream Barriers', 'Marginal Habitat', 'Full Habitat', 'WRIA', 'Ownership Type','Passability','WSDOT Downstream Corrections','non-WSDOT Downstream Corrections')
         )
       } else {
@@ -306,6 +357,7 @@ mod_Explore_server <- function(id, r){
     })
 
     # update reactive values object with Explore inputs
+    ##area_sel
     observeEvent(input$area_sel, {
       if("0" %in% input$area_sel){
         r$area_sel_explore <- wrias %>% dplyr::pull(WRIA_NR)
@@ -313,6 +365,24 @@ mod_Explore_server <- function(id, r){
         r$area_sel_explore <- input$area_sel
       }
     })
+
+    ##subarea_sel
+    observeEvent(c(input$area_sel, input$subarea_sel), {
+
+      # get areas to filter by
+      if("0" %in% input$area_sel){
+        cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
+      } else {
+        cWRIA_NR <- as.integer(input$area_sel)
+      }
+
+      if("0" %in% input$subarea_sel){
+        r$subarea_sel_explore <- huc12_wrias %>% dplyr::filter(wria_number %in% cWRIA_NR) %>% dplyr::pull(huc_number)
+      } else {
+        r$subarea_sel_explore <- input$subarea_sel
+      }
+    })
+
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
         r$owner_sel_explore <- c(1:9, 11, 12)

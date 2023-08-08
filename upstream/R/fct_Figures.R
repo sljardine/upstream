@@ -20,7 +20,7 @@ get_leaflet_map <- function(){
   # initalize the map
   m <- wrias %>%
     leaflet::leaflet() %>%
-    leaflet::addProviderTiles("CartoDB.Positron", group = "Grayscale", options = leaflet::providerTileOptions(minZoom = 7))  %>%
+    leaflet::addProviderTiles("CartoDB.Positron", group = "Grayscale", options = leaflet::providerTileOptions(minZoom = 6.5))  %>%
     leaflet::addScaleBar("bottomleft")
 
   # add wria polygons
@@ -53,15 +53,15 @@ get_leaflet_map <- function(){
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
           var childCount = cluster.getChildCount();
-          if (childCount < 100) {
-          c = 'rgba(204, 252, 255, 1.0);'
+          if (childCount < 500) {
+          c = 'rgba(241, 226, 185, 255);'
           } else if (childCount < 1000) {
-          c = 'rgba(237, 192, 181, 1);'
+          c = 'rgba(197, 247, 244, 255);'
           } else {
-          c = 'rgba(164, 164, 243, 1);'
+          c = 'rgba(232, 169, 157, 255);'
           }
          return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
-         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
+           className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
         spiderfyOnMaxZoom = FALSE,
         disableClusteringAtZoom = 10
       ),
@@ -92,12 +92,12 @@ reset_map <- function(leaf_proxy){
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
           var childCount = cluster.getChildCount();
-          if (childCount < 100) {
-          c = 'rgba(204, 252, 255, 1.0);'
+          if (childCount < 500) {
+          c = 'rgba(241, 226, 185, 255);'
           } else if (childCount < 1000) {
-          c = 'rgba(237, 192, 181, 1);'
+          c = 'rgba(197, 247, 244, 255);'
           } else {
-          c = 'rgba(164, 164, 243, 1);'
+          c = 'rgba(232, 169, 157, 255);'
           }
          return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
          className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
@@ -193,21 +193,43 @@ update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
 #' @title update map selected wria polygons
 #' @param leaf_proxy A leaflet proxy reference.
 #' @param area_sel A vector of WRIA ID numbers of interest.
+#' @param subarea_sel A vector of HUC 12 numbers of interest.
 #' @return none
 #' @export
-update_map_selected_WRIA_polygons <- function(leaf_proxy, area_sel){
-  sfW <- wrias %>% dplyr::filter(WRIA_NR %in% area_sel)
+update_map_selected_polygons <- function(leaf_proxy, area_sel, subarea_sel){
+
+  if(length(area_sel) > 1 || area_sel == 0){
+  selected_wrias <- wrias %>% dplyr::filter(WRIA_NR %in% area_sel)
 
   leaf_proxy %>%
-    leaflet::clearGroup('selected_wria') %>%
+    leaflet::clearGroup("selected_wria") %>%
     leaflet::addPolygons(
-      data = sfW,
-      group = 'selected_wria',
+      data = selected_wrias,
+      group = "selected_wria",
       weight = 5,
       opacity = 1,
       color = "#1c1cff",
       fillColor = "transparent"
     )
+  } else {
+
+  selected_hucs <- huc12 %>% dplyr::filter(huc_number %in% subarea_sel)
+
+  leaf_proxy %>%
+    leaflet::clearGroup("selected_wria") %>%
+    leaflet::clearGroup("selected_huc") %>%
+    leaflet::addPolygons(
+      data = selected_hucs,
+      group = "selected_huc",
+      weight = 5,
+      opacity = 1,
+      color = "#1c1cff",
+      fillColor = "transparent",
+      popup =  ~ paste0(
+        "<b>HUC 12 Name:</b> ",
+        huc_name)
+    )
+  }
 }
 
 #' @title update map culvert markers
@@ -219,16 +241,17 @@ update_map_selected_WRIA_polygons <- function(leaf_proxy, area_sel){
 #' @param barrier_ids A vector of point ids to highlight.
 #' @return none
 #' @export
-update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_variable, highlight, barrier_ids){
+update_map_culvert_markers <- function(leaf_proxy, area_sel, subarea_sel, owner_sel, color_variable, highlight, barrier_ids){
   # set null variables for initial map draw
   if(is.null(color_variable)){color_variable <- 'none'} else {color_variable <- color_variable}
   if(is.null(area_sel)){area_sel <- wrias$WRIA_NR} else {area_sel <- area_sel}
+  if(is.null(subarea_sel)){subarea_sel <- huc12_wrias %>% dplyr::select(huc_number) %>% dplyr::distinct()} else {subarea_sel <- subarea_sel}
   if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
   if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
 
   # filter culverts to selected wrias
   points <- culverts_cmb %>%
-    dplyr::filter(wria_number %in% area_sel)
+    dplyr::filter(huc_number %in% subarea_sel)
 
   # filter by owner class
   cSiteIds <- c()
@@ -324,12 +347,12 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_va
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
           var childCount = cluster.getChildCount();
-          if (childCount < 100) {
-          c = 'rgba(204, 252, 255, 1.0);'
+          if (childCount < 500) {
+          c = 'rgba(241, 226, 185, 255);'
           } else if (childCount < 1000) {
-          c = 'rgba(237, 192, 181, 1);'
+          c = 'rgba(197, 247, 244, 255);'
           } else {
-          c = 'rgba(164, 164, 243, 1);'
+          c = 'rgba(232, 169, 157, 255);'
           }
          return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
          className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
@@ -348,11 +371,11 @@ update_map_culvert_markers <- function(leaf_proxy, area_sel, owner_sel, color_va
 #' @param histogram_variable A variable to generate histogram from.
 #' @return A data frame of point data formatted to make histogram in ggplot.
 #' @export
-filter_and_format_culverts_for_histogram <- function(points, area_sel, owner_sel, color_variable, histogram_variable){
-  # filter by area
+filter_and_format_culverts_for_histogram <- function(points, area_sel, subarea_sel, owner_sel, color_variable, histogram_variable){
+  # filter by subarea
   points <- points %>%
     sf::st_drop_geometry() %>%
-    dplyr::filter(wria_number %in% as.integer(area_sel))
+    dplyr::filter(huc_number %in% subarea_sel)
 
   # filter by owner class
   cSiteIds <- c()
@@ -422,11 +445,11 @@ filter_and_format_culverts_for_histogram <- function(points, area_sel, owner_sel
 #' @param color_variable A variable defining color palate.
 #' @return data frame of culvert data formatted to make scatterplot in ggplot
 #' @export
-filter_and_format_culverts_for_scatterplot <- function(points, area_sel, owner_sel, x_axis_variable, y_axis_variable, color_variable){
-  # filter by area
+filter_and_format_culverts_for_scatterplot <- function(points, area_sel, subarea_sel, owner_sel, x_axis_variable, y_axis_variable, color_variable){
+  # filter by subarea
   points <- points %>%
     sf::st_drop_geometry() %>%
-    dplyr::filter(wria_number %in% as.integer(area_sel))
+    dplyr::filter(huc_number %in% subarea_sel)
 
   # filter by owner class
   cSiteIds <- c()
@@ -917,7 +940,7 @@ get_pretty_variable_name <- function(varName){
     prettyName <-  'Downstream Barrier (count)'
   } else if(varName ==  'potential_species'){
     prettyName <-  'Potential Species'
-  } else if(varName ==  'hmarg'){
+  } else if(varName ==  'hmarg_length'){
     prettyName <-  'Marginal Habitat Length (km)'
   } else if(varName ==  'hfull'){
     prettyName <-  'Full Habitat Length (km)'
