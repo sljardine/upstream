@@ -213,8 +213,6 @@ mod_Suggest_server <- function(id, r){
     # update reactive values object with Submit inputs ----
     ##area_sel ----
     observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
-    observeEvent(input$obj, r$obj_suggest <- input$obj)
-    observeEvent(input$barrier_idp, r$barrier_idp_suggest <- input$barrier_idp)
     observeEvent(input$budget, r$budget_suggest <- input$budget)
     ##subarea_sel ----
     observeEvent(c(input$area_sel, input$subarea_sel), {
@@ -232,7 +230,7 @@ mod_Suggest_server <- function(id, r){
         r$subarea_sel_suggest<- input$subarea_sel
       }
     })
-    
+
     ##owner_sel ----
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
@@ -242,6 +240,8 @@ mod_Suggest_server <- function(id, r){
       }
     })
 
+    ##planned culvs ----
+    observeEvent(input$barrier_idp, r$barrier_idp_suggest <- input$barrier_idp)
 
     updateSelectizeInput(
       session,
@@ -255,7 +255,6 @@ mod_Suggest_server <- function(id, r){
       server = TRUE
     )
 
-    # render leaflet output (DO I NEED THIS?)
     ##species_sel ----
     observeEvent(input$species_sel, r$species_sel_suggest <- input$species_sel)
     ##hq (habitat quality definition) ----
@@ -271,6 +270,7 @@ mod_Suggest_server <- function(id, r){
     observeEvent(input$budget, r$budget_suggest <- input$budget)
 
 
+    # render leaflet output (DO I NEED THIS?)
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()
     })

@@ -4,14 +4,13 @@
 #' @param D A connectivity matrix.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
-
+#' @param barrier_idp A vector of planned culvert IDs
 #' @param obj An indicator for whether objective function is to max quant (obj = 1) or max weighted sum of attributes (obj = 2).
 #' @param w_urb A weight on urban habitat quantity.
 #' @param w_ag A weight on agricultural habitat quantity.
 #' @param w_nat A weight on natural habitat quantity.
 #' @param w_temp A weight on ideal temperature.
 #' @param species_sel A vector of species ID numbers of interest.
-#' @param barrier_idp A vector of planned culvert IDs
 #' @return A logical vector of TRUE/FALSE values.
 #' @export
 solve_opt <- function(
@@ -28,9 +27,8 @@ solve_opt <- function(
   w_nat, #weight on natural habitat quantity
   w_temp, #weight on temperature
   hq, #habitat quantity definition
-  species_sel #species to run the optimization problem on
+  species_sel, #species to run the optimization problem on
   barrier_idp #planned barrier IDs
-
 ){
 
   #habitat quantity definition
@@ -81,11 +79,11 @@ solve_opt <- function(
         grepl(paste(owner_sel, collapse = "|"), unique_owner_type_code),
         hmarg, 0))
   }
-    
-  # set benefit to zero if barrier is already planned by user
+
+  # planned barrier selection: set benefit to zero if barrier is already planned by user
   if(! 0 %in% barrier_idp){
     points <- points %>%
-      dplyr::mutate(hmarg_net = ifelse(site_id %in% barrier_idp, 0, hmarg))
+      dplyr::mutate(hmarg = ifelse(site_id %in% barrier_idp, 0, hmarg))
   }
 
 
