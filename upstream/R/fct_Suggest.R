@@ -63,15 +63,22 @@ solve_opt <- function(
 
 
   # wria selection: set benefit to zero if not in the wria of interest (wria_sel)
-  if(! 0 %in% wria_sel && ! 0 %in% huc_sel){
+  if(! 0 %in% wria_sel){
     points <- points %>%
       dplyr::mutate(
-        hmarg = ifelse(wria_number %in% wria_sel, hmarg, 0),
-        hmarg = ifelse(huc_number %in% huc_sel, hmarg, 0)
+        hmarg = ifelse(wria_number %in% wria_sel, hmarg, 0)
         )
   }
 
-  # huc 12 selection: set benefit to zero if not owned by the owner of interest (owner_sel)
+  # huc selection: set benefit to zero if not in the hucof interest (huc_sel)
+  if(! 0 %in% huc_sel){
+    points <- points %>%
+      dplyr::mutate(
+        hmarg = ifelse(huc_number %in% huc_sel, hmarg, 0)
+      )
+  }
+
+  # owner selection: set benefit to zero if not owned by the owner of interest (owner_sel)
   if(! 0 %in% owner_sel){
     points <- points %>%
 
@@ -161,7 +168,15 @@ map_leaflet_opt <- function(
   if(sum(soln) == 0){
 
     #If so, display lines in selected wrias
+    if(! 0 %in% wria_sel && ! 0 %in% huc_sel){
     in_sel_area <- points$wria_number %in% wria_sel & points$huc_number %in% huc_sel
+    } else if(! 0 %in% wria_sel && 0 %in% huc_sel) {
+    in_sel_area <- points$wria_number %in% wria_sel
+    } else if(0 %in% wria_sel && ! 0 %in% huc_sel) {
+    in_sel_area <- points$huc_number %in% huc_sel
+    } else {
+    in_sel_area <- base::rep(TRUE, base::nrow(points))
+    }
     blocked_lines <- marginal_line_ids[in_sel_area] %>% base::unlist()
     leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
 
