@@ -47,34 +47,6 @@ mod_Explore_ui <- function(id){
           multiple = TRUE
         )
       ),
-      fluidRow(
-        selectizeInput(
-          inputId = ns("species_sel"),
-          label = tags$span(style = "color:#c0c0c0", "Select Species of Interest"),
-          choices = setNames(
-            c(0 : 9),
-            nm = c("All", "Bull trout", "Chinook", "Chum", "Coho",
-                   "Pink", "Resident trout", "Sockeye",
-                   "Steelhead", "SR Cutthroad")
-          ),
-          selected = 0,
-          width = '50%',
-          multiple = TRUE
-        )
-      ),
-      fluidRow(
-        radioButtons(inputId = ns("hq"),
-                     label = "Select Habitat Quantity Definition",
-                     choiceNames = list(
-                       "Length",
-                       tags$span(style = "color:#c0c0c0", "Area"),
-                       tags$span(style = "color:#c0c0c0", "Volume")
-                     ),
-                     choiceValues = c("length", "area", "volume"),
-                     inline = TRUE,
-                     selected = NULL
-        )
-      ),
       hr(),
       fluidRow(
         selectInput(
