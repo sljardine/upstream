@@ -124,7 +124,9 @@ mod_Figures_server <- function(id, r){
         culverts_cmb, #culverts
         lines_simp, #lines with linestring geometries
         r$points_sel_suggest, #output from solve_opt()
-        marginal_line_ids #comids for all lines marginally upstream of each point
+        marginal_line_ids, #comids for all lines marginally upstream of each point
+        as.integer(r$area_sel_suggest),
+        as.integer(r$subarea_sel_suggest)
       )
       # selected wria bounding box
       bbox <- get_wria_bounding_box(r$area_sel_suggest)

@@ -4,7 +4,15 @@
 \alias{map_leaflet_opt}
 \title{Map the optimization solution}
 \usage{
-map_leaflet_opt(leaf_proxy, points, lines, soln, marginal_line_ids)
+map_leaflet_opt(
+  leaf_proxy,
+  points,
+  lines,
+  soln,
+  marginal_line_ids,
+  wria_sel,
+  huc_sel
+)
 }
 \arguments{
 \item{leaf_proxy}{A basemap.}

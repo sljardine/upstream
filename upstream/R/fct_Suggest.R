@@ -152,11 +152,29 @@ map_leaflet_opt <- function(
     points, #culverts
     lines, #lines with linestring geometries
     soln, #output from solve_opt()
-    marginal_line_ids #comids for all lines marginally upstream of each point
+    marginal_line_ids, #comids for all lines marginally upstream of each point
+    wria_sel, #wria(s) to run the optimization problem on
+    huc_sel #huc(s) to run the optimization problem on
   ){
 
+  #Lines to display depend on whether the solution is a null set
+  if(sum(soln) == 0){
 
-  #Crop lines to wrias in solution
+    #If so, display lines in selected wrias
+    in_sel_area <- points$wria_number %in% wria_sel & points$huc_number %in% huc_sel
+    blocked_lines <- marginal_line_ids[in_sel_area] %>% base::unlist()
+    leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
+
+    leaf_proxy <- leaf_proxy %>%
+      leafgl::addGlPolylines(data = leaflet_lines %>%
+        dplyr::filter(FCODE != 55800),
+        color = "#cf6e7d",
+        opacity = 0.5,
+        group = "blocked_lines"
+      )
+  } else {
+
+  #If not, display lines in wrias that appear int he solution
   soln_wrias <- unique(points[soln, ]$wria_number)
   in_soln_wrias <- points$wria_number %in% soln_wrias
   #First get blocked/unblocked lines
@@ -165,10 +183,7 @@ map_leaflet_opt <- function(
   #Defined blocked/unblocked
   milp_stream_ids <- marginal_line_ids[soln] %>% base::unlist()
 
-  #Barrier color
-  pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
-
-  #Add lines
+  #Add lines in solution wrias
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(data = leaflet_lines %>%
       dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
@@ -183,6 +198,10 @@ map_leaflet_opt <- function(
         opacity = 0.5,
         group = "unblocked_lines"
       )
+  }
+
+  #Culvert color
+  pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
 
   #Add culverts
   leaf_proxy <- leaf_proxy %>%
