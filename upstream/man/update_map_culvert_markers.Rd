@@ -19,6 +19,8 @@ update_map_culvert_markers(
 
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 
+\item{subarea_sel}{A vector of WRIA ID numbers of interest.}
+
 \item{owner_sel}{A vector of owner ID numbers of interest.}
 
 \item{color_variable}{An attribute in the points data that defines point color.}

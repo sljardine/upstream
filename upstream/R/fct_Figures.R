@@ -77,6 +77,7 @@ reset_map <- function(leaf_proxy){
   leaf_proxy %>%
     leaflet::clearGroup('culverts') %>%
     leaflet::clearGroup('selected_wria') %>%
+    #leaflet::clearGroup('selected_huc') %>%
     leaflet::clearGroup('blocked_lines') %>%
     leaflet::clearGroup('unblocked_lines') %>%
     leaflet::clearGroup('selected_culverts') %>%
@@ -198,7 +199,7 @@ update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
 #' @export
 update_map_selected_polygons <- function(leaf_proxy, area_sel, subarea_sel){
 
-  if(length(area_sel) > 1 || area_sel == 0){
+  if(length(area_sel) > 1 || area_sel == 0 || subarea_sel == 0){
   selected_wrias <- wrias %>% dplyr::filter(WRIA_NR %in% area_sel)
 
   leaf_proxy %>%
@@ -235,13 +236,21 @@ update_map_selected_polygons <- function(leaf_proxy, area_sel, subarea_sel){
 #' @title update map culvert markers
 #' @param leaf_proxy leaflet proxy reference
 #' @param area_sel A vector of WRIA ID numbers of interest.
+#' @param subarea_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
 #' @param color_variable An attribute in the points data that defines point color.
 #' @param highlight Set to NULL if there are no points to highlight.
 #' @param barrier_ids A vector of point ids to highlight.
 #' @return none
 #' @export
-update_map_culvert_markers <- function(leaf_proxy, area_sel, subarea_sel, owner_sel, color_variable, highlight, barrier_ids){
+update_map_culvert_markers <- function(
+    leaf_proxy,
+    area_sel,
+    subarea_sel,
+    owner_sel,
+    color_variable,
+    highlight,
+    barrier_ids){
   # set null variables for initial map draw
   if(is.null(color_variable)){color_variable <- 'none'} else {color_variable <- color_variable}
   if(is.null(area_sel)){area_sel <- wrias$WRIA_NR} else {area_sel <- area_sel}
