@@ -1,4 +1,7 @@
-
+/* font */
+* {
+  font-family: "Arial";
+}
 
 /* logo */
 .skin-blue .main-header .logo {
@@ -18,14 +21,14 @@
 
 /* body */
 .content-wrapper, .right-side {
-   background-color: #ffffff;
+   background-color: #f2f2f2;
    height: 1000px !important;
 }
 
 /* nav tabs */
 .nav-tabs {
-  background-color: #ffffff;
-} 
+  background-color: #f2f2f2;
+}
 
 .nav-tabs-custom .nav-tabs li.active {
   border-top-color: #edc0b5;
@@ -42,8 +45,8 @@
   background-color: #f6e1d7;
 } */
 
-.content-wrapper { 
+.content-wrapper {
   height: 1250px !important;
-  
+
 }
 

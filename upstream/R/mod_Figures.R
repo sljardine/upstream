@@ -12,7 +12,7 @@ mod_Figures_ui <- function(id){
   tagList(
     fluidRow(
       tags$div(
-        style = 'float: right; width: calc(100% - 15.9ch); height: calc(50vh - 100px); min-height: 500px; border: thin solid grey; margin-right: 5px;',
+        style = 'float: right; width: calc(100% - 15.9ch); height: calc(50vh - 100px); min-height: 500px; border: thin solid grey; margin-right: 50px;',
         leafgl::leafglOutput(ns('base_map'), height = '100%'),
         align = "center"
       )
@@ -201,7 +201,7 @@ mod_Figures_server <- function(id, r){
     # render plot ui
     output$uiPlot <- renderUI({
       tags$div(
-        style = 'width: 100%; height: calc(50vh - 100px); min-height: 500px; overflow: hidden;',
+        style = 'width: calc(100% - 15.9ch); height: calc(50vh - 100px); min-height: 500px; overflow: hidden;',
         plotOutput(
           ns('plot'),
           brush = brushOpts(ns('plot_brush'), resetOnNew = TRUE, clip = FALSE),
