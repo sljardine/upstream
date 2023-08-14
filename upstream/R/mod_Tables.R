@@ -10,13 +10,17 @@
 mod_Tables_ui <- function(id){
   ns <- NS(id)
   tagList(
-    # fluidRow(
-    #   uiOutput(ns("data_table"))
-    # )
+    fluidRow(
+      tags$div(
+        style = 'float: right; width: calc(100% - 15.9ch); height: calc(50vh - 100px); min-height: 400px; margin-right: 50px;',
+        uiOutput(ns("data_table")),
+        align = "center"
+      )
+    ),
     fluidRow(
       tags$div(
         style = 'float: right; width: calc(100% - 15.9ch); height: calc(50vh - 100px); min-height: 500px; margin-right: 50px;',
-        uiOutput(ns("data_table")),
+        uiOutput(ns("list")),
         align = "center"
       )
     )
@@ -49,6 +53,18 @@ mod_Tables_server <- function(id, r){
       }
     )
 
+    store_list <- eventReactive(c(r$submit_suggest, r$submit_custom),
+      {
+        if(r$tab_sel == "Suggest"){
+          get_plan_list(culverts_cmb, r$points_sel_suggest)
+       }
+        else if(r$tab_sel == "Custom") {
+          points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids1_custom)
+          get_plan_list(culverts_cmb, points_sel_custom)
+      }
+    }
+  )
+
     # tab events
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
@@ -64,18 +80,31 @@ mod_Tables_server <- function(id, r){
       }
     })
 
-    output$logo <- renderImage({
-      list(src = "inst/app/www/placeholder.png",
-           width = "75%",
-           align = "center")
-    }, deleteFile = FALSE)
-
     output$data_table <- renderUI({
       if(!user_table()){
         imageOutput(NULL)
       } else {
-        output$render_data_table <- DT::renderDataTable({store_table()})
+        output$render_data_table <- DT::renderDataTable(
+          DT::datatable({store_table()},
+          caption = htmltools::tags$caption(style = 'caption-side: top; text-align: center; color:black;  font-size:200% ;','Estimated Habitat Gains'),
+          options = list(pageLength = 7, lengthChange = FALSE, paging = FALSE, searching = FALSE, info = FALSE)
+          )
+          )
         DT::dataTableOutput(ns("render_data_table"))}
+    })
+
+    output$list <- renderUI({
+      if(!user_table()){
+        imageOutput(NULL)
+      } else {
+        output$render_list <- DT::renderDataTable(
+          DT::datatable(
+            {store_list()},
+            caption = htmltools::tags$caption(style = 'caption-side: top; text-align: center; color:black;  font-size:200% ;','Selected Culverts'),
+            options = list(pageLength = 10, lengthChange = FALSE, searching = FALSE)
+            )
+          )
+        DT::dataTableOutput(ns("render_list"))}
     })
 
   })

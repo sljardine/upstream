@@ -26,3 +26,24 @@ get_summary_table <- function(
 
   return(sum_tab)
 }
+
+
+#' @title Get the list of culverts selected for the plan
+#' @param points A simple features point data frame containing culvert locations and attributes.
+#' @param points_sel A simple features point data frame containing selected culvert locations and attributes.
+#' @return A summary table
+#' @export
+get_plan_list <- function(
+  points,
+  points_sel
+){
+
+  plan_list <- points %>%
+    sf::st_drop_geometry() %>%
+    dplyr::filter(points_sel) %>%
+    dplyr::select(site_id, huc_name) %>%
+    as.data.frame() %>%
+    dplyr::rename(`Site ID` = site_id, `HUC 12 Name` = huc_name)
+
+  return(plan_list)
+}
