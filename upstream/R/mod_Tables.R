@@ -10,12 +10,15 @@
 mod_Tables_ui <- function(id){
   ns <- NS(id)
   tagList(
+    # fluidRow(
+    #   uiOutput(ns("data_table"))
+    # )
     fluidRow(
-      #shinydashboard::box(
-        #width = 6,
-        #solidHeader = TRUE, 
-      uiOutput(ns("data_table"))
-      #)
+      tags$div(
+        style = 'float: right; width: calc(100% - 15.9ch); height: calc(50vh - 100px); min-height: 500px; margin-right: 50px;',
+        uiOutput(ns("data_table")),
+        align = "center"
+      )
     )
   )
 }
@@ -26,9 +29,9 @@ mod_Tables_ui <- function(id){
 mod_Tables_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-    
+
     user_table <- reactiveVal(FALSE)
-    
+
     observeEvent(
       c(r$submit_suggest, r$submit_custom),
       user_table(TRUE)
@@ -45,7 +48,7 @@ mod_Tables_server <- function(id, r){
         }
       }
     )
-    
+
     # tab events
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
@@ -60,20 +63,20 @@ mod_Tables_server <- function(id, r){
         user_table(FALSE)
       }
     })
-    
+
     output$logo <- renderImage({
       list(src = "inst/app/www/placeholder.png",
            width = "75%",
            align = "center")
     }, deleteFile = FALSE)
-    
+
     output$data_table <- renderUI({
       if(!user_table()){
-        imageOutput(NULL) 
+        imageOutput(NULL)
       } else {
         output$render_data_table <- DT::renderDataTable({store_table()})
         DT::dataTableOutput(ns("render_data_table"))}
     })
-    
+
   })
 }
