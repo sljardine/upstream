@@ -2,7 +2,7 @@
 % Please edit documentation in R/fct_Figures.R
 \name{update_map_selected_polygons}
 \alias{update_map_selected_polygons}
-\title{update map selected wria polygons}
+\title{update map selected polygons}
 \usage{
 update_map_selected_polygons(leaf_proxy, area_sel, subarea_sel)
 }
@@ -17,5 +17,5 @@ update_map_selected_polygons(leaf_proxy, area_sel, subarea_sel)
 none
 }
 \description{
-update map selected wria polygons
+update map selected polygons
 }

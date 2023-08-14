@@ -39,7 +39,7 @@ get_leaflet_map <- function(){
       fillColor = "transparent"
     )
 
-  # add circle markers (could use addGlPoints maybe...)
+  # add circle markers
   m <- m %>%
     leaflet::addCircleMarkers(
       data = culverts_cmb,
@@ -191,7 +191,7 @@ update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
     )
 }
 
-#' @title update map selected wria polygons
+#' @title update map selected polygons
 #' @param leaf_proxy A leaflet proxy reference.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param subarea_sel A vector of HUC 12 numbers of interest.
@@ -204,6 +204,7 @@ update_map_selected_polygons <- function(leaf_proxy, area_sel, subarea_sel){
 
   leaf_proxy %>%
     leaflet::clearGroup("selected_wria") %>%
+    leaflet::clearGroup("selected_huc") %>%
     leaflet::addPolygons(
       data = selected_wrias,
       group = "selected_wria",
