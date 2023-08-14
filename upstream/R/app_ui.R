@@ -10,8 +10,10 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # Your application UI logic
     shinydashboard::dashboardPage(
-      shinydashboard::dashboardHeader(title = "Upstream",
-      tags$li(class = "dropdown")),
+      shinydashboard::dashboardHeader(
+      title = "Upstream",
+      tags$li(class = "dropdown")
+      ),
       shinydashboard::dashboardSidebar(disable = TRUE),
       shinydashboard::dashboardBody(
         shinydashboard::tabBox(

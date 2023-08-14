@@ -77,7 +77,7 @@ reset_map <- function(leaf_proxy){
   leaf_proxy %>%
     leaflet::clearGroup('culverts') %>%
     leaflet::clearGroup('selected_wria') %>%
-    #leaflet::clearGroup('selected_huc') %>%
+    leaflet::clearGroup('selected_huc') %>%
     leaflet::clearGroup('blocked_lines') %>%
     leaflet::clearGroup('unblocked_lines') %>%
     leaflet::clearGroup('selected_culverts') %>%
