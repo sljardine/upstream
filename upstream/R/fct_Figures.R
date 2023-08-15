@@ -195,11 +195,19 @@ update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
 #' @param leaf_proxy A leaflet proxy reference.
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param subarea_sel A vector of HUC 12 numbers of interest.
+#' @param area_choice A variable taking on values of "all" or "selection".
+#' @param subarea_choice A variable taking on values of "all" or "selection".
 #' @return none
 #' @export
-update_map_selected_polygons <- function(leaf_proxy, area_sel, subarea_sel){
+update_map_selected_polygons <- function(
+    leaf_proxy,
+    area_sel,
+    subarea_sel,
+    area_choice,
+    subarea_choice
+    ){
 
-  if(length(area_sel) > 1 || area_sel == 0 || subarea_sel == 0){
+  if(length(area_sel) > 1 || area_choice == "all" || subarea_choice == "all"){
   selected_wrias <- wrias %>% dplyr::filter(WRIA_NR %in% area_sel)
 
   leaf_proxy %>%
