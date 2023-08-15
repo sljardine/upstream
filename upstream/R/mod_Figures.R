@@ -101,7 +101,9 @@ mod_Figures_server <- function(id, r){
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_suggest,
-        r$subarea_sel_suggest
+        r$subarea_sel_suggest,
+        r$area_choice_suggest,
+        r$subarea_choice_suggest
       )
       r$points_sel_suggest <- solve_opt(
         culverts_cmb,
