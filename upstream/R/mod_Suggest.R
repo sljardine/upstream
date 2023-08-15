@@ -183,9 +183,8 @@ mod_Suggest_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
-    # update huc options ----
+    # update huc options, filtering HUCs in selected WRIA ----
     observeEvent(c(input$area_sel), {
-
       # get areas to filter by
       if("0" %in% input$area_sel){
         cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
@@ -210,13 +209,21 @@ mod_Suggest_server <- function(id, r){
       )
     })
 
-    # update reactive values object with Submit inputs ----
-    ##area_sel ----
-    observeEvent(input$area_sel, r$area_sel_suggest <- input$area_sel)
+    # update reactive values object with Suggest inputs ----
+    ##budget ----
     observeEvent(input$budget, r$budget_suggest <- input$budget)
-    ##subarea_sel ----
+    ##area_sel and area_choice ----
+    observeEvent(input$area_sel, {
+      if("0" %in% input$area_sel){
+        r$area_sel_suggest <- wrias %>% dplyr::pull(WRIA_NR)
+        r$area_choice_suggest <- "all"
+      } else {
+        r$area_sel_suggest <- input$area_sel
+        r$area_choice_suggest <- "selection"
+      }
+    })
+    ##subarea_sel and subarea_choice ----
     observeEvent(c(input$area_sel, input$subarea_sel), {
-
       # get areas to filter by
       if("0" %in% input$area_sel){
         cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
@@ -226,11 +233,12 @@ mod_Suggest_server <- function(id, r){
 
       if("0" %in% input$subarea_sel){
         r$subarea_sel_suggest <- huc12_wrias %>% dplyr::filter(wria_number %in% cWRIA_NR) %>% dplyr::pull(huc_number)
-      } else {
+        r$subarea_choice_suggest <- "all"
+        } else {
         r$subarea_sel_suggest<- input$subarea_sel
+        r$subarea_choice_suggest <- "selection"
       }
     })
-
     ##owner_sel ----
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
@@ -239,10 +247,8 @@ mod_Suggest_server <- function(id, r){
         r$owner_sel_suggest <- input$owner_sel
       }
     })
-
     ##planned culvs ----
     observeEvent(input$barrier_idp, r$barrier_idp_suggest <- input$barrier_idp)
-
     updateSelectizeInput(
       session,
       inputId = "barrier_idp",
@@ -254,7 +260,6 @@ mod_Suggest_server <- function(id, r){
       selected = 0,
       server = TRUE
     )
-
     ##species_sel ----
     observeEvent(input$species_sel, r$species_sel_suggest <- input$species_sel)
     ##hq (habitat quality definition) ----
@@ -266,9 +271,6 @@ mod_Suggest_server <- function(id, r){
     observeEvent(input$w_ag, r$w_ag_suggest <- input$w_ag)
     observeEvent(input$w_nat, r$w_nat_suggest <- input$w_nat)
     observeEvent(input$w_temp, r$w_temp_suggest <- input$w_temp)
-    ##budget ----
-    observeEvent(input$budget, r$budget_suggest <- input$budget)
-
 
     # render leaflet output (DO I NEED THIS?)
     output$base_map <- leaflet::renderLeaflet({
@@ -276,7 +278,6 @@ mod_Suggest_server <- function(id, r){
     })
 
     # tab events ----
-
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
         reset_map(leaflet::leafletProxy(ns("base_map")))

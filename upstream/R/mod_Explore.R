@@ -329,16 +329,18 @@ mod_Explore_server <- function(id, r){
     })
 
     # update reactive values object with Explore inputs
-    ##area_sel
+    ##area_sel and area_choice
     observeEvent(input$area_sel, {
       if("0" %in% input$area_sel){
         r$area_sel_explore <- wrias %>% dplyr::pull(WRIA_NR)
+        r$area_choice_explore <- "all"
       } else {
         r$area_sel_explore <- input$area_sel
+        r$area_choice_explore <- "selection"
       }
     })
 
-    ##subarea_sel
+    ##subarea_sel and subarea_choice
     observeEvent(c(input$area_sel, input$subarea_sel), {
 
       # get areas to filter by
@@ -350,8 +352,10 @@ mod_Explore_server <- function(id, r){
 
       if("0" %in% input$subarea_sel){
         r$subarea_sel_explore <- huc12_wrias %>% dplyr::filter(wria_number %in% cWRIA_NR) %>% dplyr::pull(huc_number)
+        r$subarea_choice_explore <- "all"
       } else {
         r$subarea_sel_explore <- input$subarea_sel
+        r$subarea_choice_explore <- "selection"
       }
     })
 

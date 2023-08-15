@@ -2,9 +2,15 @@
 % Please edit documentation in R/fct_Figures.R
 \name{update_map_selected_polygons}
 \alias{update_map_selected_polygons}
-\title{update map selected wria polygons}
+\title{update map selected polygons}
 \usage{
-update_map_selected_polygons(leaf_proxy, area_sel, subarea_sel)
+update_map_selected_polygons(
+  leaf_proxy,
+  area_sel,
+  subarea_sel,
+  area_choice,
+  subarea_choice
+)
 }
 \arguments{
 \item{leaf_proxy}{A leaflet proxy reference.}
@@ -12,10 +18,14 @@ update_map_selected_polygons(leaf_proxy, area_sel, subarea_sel)
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 
 \item{subarea_sel}{A vector of HUC 12 numbers of interest.}
+
+\item{area_choice}{A variable taking on values of "all" or "selection".}
+
+\item{subarea_choice}{A variable taking on values of "all" or "selection".}
 }
 \value{
 none
 }
 \description{
-update map selected wria polygons
+update map selected polygons
 }

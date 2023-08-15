@@ -69,7 +69,9 @@ mod_Figures_server <- function(id, r){
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_explore,
-        r$subarea_sel_explore
+        r$subarea_sel_explore,
+        r$area_choice_explore,
+        r$subarea_choice_explore
         )
       update_map_culvert_markers(
         leaflet::leafletProxy(ns('base_map')),
@@ -99,7 +101,9 @@ mod_Figures_server <- function(id, r){
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_suggest,
-        r$subarea_sel_suggest
+        r$subarea_sel_suggest,
+        r$area_choice_suggest,
+        r$subarea_choice_suggest
       )
       r$points_sel_suggest <- solve_opt(
         culverts_cmb,
@@ -162,11 +166,12 @@ mod_Figures_server <- function(id, r){
       # explore tab plots (scatter plot and histogram)
       if(user_plot()){
         if(r$tab_sel == "Explore"){
-          if(r$plot_type_explore == 'Scatterplot'){
+          if(r$plot_type_explore == "Scatterplot"){
             culverts_cmb %>%
               filter_and_format_culverts_for_scatterplot(
                 r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
-                r$y_axis_variable_explore, r$color_variable_explore) %>%
+                r$y_axis_variable_explore, r$color_variable_explore
+                ) %>%
               figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore,
                 r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
                 r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
