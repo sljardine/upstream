@@ -62,15 +62,8 @@ mod_Custom_server <- function(id, r){
 
     # Custom tab submit event
     observeEvent(input$submit, {
-      if(input$plans == 1 && !is.null(input$barrier_ids1))
+      if(!is.null(input$barrier_ids1))
       {r$submit_custom <- input$submit}
-      else
-        if(input$plans == 2 && !is.null(input$barrier_ids1) && !is.null(input$barrier_ids2))
-        {r$submit_custom <- input$submit}
-      else
-        if(input$plans == 3 && !is.null(input$barrier_ids1) &&
-           !is.null(input$barrier_ids2) && !is.null(input$barrier_ids3))
-        {r$submit_custom <- input$submit}
         else
       {showModal(modalDialog(title = "Warning!",
       "Please enter at least one set of barrier IDs before you click the Submit button."))}
