@@ -1,11 +1,12 @@
-FROM rocker/r-base:latest
-LABEL maintainer="USER <user@example.com>"
+FFROM rocker/r-base:4.1.0
+LABEL maintainer="USER <jardine@uw.edu>"
 
-# set renv version
 ENV RENV_VERSION 0.15.5
 
-# install linux packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install Linux packages
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends --fix-broken \
+    libfreetype-dev \
     sudo \
     libicu-dev \
     pandoc \
@@ -25,10 +26,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libudunits2-dev \
     libglpk-dev \
     libfontconfig1-dev \
-    libfreetype-dev \
-    libfreetype6-dev \
     libfribidi-dev \
-    libharfbuzz-dev
+    libharfbuzz-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN install.r ROI.plugin.glpk
 
@@ -51,6 +52,7 @@ COPY renv.lock renv.lock
 # install renv
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
+RUN R -e "remotes::install_github('r-spatial/leafgl')"
 
 # install packages from renv 
 ENV RENV_PATHS_LIBRARY renv/library
@@ -61,4 +63,5 @@ RUN echo "local(options(shiny.port = 80, shiny.host = '0.0.0.0'))" > /usr/lib/R/
 
 EXPOSE 80
 CMD Rscript app.R
+
 
