@@ -1,0 +1,37 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Setup authentication (Replace with your actual authentication steps)
+    - name: Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    # Build and Push Docker image
+    - name: Build and Push Docker image
+      run: |
+        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.APP_NAME }}:${{ github.sha }} .
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.APP_NAME }}:${{ github.sha }}
+
+    # Deploy to Google Cloud Run
+    - name: Deploy to Google Cloud Run
+      run: |
+        gcloud run deploy ${{ secrets.APP_NAME }} \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.APP_NAME }}:${{ github.sha }} \
+          --region us-central1 \
+          --platform managed
