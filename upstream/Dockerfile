@@ -1,4 +1,4 @@
-FFROM rocker/r-base:4.1.0
+FROM rocker/r-base:4.1.0
 LABEL maintainer="USER <jardine@uw.edu>"
 
 ENV RENV_VERSION 0.15.5
