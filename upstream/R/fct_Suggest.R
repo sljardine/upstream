@@ -213,8 +213,6 @@ map_leaflet_opt <- function(
   milp_stream_ids <- marginal_line_ids[soln] %>% base::unlist()
   ds_stream_ids <- downstream_line_ids[soln] %>% base::unlist()
 
-  testfilter <- ds_leaflet_lines %>% dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids)
-
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(
       data = leaflet_lines %>%
@@ -232,6 +230,7 @@ map_leaflet_opt <- function(
     )
 
   #test for null sets in ds lines. If FALSE draw lines
+  testfilter <- ds_leaflet_lines %>% dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids)
   if (inherits(sf::st_geometry(testfilter), c("sfc_LINESTRING", "sfc_MULTILINESTRING"))==TRUE){
 
  leaf_proxy <- leaf_proxy %>%
@@ -251,8 +250,6 @@ map_leaflet_opt <- function(
 
   #Culvert color
   pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
-
-  # planned barrier selection: set benefit to zero if barrier is already planned by user
 
   #Add culverts
   leaf_proxy <- leaf_proxy %>%

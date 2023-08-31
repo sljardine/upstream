@@ -49,24 +49,32 @@ get_plan_list <- function(
   barrier_idp
 ){
 
-  # planned barrier selection: set benefit to zero if barrier is already planned by user
-    points <- points %>%
-      dplyr::mutate(proj_plan = ifelse(site_id %in% barrier_idp, paste("Yes"), paste("No")))
+  # planned barrier selection if barrier is already planned by user
+  points <- points %>%
+    dplyr::mutate(proj_plan = ifelse(site_id %in% barrier_idp, paste("Yes"), paste("No")))
 
+  #sum costs for suggested barriers (do not include already planned/complete)
+  cost_less_plan <-points %>%
+    sf::st_drop_geometry() %>%
+    dplyr::filter(points_sel) %>%
+    dplyr::group_by(proj_plan)%>%
+    dplyr::filter(proj_plan=="No")%>%
+    dplyr::summarize(cost_sum = sum(cost))
 
   plan_list <- points %>%
     sf::st_drop_geometry() %>%
     dplyr::filter(points_sel) %>%
-    dplyr::select(site_id, huc_name, proj_plan, cost) %>%
+    dplyr::mutate(cost_less_plan = cost_less_plan$cost_sum)%>%
+    dplyr::select(site_id, huc_name, proj_plan, cost, cost_less_plan) %>%
     dplyr::mutate(cost_text = paste0("$",format(cost,nsmall=0, big.mark=",")))%>%
-    dplyr::mutate(cost_sum = paste0("$",format(sum(cost),nsmall=0, big.mark=",")))%>%
-    dplyr::select(-cost)%>%
+    dplyr::mutate(cost_sum_text = paste0("$",format(cost_less_plan,nsmall=0, big.mark=",")))%>%
+    dplyr::select(c(-cost,-cost_less_plan))%>%
     as.data.frame() %>%
     dplyr::rename(`Site ID` = site_id,
                   `HUC 12 Name` = huc_name,
                   `Planned / Complete` = proj_plan,
                   `Site Cost` = cost_text,
-                  `Plan Total` = cost_sum)
+                  `Total Cost` = cost_sum_text)
 
   return(plan_list)
 }
