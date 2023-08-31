@@ -1,4 +1,4 @@
-name: Deploy to Google Cloud Run attempt
+name: Deploy to Google Cloud Run
 
 on:
   push:
@@ -12,11 +12,11 @@ jobs:
     steps:
     # Checkout the code
     - name: Checkout code
-      uses: actions/checkout@v3  # Updated to latest version
+      uses: actions/checkout@v2
 
     # Setup authentication
     - name: Setup Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v0.3.0  # Updated to latest version
+      uses: google-github-actions/setup-gcloud@v0.2.1
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         service_account_key: ${{ secrets.GCP_SA_KEY }}
@@ -30,14 +30,16 @@ jobs:
     # Build and Push Docker image to Artifact Registry
     - name: Build and Push Docker image
       run: |
-        docker build -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/${{ secrets.APP_NAME }}:${{ github.sha }} ./upstream
-        docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/${{ secrets.APP_NAME }}:${{ github.sha }}
+        APP_NAME="upstream_app"  # Hardcoded app name
+        docker build -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/$APP_NAME:${{ github.sha }} ./upstream
+        docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/$APP_NAME:${{ github.sha }}
 
     # Deploy to Google Cloud Run
     - name: Deploy to Google Cloud Run
       run: |
+        APP_NAME="upstream_app"  # Hardcoded app name
         gcloud run deploy upstream_cloud_run \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/${{ secrets.APP_NAME }}:${{ github.sha }} \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/$APP_NAME:${{ github.sha }} \
           --region us-west1 \
           --platform managed
 
