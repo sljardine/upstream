@@ -38,7 +38,7 @@ jobs:
     - name: Deploy to Google Cloud Run
       run: |
         APP_NAME="upstream_app"  # Hardcoded app name
-        gcloud run deploy upstream_cloud_run \
+        gcloud run deploy upstream-cloud-run \
           --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/$APP_NAME:${{ github.sha }} \
           --region us-west1 \
           --platform managed
