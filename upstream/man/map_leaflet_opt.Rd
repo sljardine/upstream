@@ -8,8 +8,10 @@ map_leaflet_opt(
   leaf_proxy,
   points,
   lines,
+  dslines,
   soln,
   marginal_line_ids,
+  downstream_line_ids,
   wria_sel,
   huc_sel
 )
@@ -19,11 +21,15 @@ map_leaflet_opt(
 
 \item{points}{A simple features point data frame containing culvert locations and attributes.}
 
-\item{lines}{A simple features data frame with linestring geometries.}
+\item{lines}{A simple features data frame with linestring geometries upstream of culvs}
+
+\item{dslines}{A simple features data frame with linestring geometries downstream of culvs}
 
 \item{soln}{A logical vector of TRUE/FALSE values that is the output from solve_opt(.}
 
 \item{marginal_line_ids}{A vector of line IDs for all lines marginally upstream of each point.}
+
+\item{downstream_line_ids}{A vector of line IDs for all lines marginally upstream of each point.}
 
 \item{D}{A connectivity matrix.}
 }

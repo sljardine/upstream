@@ -1,12 +1,21 @@
 #' @title Summarize variables for select culverts
 #' @param points A simple features point data frame containing culvert locations and attributes.
 #' @param points_sel A simple features point data frame containing selected culvert locations and attributes.
+#' @param barrier_idp A vector of planned culvert IDs
 #' @return A summary table
 #' @export
 get_summary_table <- function(
     points,
-    points_sel
+    points_sel,
+    barrier_idp
     ){
+
+  # planned barrier selection: set benefit to zero if barrier is already planned by user
+  if(! 0 %in% barrier_idp){
+    points <- points %>%
+      dplyr::mutate(hmarg_length = ifelse(site_id %in% barrier_idp, 0, hmarg_length)
+      )
+  }
 
   sum_tab <- points %>%
     sf::st_drop_geometry() %>%
@@ -18,7 +27,7 @@ get_summary_table <- function(
       `Pink` = round(sum(hmarg_length * grepl("Pink", potential_species)), 2),
       `Sockeye` = round(sum(hmarg_length * grepl("Sockeye", potential_species)), 2),
       `Steelhead` = round(sum(hmarg_length * grepl("Steelhead", potential_species)), 2),
-      `Total` = round(sum(hmarg_length), 2)
+      `Total Habitat` = round(sum(hmarg_length), 2)
     ) %>%
     t() %>%
     as.data.frame() %>%
@@ -31,19 +40,33 @@ get_summary_table <- function(
 #' @title Get the list of culverts selected for the plan
 #' @param points A simple features point data frame containing culvert locations and attributes.
 #' @param points_sel A simple features point data frame containing selected culvert locations and attributes.
+#' @param barrier_idp A vector of planned culvert IDs
 #' @return A summary table
 #' @export
 get_plan_list <- function(
   points,
-  points_sel
+  points_sel,
+  barrier_idp
 ){
+
+  # planned barrier selection: set benefit to zero if barrier is already planned by user
+    points <- points %>%
+      dplyr::mutate(proj_plan = ifelse(site_id %in% barrier_idp, paste("Yes"), paste("No")))
+
 
   plan_list <- points %>%
     sf::st_drop_geometry() %>%
     dplyr::filter(points_sel) %>%
-    dplyr::select(site_id, huc_name) %>%
+    dplyr::select(site_id, huc_name, proj_plan, cost) %>%
+    dplyr::mutate(cost_text = paste0("$",format(cost,nsmall=0, big.mark=",")))%>%
+    dplyr::mutate(cost_sum = paste0("$",format(sum(cost),nsmall=0, big.mark=",")))%>%
+    dplyr::select(-cost)%>%
     as.data.frame() %>%
-    dplyr::rename(`Site ID` = site_id, `HUC 12 Name` = huc_name)
+    dplyr::rename(`Site ID` = site_id,
+                  `HUC 12 Name` = huc_name,
+                  `Planned / Complete` = proj_plan,
+                  `Site Cost` = cost_text,
+                  `Plan Total` = cost_sum)
 
   return(plan_list)
 }
