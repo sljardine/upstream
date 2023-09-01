@@ -30,16 +30,17 @@ jobs:
     # Build and Push Docker image to Artifact Registry
     - name: Build and Push Docker image
       run: |
-        APP_NAME="upstream_app"  # Hardcoded app name
-        docker build -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/$APP_NAME:${{ github.sha }} ./upstream
-        docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/$APP_NAME:${{ github.sha }}
+        docker build -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }} ./upstream
+        docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }}
 
     # Deploy to Google Cloud Run
     - name: Deploy to Google Cloud Run
       run: |
-        APP_NAME="upstream_app"  # Hardcoded app name
         gcloud run deploy upstream-cloud-run \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/$APP_NAME:${{ github.sha }} \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }} \
           --region us-west1 \
-          --platform managed
+          --platform managed \
+          --service-account=upstream_service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com
+
+          
 
