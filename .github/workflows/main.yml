@@ -35,7 +35,7 @@ jobs:
         with:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
-          image: us-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/upstream-docker/upstream_app:latest
+          image: us-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/upstream-docker/upstream_app:214e745f9288e3dc401c766010e88bb02a21d212
           flags: "--memory=4Gi --cpu=2"
 
       # If required, use the Cloud Run url output in later steps
