@@ -1,36 +1,42 @@
-name: Deploy to Google Cloud Run
+name: Deploy to Cloud Run
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+
+env:
+  PROJECT_ID: upstream-378723
+  GAR_LOCATION: us-west1
+  SERVICE: upstream-cloud-run
+  REGION: us-west1
 
 jobs:
   deploy:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     runs-on: ubuntu-latest
-
     steps:
-    # Checkout the code
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    # Setup authentication
-    - name: Setup Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v0.2.1
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true
+      # Google Auth using credentials JSON
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-    # Configure Docker to use Artifact Registry
-    - name: Configure Docker
-      run: |
-        gcloud --quiet auth configure-docker us-west1-docker.pkg.dev
-    
-    # Build and Push Docker image to Artifact Registry
-    - name: Build and Push Docker image
-      run: |
-        docker build -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }} ./upstream
-        docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }}
+      # Deploy to Cloud Run
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v0
+        with:
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          image: us-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/upstream-docker/upstream_app:latest
 
-          
+      # If required, use the Cloud Run url output in later steps
+      - name: Show Output
+        run: echo ${{ steps.deploy.outputs.url }}   
