@@ -28,18 +28,8 @@ jobs:
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      # Deploy to Cloud Run
-      - name: Deploy to Cloud Run
-        id: deploy
-        uses: google-github-actions/deploy-cloudrun@v1 # Use the latest stable version
-        with:
-          service: ${{ env.SERVICE }}
-          region: ${{ env.REGION }}
-          image: us-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/upstream-docker/upstream_app:latest
-          # Add environment variables if needed
-          # env_vars: PORT=8080
-
-      # If required, use the Cloud Run url output in later steps
-      - name: Show Output
-        run: echo ${{ steps.deploy.outputs.url }}
+      # Check Cloud Run Service Status
+      - name: Check Cloud Run Service Status
+        run: |
+          gcloud run services describe ${{ env.SERVICE }} --region=${{ env.REGION }} --platform=managed
 
