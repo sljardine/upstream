@@ -25,6 +25,10 @@ jobs:
     # Debug: Print gcloud info
     - name: Print gcloud info
       run: gcloud info
+    
+    # Check roles
+    - name: Check Service Account Roles
+      run: gcloud projects get-iam-policy ${{ secrets.GCP_PROJECT_ID }} --flatten="bindings[].members" --format='table(bindings.role,bindings.members)' --filter="bindings.members:upstream-service@upstream-378723.iam.gserviceaccount.com"
 
     # Debug: Print IAM policies (Replace SERVICE_ACCOUNT_NAME and PROJECT_ID)
     - name: Print IAM policies
