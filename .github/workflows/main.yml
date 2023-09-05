@@ -22,6 +22,14 @@ jobs:
         service_account_key: ${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
 
+    # Debug: Print gcloud info
+    - name: Print gcloud info
+      run: gcloud info
+
+    # Debug: Print IAM policies (Replace SERVICE_ACCOUNT_NAME and PROJECT_ID)
+    - name: Print IAM policies
+      run: gcloud iam service-accounts get-iam-policy upstream_service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com --format json
+
     # Configure Docker to use Artifact Registry
     - name: Configure Docker
       run: |
@@ -33,14 +41,17 @@ jobs:
         docker build -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }} ./upstream
         docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }}
 
-    # Deploy to Google Cloud Run
-    - name: Deploy to Google Cloud Run
-      run: |
-        gcloud run deploy upstream-cloud-run \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }} \
-          --region us-west1 \
-          --platform managed \
-          --service-account=upstream_service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com
-
+    # Deploy to Google Cloud Run using GitHub Action
+    - name: Deploy to Cloud Run
+      uses: google-github-actions/deploy-cloudrun@main
+      with:
+        image: us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }}
+        service: upstream-cloud-run
+        region: us-west1
+        platform: managed
+        allow-unauthenticated: true
+        env_vars:
+          FOO=bar
+          ZIP=zap
           
 
