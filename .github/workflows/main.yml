@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the code
     - name: Checkout code
       uses: actions/checkout@v2
 
-    # Setup authentication
     - name: Setup Google Cloud SDK
       uses: google-github-actions/setup-gcloud@v0.2.1
       with:
@@ -22,20 +20,17 @@ jobs:
         service_account_key: ${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
 
-    # Debug: Print gcloud info
     - name: Print gcloud info
       run: gcloud info
 
-    # Deploy to Google Cloud Run using GitHub Action
     - name: Deploy to Cloud Run
-      uses: google-github-actions/deploy-cloudrun@main
+      uses: google-github-actions/deploy-cloudrun@v1
       with:
         image: us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/upstream-docker/upstream_app:${{ github.sha }}
         service: upstream-cloud-run
         region: us-west1
-        platform: managed
-        allow-unauthenticated: true
         env_vars: |
           FOO=bar
           ZIP=zap
+
           
