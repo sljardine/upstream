@@ -28,7 +28,7 @@ jobs:
 
     # Debug: Print IAM policies (Replace SERVICE_ACCOUNT_NAME and PROJECT_ID)
     - name: Print IAM policies
-      run: gcloud iam service-accounts get-iam-policy upstream_service@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com --format json
+      run: gcloud iam service-accounts get-iam-policy upstream_service@$upstream-378723.iam.gserviceaccount.com --format json
 
     # Configure Docker to use Artifact Registry
     - name: Configure Docker
