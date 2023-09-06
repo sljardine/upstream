@@ -80,6 +80,7 @@ reset_map <- function(leaf_proxy){
     leaflet::clearGroup('selected_huc') %>%
     leaflet::clearGroup('blocked_lines') %>%
     leaflet::clearGroup('unblocked_lines') %>%
+    leaflet::clearGroup('ds_lines')%>%
     leaflet::clearGroup('selected_culverts') %>%
     leaflet::addCircleMarkers(
       data = culverts_cmb,

@@ -3,3 +3,5 @@
 ^data-raw$
 ^app\.R$
 ^rsconnect$
+^.*\.Rproj$
+^\.Rproj\.user$
