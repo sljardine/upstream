@@ -59,9 +59,9 @@ ENV RENV_PATHS_LIBRARY renv/library
 
 RUN R -e "renv::restore()"
 
-RUN echo "local(options(shiny.port = 80, shiny.host = '0.0.0.0'))" > /usr/lib/R/etc/Rprofile.site
+RUN echo "local(options(shiny.port = 8080, shiny.host = '0.0.0.0'))" > /usr/lib/R/etc/Rprofile.site
 
-EXPOSE 80
+EXPOSE 8080
 CMD Rscript app.R
 
 
