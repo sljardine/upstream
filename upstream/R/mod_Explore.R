@@ -250,7 +250,7 @@ mod_Explore_server <- function(id, r){
       )
     })
 
-    # update barrier ids to filter to wria and owner
+    # update barrier ids to filter to wria, huc12, and owner
     observeEvent(c(input$area_sel, input$subarea_sel, input$owner_sel), {
 
       sfC <- culverts_cmb %>% sf::st_drop_geometry()

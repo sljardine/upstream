@@ -13,12 +13,16 @@ mod_Learn_ui <- function(id){
     fluidRow(
       h3(HTML("<b>Project Team</b>"), align = "left", style = 'margin-left: 50px;'),
       tags$div(tags$ul(
-        tags$li("Sunny Jardine (lead PI)"),
-        tags$li("Robby Fonner (PI)"),
-        tags$li("Dan Holland (PI)"),
-        tags$li("Mark Scheuerell (PI)"),
-        tags$li("Braeden Van Deynze (PI)"),
-        tags$li("Logan Blair (postdoc)")
+        tags$li("Sunny Jardine (Project lead, Lead developer)"),
+        tags$li("Robby Fonner (Project advisor)"),
+        tags$li("Dan Holland (Project advisor)"),
+        tags$li("Mark Scheuerell (Project advisor)"),
+        tags$li("Braeden Van Deynze (Project advisor)"),
+        tags$li("Connor Lewis Smith (Developer, IT)"),
+        tags$li("Jeffery Comnick (Developer)"),
+        tags$li("Logan Blair (Developer)"),
+        tags$li("J Kahn (Developer)"),
+        tags$li("Zephyr Pfotenhauer (Illustrator)")
         ),
         style = 'margin-left: 50px;'
         )

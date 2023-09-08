@@ -55,6 +55,7 @@ map_leaflet_custom <- function(
   pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
 
   #Add lines
+  if(base::NROW(leaflet_lines %>% dplyr::filter(COMID %in% milp_stream_ids)) > 0 ){
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(data = leaflet_lines %>%
       dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
@@ -69,6 +70,16 @@ map_leaflet_custom <- function(
         opacity = 0.5,
         group = "unblocked_lines"
       )
+  } else {
+    leaf_proxy <- leaf_proxy %>%
+      leafgl::addGlPolylines(
+        data = leaflet_lines %>%
+          dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
+        color = "#cf6e7d",
+        opacity = 0.5,
+        group = "blocked_lines"
+      )
+  }
 
   #Add culverts
   leaf_proxy <- leaf_proxy %>%
