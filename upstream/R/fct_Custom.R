@@ -16,6 +16,7 @@ get_points_sel_custom <- function(
 #' @param leaf_proxy A basemap.
 #' @param points A simple features point data frame containing culvert locations and attributes.
 #' @param lines A simple features data frame with linestring geometries.
+#' @param dslines A simple features data frame with linestring geometries downstream of culvs
 #' @param prtf_cust A vector of point IDs for selected points.
 #' @param E A full connectivity matrix.
 #' @param marginal_line_ids A vector of line IDs for all lines marginally upstream of each point.
@@ -25,6 +26,7 @@ map_leaflet_custom <- function(
     leaf_proxy,
     points, #culverts
     lines, #lines with linestring geometries
+    dslines, #lines with linestring geometries downstream of culvs
     prtf_cust, #inputs from mod_Custom
     E, #full connectivity matrix
     marginal_line_ids #comids for all lines marginally upstream of each point
@@ -47,21 +49,54 @@ map_leaflet_custom <- function(
 
   #First get blocked/unblocked lines
   blocked_lines <- marginal_line_ids[in_cust_wrias] %>% unlist()
+  ds_blocked_lines <- downstream_line_ids[in_cust_wrias] %>% base::unlist()
+
   leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
+  ds_leaflet_lines <- dslines %>% dplyr::filter(COMID %in% ds_blocked_lines)
+
+  #Defined blocked/unblocked
   names(marginal_line_ids) <- points$site_id
   milp_stream_ids <- marginal_line_ids[prtf_cust[h_inc]] %>% unlist()
+  ds_stream_ids <- downstream_line_ids[prtf_cust[h_inc]] %>% base::unlist()
 
   #Barrier color
   pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
 
   #Add lines
-  if(base::NROW(leaflet_lines %>% dplyr::filter(COMID %in% milp_stream_ids)) > 0 ){
+  if(
+    base::nrow(leaflet_lines %>% dplyr::filter(COMID %in% milp_stream_ids)) > 0 &&
+    base::nrow(ds_leaflet_lines %>%
+               dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids)) > 0
+    ){
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(data = leaflet_lines %>%
       dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
       color = "#cf6e7d",
       opacity = 0.5,
       group = "blocked_lines"
+      )  %>%
+      leafgl::addGlPolylines(
+        data = leaflet_lines %>%
+          dplyr::filter(COMID %in% milp_stream_ids),
+        color = "#2739c7",
+        opacity = 0.5,
+        group = "unblocked_lines"
+      ) %>%
+    leafgl::addGlPolylines(
+      data = ds_leaflet_lines %>%
+        dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids),
+      color = "#2739c7",
+      opacity = 0.25,
+      group = "unblocked_lines"
+    )
+  } else if (base::nrow(leaflet_lines %>% dplyr::filter(COMID %in% milp_stream_ids)) > 0) {
+    leaf_proxy <- leaf_proxy %>%
+      leafgl::addGlPolylines(
+        data = leaflet_lines %>%
+          dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
+        color = "#cf6e7d",
+        opacity = 0.5,
+        group = "blocked_lines"
       )  %>%
       leafgl::addGlPolylines(
         data = leaflet_lines %>%

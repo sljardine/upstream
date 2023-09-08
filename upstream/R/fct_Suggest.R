@@ -188,7 +188,6 @@ map_leaflet_opt <- function(
     ds_leaflet_lines <- dslines %>% dplyr::filter(COMID %in% ds_blocked_lines)
 
     leaf_proxy <- leaf_proxy %>%
-
       leafgl::addGlPolylines(data = leaflet_lines %>%
         dplyr::filter(FCODE != 55800),
         color = "#cf6e7d",

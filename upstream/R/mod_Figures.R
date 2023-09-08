@@ -156,6 +156,7 @@ mod_Figures_server <- function(id, r){
         leaflet::leafletProxy(ns("base_map")),
         culverts_cmb, #culverts
         lines_simp, #lines with linestring geometries
+        lines_ds, #downstream lines with linestring geometries
         r$barrier_ids_custom, #inputs from mod_Custom
         E, #full connectivity matrix
         marginal_line_ids #comids for all lines marginally upstream of each point
