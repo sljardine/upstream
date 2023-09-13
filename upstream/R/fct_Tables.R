@@ -65,10 +65,7 @@ get_plan_list <- function(
     sf::st_drop_geometry() %>%
     dplyr::filter(points_sel) %>%
     dplyr::filter(proj_plan == "No") %>%
-    #dplyr::mutate(cost_less_plan = cost_less_plan$cost_sum) %>%
-    dplyr::select(site_id, huc_name, cost) %>%
-    dplyr::mutate(cost_text = paste0("$", format(cost, nsmall=0, big.mark = ","))) %>%
-    dplyr::select(-c(cost)) %>%
+    dplyr::select(site_id, huc_name, cost_text) %>%
     as.data.frame() %>%
     dplyr::rename(
       `Site ID` = site_id,

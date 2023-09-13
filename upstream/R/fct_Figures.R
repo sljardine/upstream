@@ -292,7 +292,7 @@ update_map_culvert_markers <- function(
   if(color_variable == "owner_type_code"){
     points <- points %>%
       dplyr::select(-owner_type_code) %>%
-      dplyr::rename(owner_type_code = owner_type_name_short)
+      dplyr::rename(owner_type_code = owner_name)
   }
 
   # replace wria_number with name
@@ -420,7 +420,7 @@ filter_and_format_culverts_for_histogram <- function(points, area_sel, subarea_s
   if(histogram_variable == "owner_type_code" | color_variable == "owner_type_code"){
     points <- points %>%
       dplyr::select(-owner_type_code) %>%
-      dplyr::rename(owner_type_code = owner_type_name_short)
+      dplyr::rename(owner_type_code = owner_name)
   }
 
   # create dummy variable if color variable is 'none'
@@ -494,7 +494,7 @@ filter_and_format_culverts_for_scatterplot <- function(points, area_sel, subarea
   if(x_axis_variable == "owner_type_code" | y_axis_variable == "owner_type_code" | color_variable == "owner_type_code"){
     points <- points %>%
       dplyr::select(-owner_type_code) %>%
-      dplyr::rename(owner_type_code = owner_type_name_short)
+      dplyr::rename(owner_type_code = owner_name)
   }
 
   # add dummy color variable if color_variable = "none"
@@ -918,31 +918,6 @@ replace_WRIA_number_with_name <- function(points, sfW){
     ) %>%
     dplyr::select(-wria_number) %>%
     dplyr::rename(wria_number = WRIA_NM)
-
-  return(points)
-}
-
-#' @title replace owner code with name
-#' @param points simple features data frame of culvert data
-#' @return data frame of culverts with owner name instead of owner type code
-#' @export
-replace_owner_code_with_name <- function(points){
-  points <- points %>%
-    dplyr::mutate(owner_name = dplyr::case_when(
-      owner_type_code == 1 ~ "City",
-      owner_type_code == 2 ~ "County",
-      owner_type_code == 3 ~ "Federal",
-      owner_type_code == 4 ~ "Private",
-      owner_type_code == 5 ~ "State",
-      owner_type_code == 6 ~ "Tribal",
-      owner_type_code == 7 ~ "Other",
-      owner_type_code == 8 ~ "Port",
-      owner_type_code == 9 ~ "Drainage District",
-      owner_type_code == 11 ~ "Irrigation District",
-      owner_type_code == 12 ~ "Unknown"
-    )) %>%
-    dplyr::select(-owner_type_code) %>%
-    dplyr::rename(owner_type_code = owner_name)
 
   return(points)
 }
