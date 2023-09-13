@@ -98,6 +98,7 @@ mod_Figures_server <- function(id, r){
 
     # Suggest submit button event
     observeEvent(r$submit_suggest, {
+
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_suggest,
@@ -127,8 +128,10 @@ mod_Figures_server <- function(id, r){
         leaflet::leafletProxy(ns('base_map')),
         culverts_cmb, #culverts
         lines_simp, #lines with linestring geometries
+        lines_ds, #downstream lines with linestring geometries
         r$points_sel_suggest, #output from solve_opt()
         marginal_line_ids, #comids for all lines marginally upstream of each point
+        downstream_line_ids, #comids for all lines downstream of each point on main stem
         as.integer(r$area_sel_suggest),
         as.integer(r$subarea_sel_suggest)
       )
@@ -141,15 +144,28 @@ mod_Figures_server <- function(id, r){
 
     # Custom submit button event
     observeEvent(r$submit_custom, {
+      update_map_selected_polygons(
+        leaflet::leafletProxy(ns('base_map')),
+        r$area_sel_custom,
+        r$subarea_sel_custom,
+        r$area_choice_custom,
+        r$subarea_choice_custom
+      )
       remove_map_points(leaflet::leafletProxy(ns("base_map")))
       map_leaflet_custom(
         leaflet::leafletProxy(ns("base_map")),
         culverts_cmb, #culverts
         lines_simp, #lines with linestring geometries
-        r$barrier_ids1_custom, #inputs from mod_Custom
+        lines_ds, #downstream lines with linestring geometries
+        r$barrier_ids_custom, #inputs from mod_Custom
         E, #full connectivity matrix
         marginal_line_ids #comids for all lines marginally upstream of each point
       )
+      # selected wria bounding box
+      bbox <- get_wria_bounding_box(r$area_sel_custom)
+      # zoom map to selected wrias
+      leaflet::leafletProxy(mapId = ns("base_map")) %>%
+      leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
     })
 
     # reset plot click text output

@@ -44,11 +44,11 @@ mod_Tables_server <- function(id, r){
     store_table <- eventReactive(c(r$submit_suggest, r$submit_custom),
       {
         if(r$tab_sel == "Suggest"){
-          get_summary_table(culverts_cmb, r$points_sel_suggest)
+          get_summary_table(culverts_cmb, r$points_sel_suggest, r$barrier_idp_suggest)
         }
         else if(r$tab_sel == "Custom") {
-          points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids1_custom)
-          get_summary_table(culverts_cmb, points_sel_custom)
+          points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
+          get_summary_table(culverts_cmb, points_sel_custom, 0)
         }
       }
     )
@@ -56,11 +56,11 @@ mod_Tables_server <- function(id, r){
     store_list <- eventReactive(c(r$submit_suggest, r$submit_custom),
       {
         if(r$tab_sel == "Suggest"){
-          get_plan_list(culverts_cmb, r$points_sel_suggest)
+          get_plan_list(culverts_cmb, r$points_sel_suggest, r$barrier_idp_suggest)
        }
         else if(r$tab_sel == "Custom") {
-          points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids1_custom)
-          get_plan_list(culverts_cmb, points_sel_custom)
+          points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
+          get_plan_list(culverts_cmb, points_sel_custom, 0)
       }
     }
   )
@@ -101,7 +101,8 @@ mod_Tables_server <- function(id, r){
           DT::datatable(
             {store_list()},
             caption = htmltools::tags$caption(style = 'caption-side: top; text-align: center; color:black;  font-size:200% ;','Selected Culverts'),
-            options = list(pageLength = 10, lengthChange = FALSE, searching = FALSE)
+            options = list(pageLength = 5, lengthChange = FALSE, searching = FALSE),
+            rownames = FALSE
             )
           )
         DT::dataTableOutput(ns("render_list"))}

@@ -4,7 +4,15 @@
 \alias{map_leaflet_custom}
 \title{Map the custom solution}
 \usage{
-map_leaflet_custom(leaf_proxy, points, lines, prtf_cust, E, marginal_line_ids)
+map_leaflet_custom(
+  leaf_proxy,
+  points,
+  lines,
+  dslines,
+  prtf_cust,
+  E,
+  marginal_line_ids
+)
 }
 \arguments{
 \item{leaf_proxy}{A basemap.}
@@ -12,6 +20,8 @@ map_leaflet_custom(leaf_proxy, points, lines, prtf_cust, E, marginal_line_ids)
 \item{points}{A simple features point data frame containing culvert locations and attributes.}
 
 \item{lines}{A simple features data frame with linestring geometries.}
+
+\item{dslines}{A simple features data frame with linestring geometries downstream of culvs}
 
 \item{prtf_cust}{A vector of point IDs for selected points.}
 
