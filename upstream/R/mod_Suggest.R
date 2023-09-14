@@ -137,7 +137,7 @@ mod_Suggest_ui <- function(id){
           label = "Cost",
           choiceNames = list(
             "Default Predictions",
-            tags$span(style = "color:#c0c0c0", "Provide Mean Project Cost")
+            "Provide Mean Project Cost"
           ),
           choiceValues = c(1, 2),
           inline = TRUE,
@@ -149,13 +149,13 @@ mod_Suggest_ui <- function(id){
           ns = ns,
           column(6,
           numericInput(inputId = ns("mean_design_cost"),
-            label = tags$span(style = "color:#c0c0c0", "Mean Design Cost ($)"),
+            label = "Mean Design Cost ($)",
             min = 0,
             value = NULL)
           ),
           column(6,
           numericInput(inputId = ns("mean_construction_cost"),
-            label = tags$span(style = "color:#c0c0c0", "Mean Construction Cost ($)"),
+            label = "Mean Construction Cost ($)",
             min = 0,
             value = NULL)
           )
@@ -271,6 +271,10 @@ mod_Suggest_server <- function(id, r){
     observeEvent(input$w_ag, r$w_ag_suggest <- input$w_ag)
     observeEvent(input$w_nat, r$w_nat_suggest <- input$w_nat)
     observeEvent(input$w_temp, r$w_temp_suggest <- input$w_temp)
+    ##cost (cost definition) ----
+    observeEvent(input$cost, r$cost_suggest <- input$cost)
+    observeEvent(input$mean_design_cost, r$mean_design_cost_suggest <- input$mean_design_cost)
+    observeEvent(input$mean_construction_cost, r$mean_construction_cost_suggest <- input$mean_construction_cost)
 
     # render leaflet output (DO I NEED THIS?)
     output$base_map <- leaflet::renderLeaflet({
@@ -281,21 +285,16 @@ mod_Suggest_server <- function(id, r){
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       } else if(r$tab_sel == "Explore"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       } else if(r$tab_sel == "Suggest"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       }
       else if(r$tab_sel == "Custom"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       }
       else if(r$tab_sel == "Learn"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       }
     })
 
@@ -314,12 +313,13 @@ mod_Suggest_server <- function(id, r){
       #selected an owner, selected an area, selected a subarea, entered a budget, maximizes quantity, custom costs with mean entered
       if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
          !is.na(input$budget) && input$obj == 1 &&
-        input$cost == 2 && !is.null(input$cust_cost))
+        input$cost == 2 && !is.na(input$mean_design_cost) && !is.na(input$mean_construction_cost))
       {r$submit_suggest <- input$submit}
       else
       #selected an owner, selected an area, selected a subarea, entered a budget, maximizes weighted attributes with weights summing to one, custom costs with mean entered
       if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
-         !is.na(input$budget) && input$obj == 2 && sum(input$w_urb, input$w_ag, input$w_nat, input$w_temp) == 1  && input$cost == 2 && !is.null(input$cust_cost))
+         !is.na(input$budget) && input$obj == 2 && sum(input$w_urb, input$w_ag, input$w_nat, input$w_temp) == 1  &&
+         input$cost == 2 && !is.na(input$mean_design_cost)  && !is.na(input$mean_construction_cost))
       {r$submit_suggest <- input$submit}
       else
       {showModal(modalDialog(title = "Warning!",

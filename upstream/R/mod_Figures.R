@@ -120,7 +120,10 @@ mod_Figures_server <- function(id, r){
         as.numeric(r$w_temp_suggest),
         as.integer(r$hq_suggest),
         r$species_sel_suggest,
-        r$barrier_idp_suggest
+        r$barrier_idp_suggest,
+        as.integer(r$cost_suggest),
+        as.numeric(r$mean_design_cost_suggest),
+        as.numeric(r$mean_construction_cost_suggest)
         )
       reset_map(leaflet::leafletProxy(ns('base_map')))
       remove_map_points(leaflet::leafletProxy(ns('base_map')))

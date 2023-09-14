@@ -18,7 +18,10 @@ solve_opt(
   w_temp,
   hq,
   species_sel,
-  barrier_idp
+  barrier_idp,
+  cost,
+  mean_design_cost,
+  mean_construction_cost
 )
 }
 \arguments{

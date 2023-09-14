@@ -28,7 +28,10 @@ solve_opt <- function(
   w_temp, #weight on temperature
   hq, #habitat quantity definition
   species_sel, #species to run the optimization problem on
-  barrier_idp #planned barrier IDs
+  barrier_idp, #planned barrier IDs
+  cost, #cost definition
+  mean_design_cost, #user-defined mean design cost
+  mean_construction_cost  #user-defined mean construction cost
 ){
 
   #habitat quantity definition
@@ -103,6 +106,13 @@ solve_opt <- function(
         ),
       hmarg = hmarg * species_of_interest
     )
+  }
+
+  if(cost == 2){
+    points <- points %>%
+      dplyr::mutate(
+        cost = cost - mean(cost) + mean_construction_cost + mean_design_cost
+      )
   }
 
   # objective function inputs
