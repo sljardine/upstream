@@ -110,7 +110,7 @@ map_leaflet_custom <- function(
       leafgl::addGlPolylines(
         data = leaflet_lines %>%
           dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
-        color = "#cf6e7d",
+        color = "#b0b0b0",
         opacity = 0.5,
         group = "blocked_lines"
       )

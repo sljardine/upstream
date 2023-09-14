@@ -13,8 +13,5 @@ get_pretty_variable_name(varName)
 string value of variable name to use in chart axis and legend labels
 }
 \description{
-
-}
-\details{
-
+get pretty variable name
 }
