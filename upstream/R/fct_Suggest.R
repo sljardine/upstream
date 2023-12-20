@@ -198,8 +198,7 @@ map_leaflet_opt <- function(
     ds_leaflet_lines <- dslines %>% dplyr::filter(COMID %in% ds_blocked_lines)
 
     leaf_proxy <- leaf_proxy %>%
-      leafgl::addGlPolylines(data = leaflet_lines %>%
-        dplyr::filter(FCODE != 55800),
+      leafgl::addGlPolylines(data = leaflet_lines,
         color = "#cf6e7d",
         opacity = 0.5,
         group = "blocked_lines"
@@ -225,7 +224,7 @@ map_leaflet_opt <- function(
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(
       data = leaflet_lines %>%
-        dplyr::filter(FCODE != 55800, !COMID %in% milp_stream_ids),
+        dplyr::filter(!COMID %in% milp_stream_ids),
       color = "#cf6e7d",
       opacity = 0.5,
       group = "blocked_lines"
