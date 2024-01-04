@@ -78,9 +78,11 @@ mod_Figures_server <- function(id, r){
         r$area_sel_explore,
         r$subarea_sel_explore,
         r$owner_sel_explore,
+        r$remove_bad_culvert_matches_explore,
         r$color_variable_explore,
         r$highlight_explore,
-        r$barrier_ids_explore
+        r$barrier_ids_explore,
+        r$bad_match
         )
     })
 
@@ -113,6 +115,7 @@ mod_Figures_server <- function(id, r){
         as.integer(r$area_sel_suggest),
         as.integer(r$subarea_sel_suggest),
         as.integer(r$owner_sel_suggest),
+        r$remove_bad_culvert_matches_suggest,
         as.integer(r$obj_suggest),
         as.numeric(r$w_urb_suggest),
         as.numeric(r$w_ag_suggest),
@@ -123,7 +126,9 @@ mod_Figures_server <- function(id, r){
         r$barrier_idp_suggest,
         as.integer(r$cost_suggest),
         as.numeric(r$mean_design_cost_suggest),
-        as.numeric(r$mean_construction_cost_suggest)
+        as.numeric(r$mean_construction_cost_suggest),
+        # TODO remove this!!!
+        as.logical(r$bad_match)
         )
       reset_map(leaflet::leafletProxy(ns('base_map')))
       remove_map_points(leaflet::leafletProxy(ns('base_map')))
@@ -136,7 +141,10 @@ mod_Figures_server <- function(id, r){
         marginal_line_ids, #comids for all lines marginally upstream of each point
         downstream_line_ids, #comids for all lines downstream of each point on main stem
         as.integer(r$area_sel_suggest),
-        as.integer(r$subarea_sel_suggest)
+        as.integer(r$subarea_sel_suggest),
+        r$remove_bad_culvert_matches_suggest,
+        # TODO remove this!!!
+        as.logical(r$bad_match)
       )
       # selected wria bounding box
       bbox <- get_wria_bounding_box(r$area_sel_suggest)
@@ -188,8 +196,8 @@ mod_Figures_server <- function(id, r){
           if(r$plot_type_explore == "Scatterplot"){
             culverts_cmb %>%
               filter_and_format_culverts_for_scatterplot(
-                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
-                r$y_axis_variable_explore, r$color_variable_explore
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$remove_bad_culvert_matches_explore, 
+                r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore, r$bad_match
                 ) %>%
               figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore,
                 r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
@@ -199,8 +207,8 @@ mod_Figures_server <- function(id, r){
           } else if(r$plot_type_explore == 'Histogram'){
             culverts_cmb %>%
               filter_and_format_culverts_for_histogram(
-                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
-                r$histogram_variable_explore
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$remove_bad_culvert_matches_explore, 
+                r$color_variable_explore, r$histogram_variable_explore, r$bad_match
                 ) %>%
               figure_histogram(
                 r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore,

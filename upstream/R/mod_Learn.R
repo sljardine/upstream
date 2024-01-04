@@ -19,7 +19,7 @@ mod_Learn_ui <- function(id){
         tags$li("Mark Scheuerell (Project advisor)"),
         tags$li("Braeden Van Deynze (Project advisor)"),
         tags$li("Connor Lewis Smith (Developer, IT)"),
-        tags$li("Jeffery Comnick (Developer)"),
+        tags$li("Jeffrey Comnick (Developer)"),
         tags$li("Logan Blair (Developer)"),
         tags$li("J Kahn (Developer)"),
         tags$li("Zephyr Pfotenhauer (Illustrator)")

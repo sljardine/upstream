@@ -258,20 +258,23 @@ update_map_culvert_markers <- function(
     area_sel,
     subarea_sel,
     owner_sel,
+    remove_bad_culvert_matches,
     color_variable,
     highlight,
-    barrier_ids){
+    barrier_ids,
+    # TODO remove this!!!
+    bad_match){
   # set null variables for initial map draw
   if(is.null(color_variable)){color_variable <- "none"} else {color_variable <- color_variable}
   if(is.null(area_sel)){area_sel <- wrias$WRIA_NR} else {area_sel <- area_sel}
   if(is.null(subarea_sel)){subarea_sel <- huc12_wrias %>% dplyr::select(huc_number) %>% dplyr::distinct()} else {subarea_sel <- subarea_sel}
   if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
   if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
-
+  
   # filter culverts to selected wrias
   points <- culverts_cmb %>%
     dplyr::filter(huc_number %in% subarea_sel)
-
+  
   # filter by owner class
   cSiteIds <- c()
   if("0" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::pull(site_id))}
@@ -287,6 +290,11 @@ update_map_culvert_markers <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
+  
+  # filter bad culvert matches
+  if(remove_bad_culvert_matches){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   # replace owner_type_code with name
   if(color_variable == "owner_type_code"){
@@ -322,11 +330,17 @@ update_map_culvert_markers <- function(
       domain = c("Cedar - Sammamish", "Chambers - Clover", "Deschutes", "Duwamish - Green", "Elwha - Dungeness", "Island", "Kennedy - Goldsborough", "Kitsap", "Lower Chehalis", "Lower Skagit - Samish", "Lyre - Hoko", "Nisqually", "Nooksack", "Puyallup - White", "Queets - Quinault", "Quilcene - Snow", "San Juan", "Skokomish - Dosewallips", "Snohomish", "Soleduc", "Stillaguamish", "Upper Chehalis", "Upper Skagit"),
       ordered = TRUE
     )
+  } else if(color_variable == "bad_match"){
+    pal <- leaflet::colorFactor(
+      palette = c("#f9e8e4", "#ce5537"),
+      domain = c(FALSE, TRUE),
+      ordered = TRUE
+    )
   } else {
     pal <- leaflet::colorNumeric(
-      palette = "Spectral",
+      palette = c("#f9e8e4", "#ce5537"), # c("#e0e0ff", "#1c1cff"),  # "Spectral",
       domain = points$C %>% range(),
-      reverse = TRUE
+      reverse = FALSE
     )
   }
 
@@ -389,7 +403,8 @@ update_map_culvert_markers <- function(
 #' @param histogram_variable A variable to generate histogram from.
 #' @return A data frame of point data formatted to make histogram in ggplot.
 #' @export
-filter_and_format_culverts_for_histogram <- function(points, area_sel, subarea_sel, owner_sel, color_variable, histogram_variable){
+filter_and_format_culverts_for_histogram <- function(points, area_sel, subarea_sel, owner_sel, remove_bad_culvert_matches, color_variable, histogram_variable, bad_match){
+  
   # filter by subarea
   points <- points %>%
     sf::st_drop_geometry() %>%
@@ -410,6 +425,12 @@ filter_and_format_culverts_for_histogram <- function(points, area_sel, subarea_s
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
+  
+  # filter bad culvert matches
+  if(remove_bad_culvert_matches){
+    points <- points %>%
+      dplyr::filter(!bad_match)
+  }
 
   # this swaps wria_name if X = wria_number
   if(histogram_variable == "wria_number" | color_variable == "wria_number"){
@@ -463,7 +484,8 @@ filter_and_format_culverts_for_histogram <- function(points, area_sel, subarea_s
 #' @param color_variable A variable defining color palate.
 #' @return data frame of culvert data formatted to make scatterplot in ggplot
 #' @export
-filter_and_format_culverts_for_scatterplot <- function(points, area_sel, subarea_sel, owner_sel, x_axis_variable, y_axis_variable, color_variable){
+filter_and_format_culverts_for_scatterplot <- function(points, area_sel, subarea_sel, owner_sel, remove_bad_culvert_matches, x_axis_variable, y_axis_variable, color_variable, bad_match){
+  
   # filter by subarea
   points <- points %>%
     sf::st_drop_geometry() %>%
@@ -484,6 +506,11 @@ filter_and_format_culverts_for_scatterplot <- function(points, area_sel, subarea
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
+  
+  # filter bad culvert matches
+  if(remove_bad_culvert_matches){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   # this swaps wria_name if X = wria_number
   if(x_axis_variable == "wria_number" | y_axis_variable == "wria_number" | color_variable == "wria_number"){
@@ -504,7 +531,7 @@ filter_and_format_culverts_for_scatterplot <- function(points, area_sel, subarea
   points$X <- points %>% dplyr::pull(x_axis_variable)
   points$Y <- points %>% dplyr::pull(y_axis_variable)
   points$C <- points %>% dplyr::pull(color_variable)
-
+  
   # select the variables
   points <- points %>% dplyr::select(site_id, X, Y, C)
 
@@ -616,7 +643,7 @@ figure_scatterplot <- function(
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c("none" = "grey")) +
       ggplot2::theme(legend.position = "none")
-  } else if (color_variable %in% c("owner_type_code", "wria_number")) {
+  } else if (color_variable %in% c("owner_type_code", "wria_number", "bad_match")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
       # colorRampPalette(brewer.pal(10, "Spectral"))(11)
@@ -666,6 +693,10 @@ figure_scatterplot <- function(
         ),
         drop = TRUE, limits = force
       )
+    } else if(color_variable == 'bad_match'){
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(`FALSE` = "#f9e8e4", `TRUE` = "#ce5537")
+      )
     }
     ggP <- ggP +
       scaleFill +
@@ -678,8 +709,13 @@ figure_scatterplot <- function(
   } else {
     # continuous variables
     ggP <- ggP +
-      ggplot2::scale_fill_gradientn(
-        colors = c("#5E4FA2","#3288BD","#66C2A5","#ABDDA4","#E6F598","#FFFFBF","#FEE08B","#FDAE61","#F46D43","#D53E4F","#9E0142"),
+      #ggplot2::scale_fill_gradientn(
+      #  colors = c("#5E4FA2","#3288BD","#66C2A5","#ABDDA4","#E6F598","#FFFFBF","#FEE08B","#FDAE61","#F46D43","#D53E4F","#9E0142"),
+      #  labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
+      #) +
+      ggplot2::scale_fill_gradient(
+        low = "#f9e8e4", #"#e0e0ff"
+        high = "#ce5537", #"#1c1cff",
         labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
       ) +
       ggplot2::theme(
@@ -754,7 +790,7 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c("none" = "#5b5b5b")) +
       ggplot2::theme(legend.position = "none")
-  } else if (color_variable %in% c("owner_type_code", "wria_number", "barrier_count")) {
+  } else if (color_variable %in% c("owner_type_code", "wria_number", "barrier_count", "bad_match")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
       # colorRampPalette(brewer.pal(10, "Spectral"))(11)
@@ -822,6 +858,10 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
           "13" = "#9E0142"
         ),
         drop = TRUE, limits = force
+      )
+    } else if(color_variable == "bad_match"){
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(`FALSE` = "#f9e8e4", `TRUE` = "#ce5537")
       )
     }
     ggP <- ggP +

@@ -8,6 +8,9 @@ app_server <- function(input, output, session) {
   
   r <- reactiveValues()
   
+  # TODO remove this!!!
+  r$bad_match <- sample(c(FALSE, TRUE), nrow(culverts_cmb), replace = TRUE)
+  
   mod_Figures_server("Figures_1", r = r)
   mod_Tables_server("Tables_1", r = r)
   mod_Explore_server("Explore_1", r = r)

@@ -90,45 +90,57 @@ mod_Suggest_ui <- function(id){
             "Habitat Quantity",
             "Weighted Attributes"
           ),
-          choiceValues = c(1 : 2)
+          choiceValues = c(1 : 2), 
+          inline = TRUE
           ),
         conditionalPanel(
           condition = "input.obj == 2",
           ns = ns,
           column(12,  "Select weights for each habitat quality attribute. Weights must sum to one.",
-            style = 'padding-bottom:10px;'),
-          column(3,  "Urban Habitat Quantity"),
-          column(3,
+            style = 'padding-bottom:10px; font-weight: bold;'),
+          column(4,  "Urban Habitat Quantity"),
+          column(4,  "Agricultural Habitat Quantity"),
+          column(4,  "Natural Habitat Quantity"),
+          column(4,
                  numericInput(inputId = ns("w_urb"),
                               min = 0,
                               max = 1,
                               step = 0.01,
                               label = NULL,
                               value = 0.33)),
-          column(3,  "Agricultural Habitat Quantity"),
-          column(3,
+          column(4,
                  numericInput(inputId = ns("w_ag"),
                               min = 0,
                               max = 1,
                               #step = 0.01,
                               label = NULL,
                               value = 0.33)),
-          column(3,  "Natural Habitat Quantity"),
-          column(3,
+          
+          column(4,
                  numericInput(inputId = ns("w_nat"),
                               min = 0,
                               max = 1,
                               #step = 0.01,
                               label = NULL,
                               value = 0.34)),
-          column(3,  "Ideal Habitat Temperature"),
-          column(3,
-                 numericInput(inputId = ns("w_temp"),
-                              min = -1,
-                              max = 1,
-                              #step = 0.01,
-                              label = NULL,
-                              value = 0))
+          # column(3,  "Ideal Habitat Temperature"),
+          # column(3,
+          #        numericInput(inputId = ns("w_temp"),
+          #                     min = -1,
+          #                     max = 1,
+          #                     #step = 0.01,
+          #                     label = NULL,
+          #                     value = 0))
+          tagAppendAttributes(
+            style = "margin-left: 15px;",
+            sliderInput(
+              inputId = ns("w_temp"), 
+              label = "Acceptable Temperature Range", 
+              min = 9, max = 22, step = .1, 
+              value = c(9, 22), ticks = FALSE,
+              width = '80%'
+            )
+          )
         )
       ),
       hr(),
@@ -160,6 +172,13 @@ mod_Suggest_ui <- function(id){
             value = NULL)
           )
         )
+      ),
+      hr(),
+      fluidRow(
+        radioButtons(inputId = ns("remove_bad_culvert_matches"),
+                     label = "Remove Bad Culvert Matches",
+                     choices = list("No" = 1, "Yes" = 2), selected = 2,
+                     width = "100%", inline = TRUE)
       ),
       hr(),
       fluidRow(
@@ -275,6 +294,14 @@ mod_Suggest_server <- function(id, r){
     observeEvent(input$cost, r$cost_suggest <- input$cost)
     observeEvent(input$mean_design_cost, r$mean_design_cost_suggest <- input$mean_design_cost)
     observeEvent(input$mean_construction_cost, r$mean_construction_cost_suggest <- input$mean_construction_cost)
+    ##bad culvert matches ----
+    observeEvent(input$remove_bad_culvert_matches, {
+      if(input$remove_bad_culvert_matches == 1){
+        r$remove_bad_culvert_matches_suggest <- FALSE
+      } else {
+        r$remove_bad_culvert_matches_suggest <- TRUE
+      }
+    })
 
     # render leaflet output (DO I NEED THIS?)
     output$base_map <- leaflet::renderLeaflet({
@@ -307,7 +334,7 @@ mod_Suggest_server <- function(id, r){
       else
       #selected an owner, selected an area, selected a subarea, entered a budget, maximizes weighted attributes with weights summing to one, uses default costs
       if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
-          !is.na(input$budget) && input$obj == 2 && input$cost != 2 && sum(input$w_urb, input$w_ag, input$w_nat, input$w_temp) == 1)
+          !is.na(input$budget) && input$obj == 2 && input$cost != 2 && sum(input$w_urb, input$w_ag, input$w_nat) == 1)
       {r$submit_suggest <- input$submit}
       else
       #selected an owner, selected an area, selected a subarea, entered a budget, maximizes quantity, custom costs with mean entered
@@ -318,7 +345,7 @@ mod_Suggest_server <- function(id, r){
       else
       #selected an owner, selected an area, selected a subarea, entered a budget, maximizes weighted attributes with weights summing to one, custom costs with mean entered
       if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
-         !is.na(input$budget) && input$obj == 2 && sum(input$w_urb, input$w_ag, input$w_nat, input$w_temp) == 1  &&
+         !is.na(input$budget) && input$obj == 2 && sum(input$w_urb, input$w_ag, input$w_nat) == 1  &&
          input$cost == 2 && !is.na(input$mean_design_cost)  && !is.na(input$mean_construction_cost))
       {r$submit_suggest <- input$submit}
       else

@@ -49,6 +49,13 @@ mod_Explore_ui <- function(id){
       ),
       hr(),
       fluidRow(
+        radioButtons(inputId = ns("remove_bad_culvert_matches"),
+                     label = "Remove Bad Culvert Matches",
+                     choices = list("No" = 1, "Yes" = 2), selected = 2,
+                     width = "100%", inline = TRUE)
+      ),
+      hr(),
+      fluidRow(
         selectInput(
           ns("plot_type"),
           label = "Select Plot Type",
@@ -251,13 +258,16 @@ mod_Explore_server <- function(id, r){
     # color choices
     cColorVariables <- setNames(
       c(
-        "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
+        # removed "potential_species" (was after "up_count")
+        # choosing potential_species crashes ggplot. It requires a discreet fill scale but has 100 unique values.
+        "cost", "dn_count", "up_count", "hmarg_length",
         "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
         "wria_number", "owner_type_code", "percent_fish_passable_code",
         "corrected_dn_WSDOT", "corrected_dn_nWSDOT"
       ),
       nm = c(
-        "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
+        # "Potential Species" (was after "Count of Upstream Barriers")
+        "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Marginal Habitat Length",
         "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
         "WRIA", "Owner Type", "Passability",
         "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
@@ -357,24 +367,27 @@ mod_Explore_server <- function(id, r){
     # update color variables for plot type
     observeEvent(c(input$plot_type, input$area_sel, input$owner_sel), {
       if(input$plot_type == "Scatterplot"){
+        # removed "potential_species" (was after "up_count")
+        # choosing potential_species crashes ggplot. It requires a discreet fill scale but has 100 unique values.
         cVars <- setNames(
           c("none",
-            "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
+            "cost", "dn_count", "up_count", "hmarg_length",
             "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
             "wria_number", "owner_type_code", "percent_fish_passable_code",
-            "corrected_dn_WSDOT", "corrected_dn_nWSDOT"
+            "corrected_dn_WSDOT", "corrected_dn_nWSDOT", "bad_match"
           ),
+          # "Potential Species" (was after "Count of Upstream Barriers")
           nm = c("None",
-            "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
+            "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Marginal Habitat Length",
             "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
             "WRIA", "Owner Type", "Passability",
-            "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
+            "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections", "Bad Match"
           )
         )
       } else {
         cVars <- setNames(
-          c("none", "dn_count", "up_count", "wria_number", "owner_type_code"),
-          nm = c("None", "Count of Downstream Barriers", "Count of Upstream Barriers", "WRIA", "Ownership Type")
+          c("none", "dn_count", "up_count", "wria_number", "owner_type_code", "bad_match"),
+          nm = c("None", "Count of Downstream Barriers", "Count of Upstream Barriers", "WRIA", "Ownership Type", "Bad Match")
         )
       }
 
@@ -431,6 +444,15 @@ mod_Explore_server <- function(id, r){
         r$owner_sel_explore <- input$owner_sel
       }
     })
+    
+    observeEvent(input$remove_bad_culvert_matches, {
+      if(input$remove_bad_culvert_matches == 1){
+        r$remove_bad_culvert_matches_explore <- FALSE
+      } else {
+        r$remove_bad_culvert_matches_explore <- TRUE
+      }
+    })
+    
     observeEvent(input$plot_type, r$plot_type_explore <- input$plot_type)
     observeEvent(input$x_axis_variable, r$x_axis_variable_explore <- input$x_axis_variable)
     observeEvent(input$y_axis_variable, r$y_axis_variable_explore <- input$y_axis_variable)

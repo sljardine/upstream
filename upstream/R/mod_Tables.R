@@ -44,11 +44,11 @@ mod_Tables_server <- function(id, r){
     store_table <- eventReactive(c(r$submit_suggest, r$submit_custom),
       {
         if(r$tab_sel == "Suggest"){
-          get_summary_table(culverts_cmb, r$points_sel_suggest, r$barrier_idp_suggest)
+          get_summary_table(culverts_cmb, r$points_sel_suggest, r$barrier_idp_suggest, r$remove_bad_culvert_matches_suggest, r$bad_match)
         }
         else if(r$tab_sel == "Custom") {
           points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
-          get_summary_table(culverts_cmb, points_sel_custom, 0)
+          get_summary_table(culverts_cmb, points_sel_custom, 0, r$remove_bad_culvert_matches_custom, r$bad_match)
         }
       }
     )
@@ -56,11 +56,11 @@ mod_Tables_server <- function(id, r){
     store_list <- eventReactive(c(r$submit_suggest, r$submit_custom),
       {
         if(r$tab_sel == "Suggest"){
-          get_plan_list(culverts_cmb, r$points_sel_suggest, r$barrier_idp_suggest)
+          get_plan_list(culverts_cmb, r$points_sel_suggest, r$barrier_idp_suggest, r$remove_bad_culvert_matches_suggest, r$bad_match)
        }
         else if(r$tab_sel == "Custom") {
           points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
-          get_plan_list(culverts_cmb, points_sel_custom, 0)
+          get_plan_list(culverts_cmb, points_sel_custom, 0, r$remove_bad_culvert_matches_custom, r$bad_match)
       }
     }
   )

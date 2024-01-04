@@ -21,6 +21,7 @@ solve_opt <- function(
   wria_sel, #wria(s) to run the optimization problem on
   huc_sel, #huc(s) to run the optimization problem on
   owner_sel, #owner(s) to run the optimization problem on
+  remove_bad_culvert_matches, #flag to remove bad culvert matches
   obj, #indicator for whether objective function is to max quant (1) or max weighted sum of attributes (2)
   w_urb, #weight on urban habitat quantity
   w_ag, #weight on agricultural habitat quantity
@@ -31,8 +32,16 @@ solve_opt <- function(
   barrier_idp, #planned barrier IDs
   cost, #cost definition
   mean_design_cost, #user-defined mean design cost
-  mean_construction_cost  #user-defined mean construction cost
+  mean_construction_cost,  #user-defined mean construction cost
+  # TODO remove this!!!
+  bad_match
 ){
+  
+  # filter bad culvert matches
+  if(remove_bad_culvert_matches){
+    points <- points %>% dplyr::filter(!bad_match)
+    D <- D[!bad_match, !bad_match]
+  }
 
   #habitat quantity definition
   ##length
@@ -111,7 +120,7 @@ solve_opt <- function(
   if(cost == 2){
     points <- points %>%
       dplyr::mutate(
-        cost = cost - mean(cost) + mean_construction_cost + mean_design_cost
+        cost = cost * mean_construction_cost / mean(cost) + mean_design_cost
       )
   }
 
@@ -125,7 +134,10 @@ solve_opt <- function(
   if(obj == 1){
   v <- h
   } else {
-  v <- w_urb * urb_per * h + w_ag *  ag_per * h + w_nat * nat_per * h + w_temp * temp
+  print(w_temp)
+  v <- w_urb * urb_per * h + w_ag *  ag_per * h + w_nat * nat_per * h# + w_temp * temp
+  v[v < w_temp[1]] <- 0
+  v[v > w_temp[2]] <- 0
   v[is.na(v)] <- 0 #HOT FIX
   }
 
@@ -175,10 +187,19 @@ map_leaflet_opt <- function(
     marginal_line_ids, #comids for all lines marginally upstream of each point
     downstream_line_ids, #comids for all lines downstream of each point on main stem
     wria_sel, #wria(s) to run the optimization problem on
-    huc_sel #huc(s) to run the optimization problem on
-
+    huc_sel, #huc(s) to run the optimization problem on
+    remove_bad_culvert_matches_suggest,
+    # TODO remove this!!!
+    bad_match
   ){
-
+  
+  # remove bad culvert matches
+  if(remove_bad_culvert_matches_suggest){
+    points <- points %>% dplyr::filter(!bad_match)
+    marginal_line_ids <- marginal_line_ids[!bad_match]
+    downstream_line_ids <- downstream_line_ids[!bad_match]
+  }
+  
   #Lines to display depend on whether the solution is a null set
   if(sum(soln) == 0){
 

@@ -62,6 +62,7 @@ mod_Welcome_ui <- function(id){
 #' @noRd
 mod_Welcome_server <- function(id, r){
   moduleServer(id, function(input, output, session){
+    
     ns <- session$ns
 
     observeEvent(input$explore_tab, {

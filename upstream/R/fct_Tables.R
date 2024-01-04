@@ -7,8 +7,17 @@
 get_summary_table <- function(
     points,
     points_sel,
-    barrier_idp
+    barrier_idp,
+    remove_bad_culvert_matches,
+    # TODO remove this!!!
+    bad_match
     ){
+  
+  # remove bad culvert matches
+  if(remove_bad_culvert_matches){
+    points <- points %>% dplyr::filter(!bad_match)
+    points_sel <- points_sel[!bad_match]
+  }
 
   # planned barrier selection: set benefit to zero if barrier is already planned by user
   if(! 0 %in% barrier_idp){
@@ -46,8 +55,17 @@ get_summary_table <- function(
 get_plan_list <- function(
   points,
   points_sel,
-  barrier_idp
+  barrier_idp,
+  remove_bad_culvert_matches,
+  # TODO remove this!!!
+  bad_match
 ){
+  
+  # remove bad culvert matches
+  if(remove_bad_culvert_matches){
+    points <- points %>% dplyr::filter(!bad_match)
+    points_sel <- points_sel[!bad_match]
+  }
 
   # planned barrier selection if barrier is already planned by user
   points <- points %>%
