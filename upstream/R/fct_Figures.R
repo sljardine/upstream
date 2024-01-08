@@ -938,15 +938,15 @@ get_pretty_variable_name <- function(varName){
   } else if(varName ==  "hmarg_length"){
     prettyName <-  "Marginal Habitat Length (km)"
   } else if(varName ==  "hmarg_area"){
-    prettyName <-  "Marginal Habitat Length (km^2)"
+    prettyName <-  "Marginal Habitat Area (km^2)"
   } else if(varName ==  "hmarg_volume"){
-    prettyName <-  "Marginal Habitat Length (km^3)"
+    prettyName <-  "Marginal Habitat Volume (km^3)"
   } else if(varName ==  "hfull_length"){
     prettyName <-  "Full Habitat Length (km)"
   } else if(varName ==  "hfull_area"){
-    prettyName <-  "Full Habitat Length (km^2)"
+    prettyName <-  "Full Habitat Area (km^2)"
   } else if(varName ==  "hfull_volume"){
-    prettyName <-  "Full Habitat Length (km^3)"
+    prettyName <-  "Full Habitat Volume (km^3)"
   } else if(varName == "wria_number"){
     prettyName <- "WRIA"
   } else if(varName == "owner_type_code"){
