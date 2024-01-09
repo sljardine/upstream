@@ -13,7 +13,9 @@ map_leaflet_opt(
   marginal_line_ids,
   downstream_line_ids,
   wria_sel,
-  huc_sel
+  huc_sel,
+  remove_bad_culvert_matches_suggest,
+  bad_match
 )
 }
 \arguments{

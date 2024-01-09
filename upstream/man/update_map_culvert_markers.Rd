@@ -9,9 +9,11 @@ update_map_culvert_markers(
   area_sel,
   subarea_sel,
   owner_sel,
+  remove_bad_culvert_matches,
   color_variable,
   highlight,
-  barrier_ids
+  barrier_ids,
+  bad_match
 )
 }
 \arguments{

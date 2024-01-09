@@ -4,7 +4,13 @@
 \alias{get_plan_list}
 \title{Get the list of culverts selected for the plan}
 \usage{
-get_plan_list(points, points_sel, barrier_idp)
+get_plan_list(
+  points,
+  points_sel,
+  barrier_idp,
+  remove_bad_culvert_matches,
+  bad_match
+)
 }
 \arguments{
 \item{points}{A simple features point data frame containing culvert locations and attributes.}

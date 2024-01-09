@@ -11,6 +11,7 @@ solve_opt(
   wria_sel,
   huc_sel,
   owner_sel,
+  remove_bad_culvert_matches,
   obj,
   w_urb,
   w_ag,
@@ -21,7 +22,8 @@ solve_opt(
   barrier_idp,
   cost,
   mean_design_cost,
-  mean_construction_cost
+  mean_construction_cost,
+  bad_match
 )
 }
 \arguments{
