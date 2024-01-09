@@ -49,15 +49,6 @@ mod_Suggest_ui <- function(id){
       ),
       fluidRow(
         selectizeInput(
-          inputId = ns("barrier_idp"),
-          label = "Already Planned / Will Complete",
-          selected = 0,
-          multiple = TRUE,
-          choices = NULL,
-          width = "50%")
-      ),
-      fluidRow(
-        selectizeInput(
           inputId = ns("species_sel"),
           label = "Select Species of Interest",
           choices = setNames(
@@ -69,6 +60,17 @@ mod_Suggest_ui <- function(id){
           multiple = TRUE
         )
       ),
+      hr(),
+      fluidRow(
+        selectizeInput(
+          inputId = ns("barrier_idp"),
+          label = "Already Planned / Will Complete",
+          selected = 0,
+          multiple = TRUE,
+          choices = NULL,
+          width = "50%")
+      ),
+      hr(),
       fluidRow(
         radioButtons(inputId = ns("hq"),
           label = "Select Habitat Quantity Definition",

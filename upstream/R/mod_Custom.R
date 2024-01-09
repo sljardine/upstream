@@ -51,13 +51,6 @@ mod_Custom_ui <- function(id){
       ),
       hr(),
       fluidRow(
-        radioButtons(inputId = ns("remove_bad_culvert_matches"),
-                     label = "Remove Bad Culvert Matches",
-                     choices = list("No" = 1, "Yes" = 2), selected = 2,
-                     width = "100%", inline = TRUE)
-      ),
-      hr(),
-      fluidRow(
         selectizeInput(
           inputId = ns("barrier_idp"),
           label = "Already Planned / Will Complete",
@@ -66,6 +59,15 @@ mod_Custom_ui <- function(id){
           choices = NULL,
           width = "50%")
       ),
+      hr(),
+      fluidRow(
+        radioButtons(
+          inputId = ns("remove_bad_culvert_matches"),
+          label = "Remove Bad Culvert Matches",
+          choices = list("No" = 1, "Yes" = 2), selected = 2,
+          width = "100%", inline = TRUE)
+      ),
+      hr(),
         fluidRow(
           selectizeInput(
           inputId = ns("barrier_ids"),
