@@ -4,7 +4,7 @@
 \alias{get_summary_table}
 \title{Summarize variables for select culverts}
 \usage{
-get_summary_table(points, points_sel, barrier_idp)
+get_summary_table(points, points_sel, barrier_idp, hq = 1)
 }
 \arguments{
 \item{points}{A simple features point data frame containing culvert locations and attributes.}
@@ -12,6 +12,8 @@ get_summary_table(points, points_sel, barrier_idp)
 \item{points_sel}{A simple features point data frame containing selected culvert locations and attributes.}
 
 \item{barrier_idp}{A vector of planned culvert IDs}
+
+\item{hq}{Habitat quantity definition}
 }
 \value{
 A summary table
