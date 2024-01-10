@@ -11,6 +11,7 @@ solve_opt(
   wria_sel,
   huc_sel,
   owner_sel,
+  remove_bad_match,
   obj,
   w_urb,
   w_ag,
