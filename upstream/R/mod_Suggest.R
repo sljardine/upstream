@@ -11,6 +11,7 @@ mod_Suggest_ui <- function(id){
   ns <- NS(id)
   tagList(
     fluidPage(
+      style = "height: calc(100vh - 145px); overflow-y: auto;",
       fluidRow(
         selectizeInput(
           inputId = ns("area_sel"),
