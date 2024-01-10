@@ -113,6 +113,7 @@ mod_Figures_server <- function(id, r){
         as.integer(r$area_sel_suggest),
         as.integer(r$subarea_sel_suggest),
         as.integer(r$owner_sel_suggest),
+        r$remove_bad_match_suggest,
         as.integer(r$obj_suggest),
         as.numeric(r$w_urb_suggest),
         as.numeric(r$w_ag_suggest),
@@ -136,7 +137,8 @@ mod_Figures_server <- function(id, r){
         marginal_line_ids, #comids for all lines marginally upstream of each point
         downstream_line_ids, #comids for all lines downstream of each point on main stem
         as.integer(r$area_sel_suggest),
-        as.integer(r$subarea_sel_suggest)
+        as.integer(r$subarea_sel_suggest),
+        r$remove_bad_match_suggest
       )
       # selected wria bounding box
       bbox <- get_wria_bounding_box(r$area_sel_suggest)

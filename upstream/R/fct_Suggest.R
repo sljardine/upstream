@@ -21,6 +21,7 @@ solve_opt <- function(
   wria_sel, #wria(s) to run the optimization problem on
   huc_sel, #huc(s) to run the optimization problem on
   owner_sel, #owner(s) to run the optimization problem on
+  remove_bad_match, #flag to remove bad culvert matches
   obj, #indicator for whether objective function is to max quant (1) or max weighted sum of attributes (2)
   w_urb, #weight on urban habitat quantity
   w_ag, #weight on agricultural habitat quantity
@@ -33,6 +34,13 @@ solve_opt <- function(
   mean_design_cost, #user-defined mean design cost
   mean_construction_cost  #user-defined mean construction cost
 ){
+  
+  # filter bad culvert matches
+  if(remove_bad_match){
+    bad_match <- points$bad_match
+    points <- points %>% dplyr::filter(!bad_match)
+    D <- D[!bad_match, !bad_match]
+  }
 
   #habitat quantity definition
   ##length
@@ -175,9 +183,18 @@ map_leaflet_opt <- function(
     marginal_line_ids, #comids for all lines marginally upstream of each point
     downstream_line_ids, #comids for all lines downstream of each point on main stem
     wria_sel, #wria(s) to run the optimization problem on
-    huc_sel #huc(s) to run the optimization problem on
+    huc_sel, #huc(s) to run the optimization problem on
+    remove_bad_match #boolean option to remove bad culvert matches
 
   ){
+  
+  # remove bad culvert matches
+  if(remove_bad_match){
+    bad_match <- points$bad_match
+    points <- points %>% dplyr::filter(!bad_match)
+    marginal_line_ids <- marginal_line_ids[!bad_match]
+    downstream_line_ids <- downstream_line_ids[!bad_match]
+  }
 
   #Lines to display depend on whether the solution is a null set
   if(sum(soln) == 0){

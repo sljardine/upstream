@@ -165,6 +165,13 @@ mod_Suggest_ui <- function(id){
       ),
       hr(),
       fluidRow(
+        radioButtons(inputId = ns("remove_bad_match"),
+                     label = "Remove Bad Culvert Matches",
+                     choices = list("No" = 1, "Yes" = 2), selected = 2,
+                     width = "100%", inline = TRUE)
+      ),
+      hr(),
+      fluidRow(
         numericInput(inputId = ns("budget"),
                      label = "Enter Budget ($)",
                      min = 0,
@@ -277,6 +284,14 @@ mod_Suggest_server <- function(id, r){
     observeEvent(input$cost, r$cost_suggest <- input$cost)
     observeEvent(input$mean_design_cost, r$mean_design_cost_suggest <- input$mean_design_cost)
     observeEvent(input$mean_construction_cost, r$mean_construction_cost_suggest <- input$mean_construction_cost)
+    ##bad culvert matches ----
+    observeEvent(input$remove_bad_match, {
+      if(input$remove_bad_match == 1){
+        r$remove_bad_match_suggest <- FALSE
+      } else {
+        r$remove_bad_match_suggest <- TRUE
+      }
+    })
 
     # render leaflet output (DO I NEED THIS?)
     output$base_map <- leaflet::renderLeaflet({
