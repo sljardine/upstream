@@ -119,7 +119,7 @@ solve_opt <- function(
   if(cost == 2){
     points <- points %>%
       dplyr::mutate(
-        cost = cost - mean(cost) + mean_construction_cost + mean_design_cost
+        cost = cost * mean_construction_cost / mean(cost) + mean_design_cost
       )
   }
 

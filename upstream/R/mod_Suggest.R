@@ -156,7 +156,7 @@ mod_Suggest_ui <- function(id){
           ns = ns,
           column(6,
           numericInput(inputId = ns("mean_design_cost"),
-            label = "Mean Design Cost ($)",
+            label = "Mean Design and Permitting Cost ($)",
             min = 0,
             value = NULL)
           ),
