@@ -59,9 +59,18 @@ golem_add_external_resources <- function() {
     bundle_resources(
       path = app_sys("app/www"),
       app_title = "Upstream"
+    ),
+    # Meta Description
+    tags$meta(
+      name = "description",
+      content = "A prioritization tool to aid decision making around fish barrier culvert improvement projects within Western Washington"
+    ),
+    # Canonical Link
+    tags$link(
+      rel = "canonical",
+      href = "https://upstream-wca.app"
     )
-    # Add here other external resources
-    # for example, you can add shinyalert::useShinyalert()
+    # Add other external resources if needed
   )
 }
 
