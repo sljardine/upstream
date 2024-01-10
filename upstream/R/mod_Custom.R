@@ -49,6 +49,7 @@ mod_Custom_ui <- function(id){
           multiple = TRUE
         )
       ),
+      hr(),
       fluidRow(
         selectizeInput(
           inputId = ns("barrier_idp"),
@@ -58,6 +59,7 @@ mod_Custom_ui <- function(id){
           choices = NULL,
           width = "50%")
       ),
+      hr(),
         fluidRow(
           selectizeInput(
           inputId = ns("barrier_ids"),

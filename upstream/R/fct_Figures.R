@@ -141,7 +141,11 @@ remove_map_points <- function(leaf_proxy){
 #' @param barrier_idp A vector of planned culvert IDs
 #' @return none
 #' @export
-update_map_WRIA_labels <- function(leaf_proxy, zoom_level, area_sel, owner_sel){
+update_map_WRIA_labels <- function(
+    leaf_proxy,
+    zoom_level,
+    area_sel,
+    owner_sel){
   # get WRIA centroids
   sfWC <- wrias %>%
     sf::st_drop_geometry() %>%
@@ -389,7 +393,14 @@ update_map_culvert_markers <- function(
 #' @param histogram_variable A variable to generate histogram from.
 #' @return A data frame of point data formatted to make histogram in ggplot.
 #' @export
-filter_and_format_culverts_for_histogram <- function(points, area_sel, subarea_sel, owner_sel, color_variable, histogram_variable){
+filter_and_format_culverts_for_histogram <- function(
+    points,
+    area_sel,
+    subarea_sel,
+    owner_sel,
+    color_variable,
+    histogram_variable){
+
   # filter by subarea
   points <- points %>%
     sf::st_drop_geometry() %>%
@@ -463,7 +474,15 @@ filter_and_format_culverts_for_histogram <- function(points, area_sel, subarea_s
 #' @param color_variable A variable defining color palate.
 #' @return data frame of culvert data formatted to make scatterplot in ggplot
 #' @export
-filter_and_format_culverts_for_scatterplot <- function(points, area_sel, subarea_sel, owner_sel, x_axis_variable, y_axis_variable, color_variable){
+filter_and_format_culverts_for_scatterplot <- function(
+    points,
+    area_sel,
+    subarea_sel,
+    owner_sel,
+    x_axis_variable,
+    y_axis_variable,
+    color_variable){
+
   # filter by subarea
   points <- points %>%
     sf::st_drop_geometry() %>%
@@ -938,15 +957,15 @@ get_pretty_variable_name <- function(varName){
   } else if(varName ==  "hmarg_length"){
     prettyName <-  "Marginal Habitat Length (km)"
   } else if(varName ==  "hmarg_area"){
-    prettyName <-  "Marginal Habitat Length (km^2)"
+    prettyName <-  "Marginal Habitat Area (km^2)"
   } else if(varName ==  "hmarg_volume"){
-    prettyName <-  "Marginal Habitat Length (km^3)"
+    prettyName <-  "Marginal Habitat Volume (km^3)"
   } else if(varName ==  "hfull_length"){
     prettyName <-  "Full Habitat Length (km)"
   } else if(varName ==  "hfull_area"){
-    prettyName <-  "Full Habitat Length (km^2)"
+    prettyName <-  "Full Habitat Area (km^2)"
   } else if(varName ==  "hfull_volume"){
-    prettyName <-  "Full Habitat Length (km^3)"
+    prettyName <-  "Full Habitat Volume (km^3)"
   } else if(varName == "wria_number"){
     prettyName <- "WRIA"
   } else if(varName == "owner_type_code"){
