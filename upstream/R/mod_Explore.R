@@ -49,6 +49,13 @@ mod_Explore_ui <- function(id){
       ),
       hr(),
       fluidRow(
+        radioButtons(inputId = ns("remove_bad_match"),
+                     label = "Remove Bad Culvert Matches",
+                     choices = list("No" = 1, "Yes" = 2), selected = 2,
+                     width = "100%", inline = TRUE)
+      ),
+      hr(),
+      fluidRow(
         selectInput(
           ns("plot_type"),
           label = "Select Plot Type",
@@ -71,7 +78,7 @@ mod_Explore_ui <- function(id){
                   "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
                   "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
                   "wria_number", "owner_type_code", "percent_fish_passable_code",
-                  "corrected_dn_WSDOT", "corrected_dn_nWSDOT"
+                  "corrected_dn_wsdot", "corrected_dn_other"
                 ),
                 nm = c(
                   "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
@@ -94,7 +101,7 @@ mod_Explore_ui <- function(id){
                   "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
                   "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
                   "wria_number", "owner_type_code", "percent_fish_passable_code",
-                  "corrected_dn_WSDOT", "corrected_dn_nWSDOT"
+                  "corrected_dn_wsdot", "corrected_dn_other"
                 ),
                 nm = c(
                   "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
@@ -142,7 +149,7 @@ mod_Explore_ui <- function(id){
               "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
               "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
               "wria_number", "owner_type_code", "percent_fish_passable_code",
-              "corrected_dn_WSDOT", "corrected_dn_nWSDOT"
+              "corrected_dn_wsdot", "corrected_dn_other"
             ),
             nm = c(
               "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
@@ -222,7 +229,7 @@ mod_Explore_server <- function(id, r){
         "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
         "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
         "wria_number", "owner_type_code", "percent_fish_passable_code",
-        "corrected_dn_WSDOT", "corrected_dn_nWSDOT"
+        "corrected_dn_wsdot", "corrected_dn_other"
         ),
       nm = c(
         "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
@@ -238,7 +245,7 @@ mod_Explore_server <- function(id, r){
         "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
         "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
         "wria_number", "owner_type_code", "percent_fish_passable_code",
-        "corrected_dn_WSDOT", "corrected_dn_nWSDOT"
+        "corrected_dn_wsdot", "corrected_dn_other"
       ),
       nm = c(
         "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
@@ -251,13 +258,13 @@ mod_Explore_server <- function(id, r){
     # color choices
     cColorVariables <- setNames(
       c(
-        "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
+        "cost", "dn_count", "up_count", "hmarg_length",
         "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
         "wria_number", "owner_type_code", "percent_fish_passable_code",
-        "corrected_dn_WSDOT", "corrected_dn_nWSDOT"
+        "corrected_dn_wsdot", "corrected_dn_other"
       ),
       nm = c(
-        "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
+        "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Marginal Habitat Length",
         "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
         "WRIA", "Owner Type", "Passability",
         "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
@@ -359,16 +366,16 @@ mod_Explore_server <- function(id, r){
       if(input$plot_type == "Scatterplot"){
         cVars <- setNames(
           c("none",
-            "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
+            "cost", "dn_count", "up_count", "hmarg_length",
             "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
             "wria_number", "owner_type_code", "percent_fish_passable_code",
-            "corrected_dn_WSDOT", "corrected_dn_nWSDOT"
+            "corrected_dn_wsdot", "corrected_dn_other", "bad_match"
           ),
           nm = c("None",
-            "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
+            "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Marginal Habitat Length",
             "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
             "WRIA", "Owner Type", "Passability",
-            "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
+            "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections", "Bad Match"
           )
         )
       } else {
@@ -431,6 +438,15 @@ mod_Explore_server <- function(id, r){
         r$owner_sel_explore <- input$owner_sel
       }
     })
+    
+    observeEvent(input$remove_bad_match, {
+      if(input$remove_bad_match == 1){
+        r$remove_bad_match_explore <- FALSE
+      } else {
+        r$remove_bad_match_explore <- TRUE
+      }
+    })
+    
     observeEvent(input$plot_type, r$plot_type_explore <- input$plot_type)
     observeEvent(input$x_axis_variable, r$x_axis_variable_explore <- input$x_axis_variable)
     observeEvent(input$y_axis_variable, r$y_axis_variable_explore <- input$y_axis_variable)

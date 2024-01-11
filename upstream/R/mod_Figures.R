@@ -78,6 +78,7 @@ mod_Figures_server <- function(id, r){
         r$area_sel_explore,
         r$subarea_sel_explore,
         r$owner_sel_explore,
+        r$remove_bad_match_explore,
         r$color_variable_explore,
         r$highlight_explore,
         r$barrier_ids_explore
@@ -188,9 +189,10 @@ mod_Figures_server <- function(id, r){
       if(user_plot()){
         if(r$tab_sel == "Explore"){
           if(r$plot_type_explore == "Scatterplot"){
+            print(names(culverts_cmb))
             culverts_cmb %>%
               filter_and_format_culverts_for_scatterplot(
-                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
                 r$y_axis_variable_explore, r$color_variable_explore
                 ) %>%
               figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore,
@@ -201,7 +203,7 @@ mod_Figures_server <- function(id, r){
           } else if(r$plot_type_explore == 'Histogram'){
             culverts_cmb %>%
               filter_and_format_culverts_for_histogram(
-                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$remove_bad_match_explore, r$color_variable_explore,
                 r$histogram_variable_explore
                 ) %>%
               figure_histogram(
@@ -263,7 +265,7 @@ mod_Figures_server <- function(id, r){
           r$plot_click_text_output_explore <- ''
         } else {
           r$plot_click_text_output_explore <- get_plot_click_site_id(
-            r$owner_sel_explore, r$area_sel_explore, r$x_axis_variable_explore,
+            r$owner_sel_explore, r$area_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
             r$y_axis_variable_explore, input$plot_click$x, input$plot_click$y
             )
         }
