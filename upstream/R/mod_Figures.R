@@ -189,7 +189,6 @@ mod_Figures_server <- function(id, r){
       if(user_plot()){
         if(r$tab_sel == "Explore"){
           if(r$plot_type_explore == "Scatterplot"){
-            print(names(culverts_cmb))
             culverts_cmb %>%
               filter_and_format_culverts_for_scatterplot(
                 r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
