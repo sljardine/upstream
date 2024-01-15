@@ -46,7 +46,7 @@ mod_Tables_server <- function(id, r){
     store_table <- eventReactive(c(r$submit_suggest, r$submit_custom),
       {
         if(r$tab_sel == "Suggest"){
-          get_summary_table(culverts_cmb, r$points_sel_suggest, r$barrier_idp_suggest, r$hq_suggest)
+          get_summary_table(culverts_cmb, r$points_sel_suggest, r$barrier_idp_suggest, r$hq_suggest, r$remove_bad_match_suggest)
         }
         else if(r$tab_sel == "Custom") {
           points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
@@ -62,6 +62,7 @@ mod_Tables_server <- function(id, r){
             culverts_cmb, 
             r$points_sel_suggest, 
             r$barrier_idp_suggest,
+            r$remove_bad_match_suggest,
             r$cost_suggest,
             r$mean_design_cost_suggest,
             r$mean_construction_cost_suggest)

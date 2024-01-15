@@ -9,8 +9,14 @@ get_summary_table <- function(
     points,
     points_sel,
     barrier_idp,
-    hq = 1
+    hq = 1,
+    remove_bad_match
     ){
+  
+  # remove bad culvert matches
+  if(remove_bad_match){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   #habitat quantity definition
   ##length
@@ -91,10 +97,16 @@ get_plan_list <- function(
   points,
   points_sel,
   barrier_idp,
+  remove_bad_match,
   cost = 1, #cost definition
   mean_design_cost = NULL, #user-defined mean design cost
   mean_construction_cost = NULL  #user-defined mean construction cost
 ){
+  
+  # remove bad culvert matches
+  if(remove_bad_match){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   # cost adjustment
   if(cost == 2){
