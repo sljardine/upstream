@@ -90,9 +90,21 @@ get_summary_table <- function(
 get_plan_list <- function(
   points,
   points_sel,
-  barrier_idp
+  barrier_idp,
+  cost = 1, #cost definition
+  mean_design_cost = NULL, #user-defined mean design cost
+  mean_construction_cost = NULL  #user-defined mean construction cost
 ){
 
+  # cost adjustment
+  if(cost == 2){
+    points <- points %>%
+      dplyr::mutate(
+        cost = cost * mean_construction_cost / mean(cost) + mean_design_cost,
+        cost_text = paste0("$", format(cost, nsmall = 0, big.mark = ","))
+      )
+  }
+  
   # planned barrier selection if barrier is already planned by user
   points <- points %>%
     dplyr::mutate(proj_plan = ifelse(site_id %in% barrier_idp, paste("Yes"), paste("No")))
