@@ -9,8 +9,14 @@ get_summary_table <- function(
     points,
     points_sel,
     barrier_idp,
-    hq = 1
+    hq = 1,
+    remove_bad_match
     ){
+  
+  # remove bad culvert matches
+  if(remove_bad_match){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   #habitat quantity definition
   ##length
@@ -90,8 +96,14 @@ get_summary_table <- function(
 get_plan_list <- function(
   points,
   points_sel,
-  barrier_idp
+  barrier_idp,
+  remove_bad_match
 ){
+  
+  # remove bad culvert matches
+  if(remove_bad_match){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   # planned barrier selection if barrier is already planned by user
   points <- points %>%

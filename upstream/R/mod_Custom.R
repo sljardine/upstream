@@ -51,6 +51,13 @@ mod_Custom_ui <- function(id){
       ),
       hr(),
       fluidRow(
+        radioButtons(inputId = ns("remove_bad_match"),
+                     label = "Remove Bad Culvert Matches",
+                     choices = list("No" = 1, "Yes" = 2), selected = 2,
+                     width = "100%", inline = TRUE)
+      ),
+      hr(),
+      fluidRow(
         selectizeInput(
           inputId = ns("barrier_idp"),
           label = "Already Planned / Will Complete",
@@ -147,9 +154,14 @@ mod_Custom_server <- function(id, r){
     })
 
     # update barrier ids to filter to wria, huc12, and owner
-    observeEvent(c(input$area_sel, input$subarea_sel, input$owner_sel), {
+    observeEvent(c(input$area_sel, input$subarea_sel, input$owner_sel, input$remove_bad_match), {
 
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
+      
+      # filter bad culvert matches
+      if(input$remove_bad_match == 2){
+        sfC <- sfC %>% dplyr::filter(!bad_match)
+      }
 
       # get areas to filter by
       if("0" %in% input$area_sel){
@@ -246,6 +258,15 @@ mod_Custom_server <- function(id, r){
     )
     ##selected culvs ----
     observeEvent(input$barrier_ids, r$barrier_ids_custom <- input$barrier_ids, ignoreNULL = FALSE)
+    
+    ##remove bad culvert matches ----
+    observeEvent(input$remove_bad_match, {
+      if(input$remove_bad_match == 1){
+        r$remove_bad_match_custom <- FALSE
+      } else {
+        r$remove_bad_match_custom <- TRUE
+      }
+    })
 
     # Custom tab submit event
     observeEvent(input$submit, {

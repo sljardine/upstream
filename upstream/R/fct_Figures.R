@@ -262,6 +262,7 @@ update_map_culvert_markers <- function(
     area_sel,
     subarea_sel,
     owner_sel,
+    remove_bad_match,
     color_variable,
     highlight,
     barrier_ids){
@@ -291,6 +292,11 @@ update_map_culvert_markers <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
+  
+  # filter bad culvert matches
+  if(remove_bad_match){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   # replace owner_type_code with name
   if(color_variable == "owner_type_code"){
@@ -326,11 +332,17 @@ update_map_culvert_markers <- function(
       domain = c("Cedar - Sammamish", "Chambers - Clover", "Deschutes", "Duwamish - Green", "Elwha - Dungeness", "Island", "Kennedy - Goldsborough", "Kitsap", "Lower Chehalis", "Lower Skagit - Samish", "Lyre - Hoko", "Nisqually", "Nooksack", "Puyallup - White", "Queets - Quinault", "Quilcene - Snow", "San Juan", "Skokomish - Dosewallips", "Snohomish", "Soleduc", "Stillaguamish", "Upper Chehalis", "Upper Skagit"),
       ordered = TRUE
     )
+  } else if(color_variable == "bad_match"){
+    pal <- leaflet::colorFactor(
+      palette = c("#f9e8e4", "#ce5537"),
+      domain = c(FALSE, TRUE),
+      ordered = TRUE
+    )
   } else {
     pal <- leaflet::colorNumeric(
-      palette = "Spectral",
+      palette = c("#f9e8e4", "#ce5537"), # c("#e0e0ff", "#1c1cff"),  # "Spectral",
       domain = points$C %>% range(),
-      reverse = TRUE
+      reverse = FALSE
     )
   }
 
@@ -398,6 +410,7 @@ filter_and_format_culverts_for_histogram <- function(
     area_sel,
     subarea_sel,
     owner_sel,
+    remove_bad_match,
     color_variable,
     histogram_variable){
 
@@ -421,6 +434,11 @@ filter_and_format_culverts_for_histogram <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
+  
+  # filter bad culvert matches
+  if(remove_bad_match){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   # this swaps wria_name if X = wria_number
   if(histogram_variable == "wria_number" | color_variable == "wria_number"){
@@ -479,6 +497,7 @@ filter_and_format_culverts_for_scatterplot <- function(
     area_sel,
     subarea_sel,
     owner_sel,
+    remove_bad_match,
     x_axis_variable,
     y_axis_variable,
     color_variable){
@@ -503,6 +522,11 @@ filter_and_format_culverts_for_scatterplot <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
+  
+  # filter bad culvert matches
+  if(remove_bad_match){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   # this swaps wria_name if X = wria_number
   if(x_axis_variable == "wria_number" | y_axis_variable == "wria_number" | color_variable == "wria_number"){
@@ -635,7 +659,7 @@ figure_scatterplot <- function(
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c("none" = "grey")) +
       ggplot2::theme(legend.position = "none")
-  } else if (color_variable %in% c("owner_type_code", "wria_number")) {
+  } else if (color_variable %in% c("owner_type_code", "wria_number", "bad_match")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
       # colorRampPalette(brewer.pal(10, "Spectral"))(11)
@@ -685,6 +709,10 @@ figure_scatterplot <- function(
         ),
         drop = TRUE, limits = force
       )
+    } else if(color_variable == 'bad_match'){
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(`FALSE` = "#f9e8e4", `TRUE` = "#ce5537")
+      )
     }
     ggP <- ggP +
       scaleFill +
@@ -697,8 +725,9 @@ figure_scatterplot <- function(
   } else {
     # continuous variables
     ggP <- ggP +
-      ggplot2::scale_fill_gradientn(
-        colors = c("#5E4FA2","#3288BD","#66C2A5","#ABDDA4","#E6F598","#FFFFBF","#FEE08B","#FDAE61","#F46D43","#D53E4F","#9E0142"),
+      ggplot2::scale_fill_gradient(
+        low = "#f9e8e4", #"#e0e0ff"
+        high = "#ce5537", #"#1c1cff",
         labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
       ) +
       ggplot2::theme(
@@ -741,7 +770,7 @@ figure_scatterplot <- function(
 figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_variable, histogram_variable, histogram_nbins, highlight, barrier_ids, plot_xmin, plot_xmax, plot_ymin, plot_ymax){
   # init the ggplot
   ggP <- points %>%
-    ggplot2::ggplot(ggplot2::aes(x = X, fill = C)) +
+    ggplot2::ggplot(ggplot2::aes(x = X, fill = C, group = C)) +
     ggplot2::xlab(get_pretty_variable_name(histogram_variable)) +
     ggplot2::guides(color = "none") +
     ggplot2::theme_bw() +
@@ -972,9 +1001,9 @@ get_pretty_variable_name <- function(varName){
     prettyName <- "Owner Type"
   } else if(varName == "percent_fish_passable_code"){
     prettyName <- "Passability"
-  }else if(varName == "corrected_dn_WSDOT"){
+  }else if(varName == "corrected_dn_wsdot"){
     prettyName <- "WSDOT Downstream Corrections"
-  }else if(varName == "corrected_dn_nWSDOT"){
+  }else if(varName == "corrected_dn_other"){
     prettyName <- "non-WSDOT Downstream Corrections"
   }
 
@@ -986,7 +1015,7 @@ get_pretty_variable_name <- function(varName){
 #' @param plotClickY y coordinate from plot click event
 #' @return string value of culvert site id closest to plot click coordinates or empty string if beyond maximum distance
 #' @export
-get_plot_click_site_id <- function(owner_sel, area_sel, x_axis_variable, y_axis_variable, plotClickX, plotClickY){
+get_plot_click_site_id <- function(owner_sel, area_sel, remove_bad_match, x_axis_variable, y_axis_variable, plotClickX, plotClickY){
   points <- culverts_cmb
 
   # get sites for selected owners
@@ -1006,14 +1035,20 @@ get_plot_click_site_id <- function(owner_sel, area_sel, x_axis_variable, y_axis_
   # filter by area and owner
   points <- points %>%
     dplyr::filter(wria_number %in% area_sel & site_id %in% cSiteIds) %>%
-    dplyr::rename(X = x_axis_variable, Y = y_axis_variable)
+    dplyr::rename(X_var = x_axis_variable, Y_var = y_axis_variable)
+  
+  # filter bad culvert matches
+  if(remove_bad_match){
+    points <- points %>% dplyr::filter(!bad_match)
+  }
 
   points1 <- points %>%
-    dplyr::mutate(RelX = X / max(points$X), RelY = Y / max(points$Y)) %>%
-    dplyr::mutate(Diff = sqrt((RelX - plotClickX / max(points$X))^2 + (RelY - plotClickY / max(points$Y))^2)) %>%
+    dplyr::mutate(RelX = X_var / max(X_var), RelY = Y_var / max(Y_var)) %>%
+    dplyr::mutate(Diff = sqrt((RelX - plotClickX / max(X_var))^2 + (RelY - plotClickY / max(Y_var))^2)) %>%
     dplyr::arrange(Diff) %>%
     dplyr::slice(1) %>%
-    dplyr::select(site_id, X, Y, Diff)
+    dplyr::select(site_id, X_var, Y_var, Diff) %>%
+    dplyr::rename(X = X_var, Y = Y_var)
 
   if(points1$Diff < .03){
     siteId <- paste0("Site Id: ", points1$site_id)
