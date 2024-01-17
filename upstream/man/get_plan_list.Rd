@@ -8,6 +8,7 @@ get_plan_list(
   points,
   points_sel,
   barrier_idp,
+  remove_bad_match,
   cost = 1,
   mean_design_cost = NULL,
   mean_construction_cost = NULL

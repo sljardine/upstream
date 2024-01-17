@@ -4,7 +4,7 @@
 \alias{get_summary_table}
 \title{Summarize variables for select culverts}
 \usage{
-get_summary_table(points, points_sel, barrier_idp, hq = 1)
+get_summary_table(points, points_sel, barrier_idp, hq = 1, remove_bad_match)
 }
 \arguments{
 \item{points}{A simple features point data frame containing culvert locations and attributes.}

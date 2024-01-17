@@ -9,6 +9,7 @@ filter_and_format_culverts_for_histogram(
   area_sel,
   subarea_sel,
   owner_sel,
+  remove_bad_match,
   color_variable,
   histogram_variable
 )

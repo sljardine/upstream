@@ -50,7 +50,7 @@ mod_Tables_server <- function(id, r){
         }
         else if(r$tab_sel == "Custom") {
           points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
-          get_summary_table(culverts_cmb, points_sel_custom, 0)
+          get_summary_table(culverts_cmb, points_sel_custom, barrier_idp = 0, remove_bad_match = FALSE)
         }
       }
     )
@@ -69,7 +69,7 @@ mod_Tables_server <- function(id, r){
        }
         else if(r$tab_sel == "Custom") {
           points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
-          get_plan_list(culverts_cmb, points_sel_custom, 0)
+          get_plan_list(culverts_cmb, points_sel_custom, barrier_idp = 0, remove_bad_match = FALSE)
       }
     }
   )

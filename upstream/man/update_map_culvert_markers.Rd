@@ -9,6 +9,7 @@ update_map_culvert_markers(
   area_sel,
   subarea_sel,
   owner_sel,
+  remove_bad_match,
   color_variable,
   highlight,
   barrier_ids

@@ -7,6 +7,7 @@
 get_plot_click_site_id(
   owner_sel,
   area_sel,
+  remove_bad_match,
   x_axis_variable,
   y_axis_variable,
   plotClickX,
