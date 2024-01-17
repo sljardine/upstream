@@ -340,7 +340,9 @@ update_map_culvert_markers <- function(
     )
   } else if(color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri", "hmarg_length_urb",
                                   "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural", "hmarg_area_natural",
-                                  "hmarg_volume_natural", "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08")) {
+                                  "hmarg_volume_natural", "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08",
+                                  "hfull_length_agri", "hfull_area_agri", "hfull_volume_agri", "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
+                                  "hfull_length_natural", "hfull_area_natural", "hfull_volume_natural")) {
     pal <- leaflet::colorNumeric(
       palette = colorRampPalette(c("#f9e8e4", "#ce5537"))(100),
       domain = range(points$C, na.rm = TRUE),
@@ -670,7 +672,8 @@ figure_scatterplot <- function(
   } else if (color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri",
                                    "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural",
                                    "hmarg_area_natural", "hmarg_volume_natural", "hmarg_length_TempVMM08", "hmarg_area_TempVMM08",
-                                   "hmarg_volume_TempVMM08")) {
+                                   "hmarg_volume_TempVMM08", "hfull_length_agri", "hfull_area_agri", "hfull_volume_agri", "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
+                                   "hfull_length_natural", "hfull_area_natural", "hfull_volume_natural")) {
     # Gradient palette for habitat quality variables
     ggP <- ggP +
       ggplot2::scale_fill_gradient(
@@ -1070,6 +1073,24 @@ get_pretty_variable_name <- function(varName){
     prettyName <- "Temperature Weighted by Area"
   }else if(varName == "hmarg_volume_TempVMM08"){
     prettyName <- "Temperature Weighted by Volume"
+  }else if(varName == "hfull_length_agri"){
+    prettyName <- "Full Agricultural Habitat % (Length)"
+  }else if(varName == "hfull_area_agri"){
+    prettyName <- "Full Agricultural Habitat % (Area)"
+  }else if(varName == "hfull_volume_agri"){
+    prettyName <- "Full Agricultural Habitat % (Volume)"
+  }else if(varName == "hfull_length_urb"){
+    prettyName <- "Full Urban Habitat % (Length)"
+  }else if(varName == "hfull_area_urb"){
+    prettyName <- "Full Urban Habitat % (Area)"
+  }else if(varName == "hfull_volume_urb"){
+    prettyName <- "Full Urban Habitat % (Volume)"
+  }else if(varName == "hfull_length_natural"){
+    prettyName <- "Full Natural Habitat % (Length)"
+  }else if(varName == "hfull_area_natural"){
+    prettyName <- "Full Natural Habitat % (Area)"
+  }else if(varName == "hfull_volume_natural"){
+    prettyName <- "Full Natural Habitat % (Volume)"
   }
 
   return(prettyName)

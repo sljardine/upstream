@@ -16,7 +16,9 @@ commonVariables <- setNames(
     "corrected_dn_wsdot", "corrected_dn_other", "hmarg_length_agri", "hmarg_area_agri",
     "hmarg_volume_agri", "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb",
     "hmarg_length_natural", "hmarg_area_natural", "hmarg_volume_natural", "hmarg_length_TempVMM08",
-    "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08"
+    "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08", "hfull_length_agri", "hfull_area_agri", "hfull_volume_agri",
+    "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb", "hfull_length_natural", "hfull_area_natural",
+    "hfull_volume_natural"
   ),
   nm = c(
     "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
@@ -25,7 +27,10 @@ commonVariables <- setNames(
     "Marginal Agricultural Habitat (Length)", "Marginal Agricultural Habitat (Area)", "Marginal Agricultural Habitat (Volume)",
     "Marginal Urban Habitat (Length)", "Marginal Urban Habitat (Area)","Marginal Urban Habitat (Volume)",
     "Marginal Natural Habitat (Length)", "Marginal Natural Habitat (Area)", "Marginal Natural Habitat (Volume)", "Temperature Weighted by Length",
-    "Temperature Weighted by Area", "Temperature Weighted by Volume"
+    "Temperature Weighted by Area", "Temperature Weighted by Volume",
+    "Full Agricultural Habitat (Length)", "Full Agricultural Habitat (Area)", "Full Agricultural Habitat (Volume)",
+    "Full Urban Habitat (Length)", "Full Urban Habitat (Area)","Full Urban Habitat (Volume)",
+    "Full Natural Habitat (Length)", "Full Natural Habitat (Area)", "Full Natural Habitat (Volume)"
   )
 )
 
