@@ -292,7 +292,7 @@ update_map_culvert_markers <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-  
+
   # filter bad culvert matches
   if(remove_bad_match){
     points <- points %>% dplyr::filter(!bad_match)
@@ -337,6 +337,14 @@ update_map_culvert_markers <- function(
       palette = c("#f9e8e4", "#ce5537"),
       domain = c(FALSE, TRUE),
       ordered = TRUE
+    )
+  } else if(color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri", "hmarg_length_urb",
+                                  "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural", "hmarg_area_natural",
+                                  "hmarg_volume_natural", "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08")) {
+    pal <- leaflet::colorNumeric(
+      palette = colorRampPalette(c("#f9e8e4", "#ce5537"))(100),
+      domain = range(points$C, na.rm = TRUE),
+      reverse = FALSE
     )
   } else {
     pal <- leaflet::colorNumeric(
@@ -434,7 +442,7 @@ filter_and_format_culverts_for_histogram <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-  
+
   # filter bad culvert matches
   if(remove_bad_match){
     points <- points %>% dplyr::filter(!bad_match)
@@ -522,7 +530,7 @@ filter_and_format_culverts_for_scatterplot <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-  
+
   # filter bad culvert matches
   if(remove_bad_match){
     points <- points %>% dplyr::filter(!bad_match)
@@ -659,6 +667,24 @@ figure_scatterplot <- function(
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c("none" = "grey")) +
       ggplot2::theme(legend.position = "none")
+  } else if (color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri",
+                                   "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural",
+                                   "hmarg_area_natural", "hmarg_volume_natural", "hmarg_length_TempVMM08", "hmarg_area_TempVMM08",
+                                   "hmarg_volume_TempVMM08")) {
+    # Gradient palette for habitat quality variables
+    ggP <- ggP +
+      ggplot2::scale_fill_gradient(
+        low = "#f9e8e4", #"#e0e0ff"
+        high = "#ce5537", #"#1c1cff",
+        labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
+      ) +
+      ggplot2::theme(
+        legend.position = c(.99, .95),
+        legend.direction = "vertical",
+        legend.justification = c(1, 1),
+        legend.key.height = ggplot2::unit(1, "cm"),
+        legend.box.background = ggplot2::element_rect(color = "grey")
+      )
   } else if (color_variable %in% c("owner_type_code", "wria_number", "bad_match")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
@@ -802,6 +828,21 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c("none" = "#5b5b5b")) +
       ggplot2::theme(legend.position = "none")
+  } else if(color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri", "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural", "hmarg_area_natural", "hmarg_volume_natural")){
+    # Gradient palette for habitat quality variables
+    ggP <- ggP +
+      ggplot2::scale_fill_gradient(
+        low = "#f9e8e4", #"#e0e0ff"
+        high = "#ce5537", #"#1c1cff",
+        labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
+      ) +
+      ggplot2::theme(
+        legend.position = c(.99, .95),
+        legend.direction = "vertical",
+        legend.justification = c(1, 1),
+        legend.key.height = ggplot2::unit(1, "cm"),
+        legend.box.background = ggplot2::element_rect(color = "grey")
+      )
   } else if (color_variable %in% c("owner_type_code", "wria_number", "barrier_count")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
@@ -1005,6 +1046,30 @@ get_pretty_variable_name <- function(varName){
     prettyName <- "WSDOT Downstream Corrections"
   }else if(varName == "corrected_dn_other"){
     prettyName <- "non-WSDOT Downstream Corrections"
+  }else if(varName == "hmarg_length_agri"){
+    prettyName <- "Marginal Agricultural Habitat % (Length)"
+  }else if(varName == "hmarg_area_agri"){
+    prettyName <- "Marginal Agricultural Habitat % (Area)"
+  }else if(varName == "hmarg_volume_agri"){
+    prettyName <- "Marginal Agricultural Habitat % (Volume)"
+  }else if(varName == "hmarg_length_urb"){
+    prettyName <- "Marginal Urban Habitat % (Length)"
+  }else if(varName == "hmarg_area_urb"){
+    prettyName <- "Marginal Urban Habitat % (Area)"
+  }else if(varName == "hmarg_volume_urb"){
+    prettyName <- "Marginal Urban Habitat % (Volume)"
+  }else if(varName == "hmarg_length_natural"){
+    prettyName <- "Marginal Natural Habitat % (Length)"
+  }else if(varName == "hmarg_area_natural"){
+    prettyName <- "Marginal Natural Habitat % (Area)"
+  }else if(varName == "hmarg_volume_natural"){
+    prettyName <- "Marginal Natural Habitat % (Volume)"
+  }else if(varName == "hmarg_length_TempVMM08"){
+    prettyName <- "Temperature Weighted by Length"
+  }else if(varName == "hmarg_area_TempVMM08"){
+    prettyName <- "Temperature Weighted by Area"
+  }else if(varName == "hmarg_volume_TempVMM08"){
+    prettyName <- "Temperature Weighted by Volume"
   }
 
   return(prettyName)
@@ -1018,7 +1083,7 @@ get_pretty_variable_name <- function(varName){
 get_plot_click_site_id <- function(owner_sel, area_sel, remove_bad_match, x_axis_variable, y_axis_variable, plotClickX, plotClickY){
   points <- culverts_cmb
 
-  # get sites for selected owners
+  # Filter by owner selection
   cSiteIds <- c()
   if("1" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
   if("2" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
@@ -1032,26 +1097,35 @@ get_plot_click_site_id <- function(owner_sel, area_sel, remove_bad_match, x_axis
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
 
-  # filter by area and owner
+  # Filter by area and owner
   points <- points %>%
-    dplyr::filter(wria_number %in% area_sel & site_id %in% cSiteIds) %>%
-    dplyr::rename(X_var = x_axis_variable, Y_var = y_axis_variable)
-  
-  # filter bad culvert matches
+    dplyr::filter(wria_number %in% area_sel & site_id %in% cSiteIds)
+
+  # Filter bad culvert matches
   if(remove_bad_match){
     points <- points %>% dplyr::filter(!bad_match)
   }
 
-  points1 <- points %>%
-    dplyr::mutate(RelX = X_var / max(X_var), RelY = Y_var / max(Y_var)) %>%
-    dplyr::mutate(Diff = sqrt((RelX - plotClickX / max(X_var))^2 + (RelY - plotClickY / max(Y_var))^2)) %>%
-    dplyr::arrange(Diff) %>%
-    dplyr::slice(1) %>%
-    dplyr::select(site_id, X_var, Y_var, Diff) %>%
-    dplyr::rename(X = X_var, Y = Y_var)
+  # Ensure the x and y axis variables are numeric and handle NA values
+  points <- points %>%
+    dplyr::mutate(X_var = as.numeric(.data[[x_axis_variable]]),
+                  Y_var = as.numeric(.data[[y_axis_variable]])) %>%
+    dplyr::filter(!is.na(X_var) & !is.na(Y_var))
 
-  if(points1$Diff < .03){
-    siteId <- paste0("Site Id: ", points1$site_id)
+  # Calculate relative positions and differences
+  max_X_var <- max(points$X_var, na.rm = TRUE)
+  max_Y_var <- max(points$Y_var, na.rm = TRUE)
+
+  points <- points %>%
+    dplyr::mutate(RelX = X_var / max_X_var,
+                  RelY = Y_var / max_Y_var,
+                  Diff = sqrt((RelX - plotClickX / max_X_var)^2 + (RelY - plotClickY / max_Y_var)^2)) %>%
+    dplyr::arrange(Diff) %>%
+    dplyr::slice(1)
+
+  # Check if click is close to a point
+  if(nrow(points) > 0 && points$Diff[1] < .03){
+    siteId <- paste0("Site Id: ", points$site_id[1])
   } else {
     siteId <- ''
   }

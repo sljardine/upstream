@@ -7,6 +7,29 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
+
+commonVariables <- setNames(
+  c(
+    "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
+    "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
+    "wria_number", "owner_type_code", "percent_fish_passable_code",
+    "corrected_dn_wsdot", "corrected_dn_other", "hmarg_length_agri", "hmarg_area_agri",
+    "hmarg_volume_agri", "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb",
+    "hmarg_length_natural", "hmarg_area_natural", "hmarg_volume_natural", "hmarg_length_TempVMM08",
+    "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08"
+  ),
+  nm = c(
+    "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
+    "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
+    "WRIA", "Owner Type", "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections",
+    "Marginal Agricultural Habitat (Length)", "Marginal Agricultural Habitat (Area)", "Marginal Agricultural Habitat (Volume)",
+    "Marginal Urban Habitat (Length)", "Marginal Urban Habitat (Area)","Marginal Urban Habitat (Volume)",
+    "Marginal Natural Habitat (Length)", "Marginal Natural Habitat (Area)", "Marginal Natural Habitat (Volume)", "Temperature Weighted by Length",
+    "Temperature Weighted by Area", "Temperature Weighted by Volume"
+  )
+)
+
+
 mod_Explore_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -73,20 +96,7 @@ mod_Explore_ui <- function(id){
               inputId = ns("x_axis_variable"),
               label = "Variable on X axis",
               # TODO - Pass as argument or add to r reactive function?
-              choices = setNames(
-                c(
-                  "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
-                  "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
-                  "wria_number", "owner_type_code", "percent_fish_passable_code",
-                  "corrected_dn_wsdot", "corrected_dn_other"
-                ),
-                nm = c(
-                  "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
-                  "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
-                  "WRIA", "Owner Type", "Passability",
-                  "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
-                )
-              ),
+              choices = commonVariables,
               selected = "cost",
               width = "100%"),
             offset = 0
@@ -96,20 +106,7 @@ mod_Explore_ui <- function(id){
             selectizeInput(
               inputId = ns("y_axis_variable"),
               label = "Variable on Y axis",
-              choices = setNames(
-                c(
-                  "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
-                  "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
-                  "wria_number", "owner_type_code", "percent_fish_passable_code",
-                  "corrected_dn_wsdot", "corrected_dn_other"
-                ),
-                nm = c(
-                  "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
-                  "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
-                  "WRIA", "Owner Type", "Passability",
-                  "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
-                )
-              ),
+              choices = commonVariables,
               selected = "hfull_length",
               width = "100%"
             ),
@@ -144,20 +141,7 @@ mod_Explore_ui <- function(id){
           inputId = ns("histogram_variable"),
           label = "Variable to display",
           # TODO - Pass as argument or add to r reactive function?
-          choices = setNames(
-            c(
-              "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
-              "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
-              "wria_number", "owner_type_code", "percent_fish_passable_code",
-              "corrected_dn_wsdot", "corrected_dn_other"
-            ),
-            nm = c(
-              "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
-              "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
-              "WRIA", "Owner Type", "Passability",
-              "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
-            )
-          )
+          choices = commonVariables
         ),
         # number of bins for numerical vars
         conditionalPanel(
@@ -224,52 +208,13 @@ mod_Explore_server <- function(id, r){
     ns <- session$ns
 
     # scatter plot variable choices
-    cScatterPlotVariables <- setNames(
-      c(
-        "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
-        "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
-        "wria_number", "owner_type_code", "percent_fish_passable_code",
-        "corrected_dn_wsdot", "corrected_dn_other"
-        ),
-      nm = c(
-        "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
-        "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
-        "WRIA", "Owner Type", "Passability",
-        "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
-        )
-    )
+    cScatterPlotVariables <- commonVariables
 
     # histogram choices
-    cHistogramVariables <- setNames(
-      c(
-        "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
-        "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
-        "wria_number", "owner_type_code", "percent_fish_passable_code",
-        "corrected_dn_wsdot", "corrected_dn_other"
-      ),
-      nm = c(
-        "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
-        "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
-        "WRIA", "Owner Type", "Passability",
-        "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
-      )
-    )
+    cHistogramVariables <- commonVariables
 
     # color choices
-    cColorVariables <- setNames(
-      c(
-        "cost", "dn_count", "up_count", "hmarg_length",
-        "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
-        "wria_number", "owner_type_code", "percent_fish_passable_code",
-        "corrected_dn_wsdot", "corrected_dn_other"
-      ),
-      nm = c(
-        "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Marginal Habitat Length",
-        "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
-        "WRIA", "Owner Type", "Passability",
-        "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
-      )
-    )
+    cColorVariables <- commonVariables
 
     # Explore tab submit event
     observeEvent(input$submit, {
@@ -364,20 +309,7 @@ mod_Explore_server <- function(id, r){
     # update color variables for plot type
     observeEvent(c(input$plot_type, input$area_sel, input$owner_sel), {
       if(input$plot_type == "Scatterplot"){
-        cVars <- setNames(
-          c("none",
-            "cost", "dn_count", "up_count", "hmarg_length",
-            "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
-            "wria_number", "owner_type_code", "percent_fish_passable_code",
-            "corrected_dn_wsdot", "corrected_dn_other", "bad_match"
-          ),
-          nm = c("None",
-            "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Marginal Habitat Length",
-            "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
-            "WRIA", "Owner Type", "Passability",
-            "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections", "Bad Match"
-          )
-        )
+        cVars <- commonVariables
       } else {
         cVars <- setNames(
           c("none", "dn_count", "up_count", "wria_number", "owner_type_code"),
@@ -438,7 +370,7 @@ mod_Explore_server <- function(id, r){
         r$owner_sel_explore <- input$owner_sel
       }
     })
-    
+
     observeEvent(input$remove_bad_match, {
       if(input$remove_bad_match == 1){
         r$remove_bad_match_explore <- FALSE
@@ -446,7 +378,7 @@ mod_Explore_server <- function(id, r){
         r$remove_bad_match_explore <- TRUE
       }
     })
-    
+
     observeEvent(input$plot_type, r$plot_type_explore <- input$plot_type)
     observeEvent(input$x_axis_variable, r$x_axis_variable_explore <- input$x_axis_variable)
     observeEvent(input$y_axis_variable, r$y_axis_variable_explore <- input$y_axis_variable)
