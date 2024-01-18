@@ -338,6 +338,25 @@ update_map_culvert_markers <- function(
       domain = c(FALSE, TRUE),
       ordered = TRUE
     )
+  } else if(color_variable == "percent_fish_passable_code"){
+    pal <- leaflet::colorFactor(
+      palette = c("#FF0000", "#FFA500", "#FFFF00", "#808080"), # Red, Orange, Yellow, Grey
+      domain = c("0%", "33%", "67%", "Unknown"),
+      ordered = TRUE
+    )
+  } else if(color_variable == "potential_species") {
+    pal <- leaflet::colorFactor(
+      palette = c(
+        "Steelhead" = "#FF0000",   # Red
+        "Coho" = "#FFA500",        # Orange
+        "Chinook" = "#FFFF00",     # Yellow
+        "Sockeye" = "#808080",     # Grey
+        "Chum" = "#E04F4A",        # A shade of red
+        "Pink" = "#9E0142"         # A darker shade of red
+      ),
+      domain = c("Steelhead", "Coho", "Chinook", "Sockeye", "Chum", "Pink"),
+      ordered = TRUE
+    )
   } else if(color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri", "hmarg_length_urb",
                                   "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural", "hmarg_area_natural",
                                   "hmarg_volume_natural", "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08",
@@ -652,16 +671,16 @@ figure_scatterplot <- function(
     )
 
   # y axis variable
-  if(y_axis_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  if(y_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_y_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
   } else {
     ggP <- ggP + ggplot2::scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
   }
 
   # x axis variable
-  if(x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  if(x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
-  } else if(!x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  } else if(!x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
   }
 
@@ -690,7 +709,7 @@ figure_scatterplot <- function(
         legend.key.height = ggplot2::unit(1, "cm"),
         legend.box.background = ggplot2::element_rect(color = "grey")
       )
-  } else if (color_variable %in% c("owner_type_code", "wria_number", "bad_match")) {
+  } else if (color_variable %in% c("owner_type_code", "wria_number", "bad_match", "percent_fish_passable_code", "potential_species")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
       # colorRampPalette(brewer.pal(10, "Spectral"))(11)
@@ -708,6 +727,28 @@ figure_scatterplot <- function(
           "Tribal" = "#3682BA",
           "Unknown" = "#5E4FA2",
           "Multiple" = "#B8B8B8"
+        ),
+        drop = TRUE, limits = force
+      )
+    } else if(color_variable == "percent_fish_passable_code") {
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(
+          `0%` = "#FF0000",   # Red for 0%
+          `33%` = "#FFA500",  # Orange for 33%
+          `67%` = "#FFFF00",  # Yellow for 67%
+          `Unknown` = "#808080" # Grey for Unknown
+        ),
+        drop = TRUE, limits = force
+      )
+    } else if(color_variable == "potential_species") {
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(
+          "Steelhead" = "#FF0000",   # Red for 0%
+          "Coho" = "#FFA500",  # Orange for 33%
+          "Chinook" = "#FFFF00",  # Yellow for 67%
+          "Sockeye" = "#808080",
+          "Chum" = "#E04F4A",
+          "Pink" = "#9E0142"
         ),
         drop = TRUE, limits = force
       )
@@ -771,7 +812,7 @@ figure_scatterplot <- function(
   }
 
   # x axis tick label orientation
-  if(x_axis_variable %in% c("wria_number", "owner_type_code", "potential_species")){
+  if(x_axis_variable %in% c("wria_number", "owner_type_code", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP +
       ggplot2::theme(
         axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
@@ -848,7 +889,7 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
         legend.key.height = ggplot2::unit(1, "cm"),
         legend.box.background = ggplot2::element_rect(color = "grey")
       )
-  } else if (color_variable %in% c("owner_type_code", "wria_number", "barrier_count")) {
+  } else if (color_variable %in% c("owner_type_code", "wria_number", "barrier_count", "percent_fish_passable_code")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
       # colorRampPalette(brewer.pal(10, "Spectral"))(11)
@@ -895,6 +936,16 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
           "Stillaguamish" = "#3682BA",
           "Upper Chehalis" = "#4A68AE",
           "Upper Skagit" =  "#5E4FA2"
+        ),
+        drop = TRUE, limits = force
+      )
+    } else if(color_variable == "percent_fish_passable_code") {
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(
+          `0%` = "#FF0000",   # Red for 0%
+          `33%` = "#FFA500",  # Orange for 33%
+          `67%` = "#FFFF00",  # Yellow for 67%
+          `Unknown` = "#808080" # Grey for Unknown
         ),
         drop = TRUE, limits = force
       )
@@ -1052,23 +1103,23 @@ get_pretty_variable_name <- function(varName){
   }else if(varName == "corrected_dn_other"){
     prettyName <- "non-WSDOT Downstream Corrections"
   }else if(varName == "hmarg_length_agri"){
-    prettyName <- "Marginal Agricultural Habitat % (Length)"
+    prettyName <- "Marginal Agricultural Habitat (Length)"
   }else if(varName == "hmarg_area_agri"){
-    prettyName <- "Marginal Agricultural Habitat % (Area)"
+    prettyName <- "Marginal Agricultural Habitat (Area)"
   }else if(varName == "hmarg_volume_agri"){
-    prettyName <- "Marginal Agricultural Habitat % (Volume)"
+    prettyName <- "Marginal Agricultural Habitat (Volume)"
   }else if(varName == "hmarg_length_urb"){
-    prettyName <- "Marginal Urban Habitat % (Length)"
+    prettyName <- "Marginal Urban Habitat (Length)"
   }else if(varName == "hmarg_area_urb"){
-    prettyName <- "Marginal Urban Habitat % (Area)"
+    prettyName <- "Marginal Urban Habitat (Area)"
   }else if(varName == "hmarg_volume_urb"){
-    prettyName <- "Marginal Urban Habitat % (Volume)"
+    prettyName <- "Marginal Urban Habitat (Volume)"
   }else if(varName == "hmarg_length_natural"){
-    prettyName <- "Marginal Natural Habitat % (Length)"
+    prettyName <- "Marginal Natural Habitat (Length)"
   }else if(varName == "hmarg_area_natural"){
-    prettyName <- "Marginal Natural Habitat % (Area)"
+    prettyName <- "Marginal Natural Habitat (Area)"
   }else if(varName == "hmarg_volume_natural"){
-    prettyName <- "Marginal Natural Habitat % (Volume)"
+    prettyName <- "Marginal Natural Habitat (Volume)"
   }else if(varName == "hmarg_length_TempVMM08"){
     prettyName <- "Marginal Temp Weighted by Length"
   }else if(varName == "hmarg_area_TempVMM08"){

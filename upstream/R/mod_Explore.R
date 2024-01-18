@@ -10,32 +10,106 @@
 
 commonVariables <- setNames(
   c(
-    "cost", "dn_count", "up_count", "potential_species", "hmarg_length",
-    "hmarg_area", "hmarg_volume", "hfull_length", "hfull_area", "hfull_volume",
-    "wria_number", "owner_type_code", "percent_fish_passable_code",
-    "corrected_dn_wsdot", "corrected_dn_other", "hmarg_length_agri", "hmarg_area_agri",
-    "hmarg_volume_agri", "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb",
-    "hmarg_length_natural", "hmarg_area_natural", "hmarg_volume_natural", "hmarg_length_TempVMM08",
-    "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08", "hfull_length_agri", "hfull_area_agri", "hfull_volume_agri",
-    "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb", "hfull_length_natural", "hfull_area_natural",
-    "hfull_volume_natural", "hfull_length_TempVMM08", "hfull_area_TempVMM08", "hfull_volume_TempVMM08"
+    "wria_number", "owner_type_code", "potential_species",
+    "dn_count", "up_count", "cost",
+    "hfull_length", "hfull_area", "hfull_volume",
+    "hmarg_length", "hmarg_area", "hmarg_volume",
+    "hfull_length_natural", "hfull_area_natural", "hfull_volume_natural",
+    "hmarg_length_natural", "hmarg_area_natural", "hmarg_volume_natural",
+    "hfull_length_agri", "hfull_area_agri", "hfull_volume_agri",
+    "hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri",
+    "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
+    "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb",
+    "hfull_length_TempVMM08", "hfull_area_TempVMM08", "hfull_volume_TempVMM08",
+    "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08",
+    "percent_fish_passable_code", "corrected_dn_wsdot", "corrected_dn_other"
   ),
   nm = c(
-    "Cost", "Count of Downstream Barriers", "Count of Upstream Barriers", "Potential Species", "Marginal Habitat Length",
-    "Marginal Habitat Area", "Marginal Habitat Volume", "Full Habitat Length", "Full Habitat Area", "Full Habitat Volume",
-    "WRIA", "Owner Type", "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections",
-    "Marginal Agricultural Habitat (Length)", "Marginal Agricultural Habitat (Area)", "Marginal Agricultural Habitat (Volume)",
-    "Marginal Urban Habitat (Length)", "Marginal Urban Habitat (Area)","Marginal Urban Habitat (Volume)",
-    "Marginal Natural Habitat (Length)", "Marginal Natural Habitat (Area)", "Marginal Natural Habitat (Volume)", "Marginal Temp Weighted by Length",
-    "Marginal Temp Weighted by Area", "Marginal Temp Weighted by Volume",
-    "Full Agricultural Habitat (Length)", "Full Agricultural Habitat (Area)", "Full Agricultural Habitat (Volume)",
-    "Full Urban Habitat (Length)", "Full Urban Habitat (Area)","Full Urban Habitat (Volume)",
+    "WRIA", "Owner Type", "Potential Species",
+    "Count of Downstream Barriers", "Count of Upstream Barriers", "Cost",
+    "Full Habitat (Length)", "Full Habitat (Area)", "Full Habitat (Volume)",
+    "Marginal Habitat (Length)", "Marginal Habitat (Area)", "Marginal Habitat (Volume)",
     "Full Natural Habitat (Length)", "Full Natural Habitat (Area)", "Full Natural Habitat (Volume)",
-    "Full Temp Weighted by Length", "Full Temp Weighted by Area", "Full Temp Weighted by Volume"
+    "Marginal Natural Habitat (Length)", "Marginal Natural Habitat (Area)", "Marginal Natural Habitat (Volume)",
+    "Full Agricultural Habitat (Length)", "Full Agricultural Habitat (Area)", "Full Agricultural Habitat (Volume)",
+    "Marginal Agricultural Habitat (Length)", "Marginal Agricultural Habitat (Area)", "Marginal Agricultural Habitat (Volume)",
+    "Full Urban Habitat (Length)", "Full Urban Habitat (Area)", "Full Urban Habitat (Volume)",
+    "Marginal Urban Habitat (Length)", "Marginal Urban Habitat (Area)", "Marginal Urban Habitat (Volume)",
+    "Full Temp (Length)", "Full Temp (Area)", "Full Temp (Volume)",
+    "Marginal Temp (Length)", "Marginal Temp (Area)", "Marginal Temp (Volume)",
+    "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
   )
 )
 
+length_vars <- setNames(
+  c(
+    "wria_number", "owner_type_code", "potential_species",
+    "dn_count", "up_count", "cost",
+    "hfull_length", "hmarg_length", "hfull_length_natural",
+    "hmarg_length_natural",
+    "hfull_length_agri",
+    "hmarg_length_agri",
+    "hfull_length_urb",
+    "hmarg_length_urb",
+    "hfull_length_TempVMM08",
+    "hmarg_length_TempVMM08",
+    "percent_fish_passable_code", "corrected_dn_wsdot", "corrected_dn_other"
+  ),
+  nm = c(
+    "WRIA", "Owner Type", "Potential Species",
+    "Count of Downstream Barriers", "Count of Upstream Barriers", "Cost",
+    "Full Habitat (Length)",
+    "Marginal Habitat (Length)",
+    "Full Natural Habitat (Length)",
+    "Marginal Natural Habitat (Length)",
+    "Full Agricultural Habitat (Length)",
+    "Marginal Agricultural Habitat (Length)",
+    "Full Urban Habitat (Length)",
+    "Marginal Urban Habitat (Length)",
+    "Full Temp (Length)",
+    "Marginal Temp (Length)",
+    "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
+  )
+)
 
+volume_vars <- setNames(
+  c(
+    "wria_number", "owner_type_code", "potential_species",
+    "dn_count", "up_count", "cost",
+    "hfull_volume", "hmarg_volume", "hfull_volume_natural",
+    "hmarg_volume_natural", "hfull_volume_agri",
+    "hmarg_volume_agri", "hfull_volume_urb", "hmarg_volume_urb",
+    "hfull_volume_TempVMM08", "hmarg_volume_TempVMM08",
+    "percent_fish_passable_code", "corrected_dn_wsdot", "corrected_dn_other"
+  ),
+  nm = c(
+    "WRIA", "Owner Type", "Potential Species",
+    "Count of Downstream Barriers", "Count of Upstream Barriers", "Cost",
+    "Full Habitat (Volume)", "Marginal Habitat (Volume)", "Full Natural Habitat (Volume)",
+    "Marginal Natural Habitat (Volume)", "Full Agricultural Habitat (Volume)", "Marginal Agricultural Habitat (Volume)",
+    "Full Urban Habitat (Volume)", "Marginal Urban Habitat (Volume)", "Full Temp (Volume)", "Marginal Temp (Volume)",
+    "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
+  )
+)
+
+area_vars <- setNames(
+  c(
+    "wria_number", "owner_type_code", "potential_species",
+    "dn_count", "up_count", "cost",
+    "hfull_area", "hmarg_area", "hfull_area_natural", "hmarg_area_natural",
+    "hfull_area_agri", "hmarg_area_agri", "hfull_area_urb", "hmarg_area_urb",  "hfull_area_TempVMM08",
+    "hmarg_area_TempVMM08",
+    "percent_fish_passable_code", "corrected_dn_wsdot", "corrected_dn_other"
+  ),
+  nm = c(
+    "WRIA", "Owner Type", "Potential Species",
+    "Count of Downstream Barriers", "Count of Upstream Barriers", "Cost",
+    "Full Habitat (Area)", "Marginal Habitat (Area)", "Full Natural Habitat (Area)", "Marginal Natural Habitat (Area)",  "Full Agricultural Habitat (Area)", "Marginal Agricultural Habitat (Area)", "Full Urban Habitat (Area)", "Marginal Urban Habitat (Area)","Full Temp (Area)",  "Marginal Temp (Area)",
+    "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
+  )
+)
+
+# UI ----
 mod_Explore_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -82,6 +156,19 @@ mod_Explore_ui <- function(id){
                      label = "Remove Bad Culvert Matches",
                      choices = list("No" = 1, "Yes" = 2), selected = 2,
                      width = "100%", inline = TRUE)
+      ),
+      fluidRow(
+        radioButtons(inputId = ns("hq"),
+                     label = "Select Habitat Quantity Definition",
+                     choiceNames = list(
+                       "Length",
+                       "Area",
+                       "Volume"
+                     ),
+                     choiceValues = c(1 : 3),
+                     inline = TRUE,
+                     selected = "Length"
+        )
       ),
       hr(),
       fluidRow(
@@ -213,14 +300,14 @@ mod_Explore_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    # scatter plot variable choices
-    cScatterPlotVariables <- commonVariables
+# scatter plot variable choices
+cScatterPlotVariables <- commonVariables
 
-    # histogram choices
-    cHistogramVariables <- commonVariables
+# histogram choices
+cHistogramVariables <- commonVariables
 
-    # color choices
-    cColorVariables <- commonVariables
+# color choices
+cColorVariables <- commonVariables
 
     # Explore tab submit event
     observeEvent(input$submit, {
@@ -261,6 +348,34 @@ mod_Explore_server <- function(id, r){
         selected = 0,
         server = TRUE
       )
+    })
+
+    # update x variable based on hq
+    observeEvent(input$hq, {
+      if(input$hq == 3) {
+        filteredNames <- volume_vars
+      } else if(input$hq == 2) {
+        filteredNames <- area_vars
+      } else {
+        filteredNames <- length_vars
+      }
+
+      # Update the x-axis variable choices
+      updateSelectizeInput(session, "x_axis_variable", choices = filteredNames)
+    })
+
+    # update y variable based on hq
+    observeEvent(input$hq, {
+      if(input$hq == 3) {
+        filteredNames <- volume_vars
+      } else if(input$hq == 2) {
+        filteredNames <- area_vars
+      } else {
+        filteredNames <- length_vars
+      }
+
+      # Update the x-axis variable choices
+      updateSelectizeInput(session, "y_axis_variable", choices = filteredNames)
     })
 
     # update barrier ids to filter to wria, huc12, and owner
