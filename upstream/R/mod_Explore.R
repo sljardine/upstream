@@ -253,7 +253,7 @@ mod_Explore_ui <- function(id){
         selectInput(
           inputId = ns("color_variable"),
           label = "Select Variable for Map and Plot Fill Color",
-          choices = NULL
+          choices = commonVariables
         )
       ),
       fluidRow(
@@ -428,9 +428,19 @@ cColorVariables <- commonVariables
     })
 
     # update color variables for plot type
-    observeEvent(c(input$plot_type, input$area_sel, input$owner_sel), {
-      if(input$plot_type == "Scatterplot"){
-        cVars <- commonVariables
+    observeEvent(c(input$plot_type, input$area_sel, input$owner_sel, input$hq), {
+      if(input$plot_type == "Scatterplot") {
+        if(!is.null(input$hq) && input$hq != "") {
+          if(input$hq == 3) {  # Assuming 3 corresponds to 'Volume'
+            cVars <- volume_vars
+          } else if(input$hq == 2) {  # Assuming 2 corresponds to 'Area'
+            cVars <- area_vars
+          } else {  # Default case, assuming any other value including 1 corresponds to 'Length'
+            cVars <- length_vars
+          }
+        } else {
+          cVars <- commonVariables
+        }
       } else {
         cVars <- setNames(
           c("none", "dn_count", "up_count", "wria_number", "owner_type_code"),
