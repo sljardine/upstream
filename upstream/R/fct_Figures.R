@@ -1121,35 +1121,35 @@ get_pretty_variable_name <- function(varName){
   }else if(varName == "hmarg_volume_natural"){
     prettyName <- "Marginal Natural Habitat (Volume)"
   }else if(varName == "hmarg_length_TempVMM08"){
-    prettyName <- "Marginal Temp Weighted by Length"
+    prettyName <- "Marginal Weighted Temperature (Length)"
   }else if(varName == "hmarg_area_TempVMM08"){
-    prettyName <- "Marginal Temp Weighted by Area"
+    prettyName <- "Marginal Weighted Temperature (Area)"
   }else if(varName == "hmarg_volume_TempVMM08"){
-    prettyName <- "Marginal Temp Weighted by Volume"
+    prettyName <- "Marginal Weighted Temperature (Volume)"
   }else if(varName == "hfull_length_agri"){
-    prettyName <- "Full Agricultural Habitat % (Length)"
+    prettyName <- "Full Agricultural Habitat (Length)"
   }else if(varName == "hfull_area_agri"){
-    prettyName <- "Full Agricultural Habitat % (Area)"
+    prettyName <- "Full Agricultural Habitat (Area)"
   }else if(varName == "hfull_volume_agri"){
-    prettyName <- "Full Agricultural Habitat % (Volume)"
+    prettyName <- "Full Agricultural Habitat (Volume)"
   }else if(varName == "hfull_length_urb"){
-    prettyName <- "Full Urban Habitat % (Length)"
+    prettyName <- "Full Urban Habitat (Length)"
   }else if(varName == "hfull_area_urb"){
-    prettyName <- "Full Urban Habitat % (Area)"
+    prettyName <- "Full Urban Habitat (Area)"
   }else if(varName == "hfull_volume_urb"){
-    prettyName <- "Full Urban Habitat % (Volume)"
+    prettyName <- "Full Urban Habitat (Volume)"
   }else if(varName == "hfull_length_natural"){
-    prettyName <- "Full Natural Habitat % (Length)"
+    prettyName <- "Full Natural Habitat (Length)"
   }else if(varName == "hfull_area_natural"){
-    prettyName <- "Full Natural Habitat % (Area)"
+    prettyName <- "Full Natural Habitat (Area)"
   }else if(varName == "hfull_volume_natural"){
-    prettyName <- "Full Natural Habitat % (Volume)"
+    prettyName <- "Full Natural Habitat (Volume)"
   }else if(varName == "hfull_length_TempVMM08"){
-    prettyName <- "Full Temp Weighted by Length"
+    prettyName <- "Full Weighted Temperature (Length)"
   }else if(varName == "hfull_area_TempVMM08"){
-    prettyName <- "Full Temp Weighted by Area"
+    prettyName <- "Full Weighted Temperature (Area)"
   }else if(varName == "hfull_volume_TempVMM08"){
-    prettyName <- "Full Temp Weighted by Volume"
+    prettyName <- "Full Weighted Temperature (Volume)"
   }
 
   return(prettyName)

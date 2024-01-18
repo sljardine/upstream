@@ -35,79 +35,15 @@ commonVariables <- setNames(
     "Marginal Agricultural Habitat (Length)", "Marginal Agricultural Habitat (Area)", "Marginal Agricultural Habitat (Volume)",
     "Full Urban Habitat (Length)", "Full Urban Habitat (Area)", "Full Urban Habitat (Volume)",
     "Marginal Urban Habitat (Length)", "Marginal Urban Habitat (Area)", "Marginal Urban Habitat (Volume)",
-    "Full Temp (Length)", "Full Temp (Area)", "Full Temp (Volume)",
-    "Marginal Temp (Length)", "Marginal Temp (Area)", "Marginal Temp (Volume)",
+    "Full Temperature (Length)", "Full Temperature (Area)", "Full Temperature (Volume)",
+    "Marginal Temperature (Length)", "Marginal Temperature (Area)", "Marginal Temperature (Volume)",
     "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
   )
 )
 
-length_vars <- setNames(
-  c(
-    "wria_number", "owner_type_code", "potential_species",
-    "dn_count", "up_count", "cost",
-    "hfull_length", "hmarg_length", "hfull_length_natural",
-    "hmarg_length_natural",
-    "hfull_length_agri",
-    "hmarg_length_agri",
-    "hfull_length_urb",
-    "hmarg_length_urb",
-    "hfull_length_TempVMM08",
-    "hmarg_length_TempVMM08",
-    "percent_fish_passable_code", "corrected_dn_wsdot", "corrected_dn_other"
-  ),
-  nm = c(
-    "WRIA", "Owner Type", "Potential Species",
-    "Count of Downstream Barriers", "Count of Upstream Barriers", "Cost",
-    "Full Habitat (Length)",
-    "Marginal Habitat (Length)",
-    "Full Natural Habitat (Length)",
-    "Marginal Natural Habitat (Length)",
-    "Full Agricultural Habitat (Length)",
-    "Marginal Agricultural Habitat (Length)",
-    "Full Urban Habitat (Length)",
-    "Marginal Urban Habitat (Length)",
-    "Full Temp (Length)",
-    "Marginal Temp (Length)",
-    "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
-  )
-)
-
-volume_vars <- setNames(
-  c(
-    "wria_number", "owner_type_code", "potential_species",
-    "dn_count", "up_count", "cost",
-    "hfull_volume", "hmarg_volume", "hfull_volume_natural",
-    "hmarg_volume_natural", "hfull_volume_agri",
-    "hmarg_volume_agri", "hfull_volume_urb", "hmarg_volume_urb",
-    "hfull_volume_TempVMM08", "hmarg_volume_TempVMM08",
-    "percent_fish_passable_code", "corrected_dn_wsdot", "corrected_dn_other"
-  ),
-  nm = c(
-    "WRIA", "Owner Type", "Potential Species",
-    "Count of Downstream Barriers", "Count of Upstream Barriers", "Cost",
-    "Full Habitat (Volume)", "Marginal Habitat (Volume)", "Full Natural Habitat (Volume)",
-    "Marginal Natural Habitat (Volume)", "Full Agricultural Habitat (Volume)", "Marginal Agricultural Habitat (Volume)",
-    "Full Urban Habitat (Volume)", "Marginal Urban Habitat (Volume)", "Full Temp (Volume)", "Marginal Temp (Volume)",
-    "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
-  )
-)
-
-area_vars <- setNames(
-  c(
-    "wria_number", "owner_type_code", "potential_species",
-    "dn_count", "up_count", "cost",
-    "hfull_area", "hmarg_area", "hfull_area_natural", "hmarg_area_natural",
-    "hfull_area_agri", "hmarg_area_agri", "hfull_area_urb", "hmarg_area_urb",  "hfull_area_TempVMM08",
-    "hmarg_area_TempVMM08",
-    "percent_fish_passable_code", "corrected_dn_wsdot", "corrected_dn_other"
-  ),
-  nm = c(
-    "WRIA", "Owner Type", "Potential Species",
-    "Count of Downstream Barriers", "Count of Upstream Barriers", "Cost",
-    "Full Habitat (Area)", "Marginal Habitat (Area)", "Full Natural Habitat (Area)", "Marginal Natural Habitat (Area)",  "Full Agricultural Habitat (Area)", "Marginal Agricultural Habitat (Area)", "Full Urban Habitat (Area)", "Marginal Urban Habitat (Area)","Full Temp (Area)",  "Marginal Temp (Area)",
-    "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
-  )
-)
+length_vars <- commonVariables[!grepl("(volume|Volume|area|Area)", names(commonVariables))]
+volume_vars <- commonVariables[!grepl("(length|Length|area|Area)", names(commonVariables))]
+area_vars <- commonVariables[!grepl("(length|Length|volume|Volume)", names(commonVariables))]
 
 # UI ----
 mod_Explore_ui <- function(id){
