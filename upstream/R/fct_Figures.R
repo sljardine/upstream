@@ -753,6 +753,16 @@ figure_scatterplot <- function(
         ),
         drop = TRUE, limits = force
       )
+    } else if(color_variable == "percent_fish_passable_code") {
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(
+          `0%` = "#FF0000",   # Red for 0%
+          `33%` = "#FFA500",  # Orange for 33%
+          `67%` = "#FFFF00",  # Yellow for 67%
+          `Unknown` = "#808080" # Grey for Unknown
+        ),
+        drop = TRUE, limits = force
+      )
     } else if(color_variable == "wria_number") {
       scaleFill <- ggplot2::scale_fill_manual(
         values = c(
