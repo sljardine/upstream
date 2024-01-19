@@ -311,10 +311,18 @@ update_map_culvert_markers <- function(
   }
 
   # assign color variable to C
-  if(color_variable %in% c("none", "")){
+  if(color_variable %in% c("none", "")) {
     points$C <- "none"
   } else {
-    points$C <- points %>% dplyr::pull(color_variable)
+    # Check if color_variable is not in the specified list and needs quantile binning
+    if(!color_variable %in% c("owner_type_code", "wria_number", "bad_match", "potential_species", "percent_fish_passable_code")) {
+      # If color_variable is not in the list, break it into 5 quantiles
+      points$C <- points %>%
+        dplyr::mutate(C = dplyr::ntile(.data[[color_variable]], 5)) %>% dplyr::pull(C)
+    } else {
+      # If color_variable is in the list, use it directly
+      points$C <- points %>% dplyr::pull(color_variable)
+    }
   }
 
   # palette
@@ -340,36 +348,14 @@ update_map_culvert_markers <- function(
     )
   } else if(color_variable == "percent_fish_passable_code"){
     pal <- leaflet::colorFactor(
-      palette = c("#FF0000", "#FFA500", "#FFFF00", "#808080"), # Red, Orange, Yellow, Grey
+      palette = c("#C15F6E", "#EFDEB0", "#2332BF", "#808080"), # Red, Orange, Yellow, Grey
       domain = c("0%", "33%", "67%", "Unknown"),
       ordered = TRUE
-    )
-  } else if(color_variable == "percent_fish_passable_code"){
-    pal <- leaflet::colorFactor(
-      palette = c("#FF0000", "#FFA500", "#FFFF00", "#808080"), # Red, Orange, Yellow, Grey
-      domain = c("0%", "33%", "67%", "Unknown"),
-      ordered = TRUE
-    )
-  } else if(color_variable %in% c("hfull_length_TempVMM08", "hfull_area_TempVMM08", "hfull_volume_TempVMM08",
-            "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08")) {
-    pal <- leaflet::colorNumeric(
-      palette = colorRampPalette(c("blue", "white", "red"))(100),
-      domain = NULL
-    )
-  } else if(color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri", "hmarg_length_urb",
-                                  "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural", "hmarg_area_natural",
-                                  "hmarg_volume_natural","hfull_length_agri", "hfull_area_agri", "hfull_volume_agri",
-                                  "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
-                                  "hfull_length_natural", "hfull_area_natural", "hfull_volume_natural")) {
-    pal <- leaflet::colorNumeric(
-      palette = colorRampPalette(c("#f9e8e4", "#ce5537"))(100),
-      domain = range(points$C, na.rm = TRUE),
-      reverse = FALSE
     )
   } else {
     pal <- leaflet::colorNumeric(
-      palette = c("#f9e8e4", "#ce5537"), # c("#e0e0ff", "#1c1cff"),  # "Spectral",
-      domain = points$C %>% range(),
+      palette = colorRampPalette(c("blue", "white", "#C15F6E"))(100),
+      domain = range(points$C, na.rm = TRUE),
       reverse = FALSE
     )
   }
@@ -574,7 +560,14 @@ filter_and_format_culverts_for_scatterplot <- function(
   # calculate new variables
   points$X <- points %>% dplyr::pull(x_axis_variable)
   points$Y <- points %>% dplyr::pull(y_axis_variable)
-  points$C <- points %>% dplyr::pull(color_variable)
+  if(!color_variable %in% c("none", "owner_type_code", "wria_number", "bad_match", "potential_species", "percent_fish_passable_code")) {
+    # If color_variable is not in the list, break it into 5 quantiles
+    points$C <- points %>%
+      dplyr::mutate(C = dplyr::ntile(.data[[color_variable]], 5)) %>% dplyr::pull(C)
+  } else {
+    # If color_variable is in the list, use it directly
+    points$C <- points %>% dplyr::pull(color_variable)
+  }
 
   # select the variables
   points <- points %>% dplyr::select(site_id, X, Y, C)
@@ -687,39 +680,6 @@ figure_scatterplot <- function(
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c("none" = "grey")) +
       ggplot2::theme(legend.position = "none")
-  } else if (color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri",
-                                   "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural",
-                                   "hmarg_area_natural", "hmarg_volume_natural", "hfull_length_agri", "hfull_area_agri",
-                                   "hfull_volume_agri", "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
-                                   "hfull_length_natural", "hfull_area_natural", "hfull_volume_natural")) {
-    # Gradient palette for habitat quality variables
-    ggP <- ggP +
-      ggplot2::scale_fill_gradient(
-        low = "#f9e8e4", #"#e0e0ff"
-        high = "#ce5537", #"#1c1cff",
-        labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
-      ) +
-      ggplot2::theme(
-        legend.position = c(.99, .95),
-        legend.direction = "vertical",
-        legend.justification = c(1, 1),
-        legend.key.height = ggplot2::unit(1, "cm"),
-        legend.box.background = ggplot2::element_rect(color = "grey")
-      )
-  } else if(color_variable %in% c("hfull_length_TempVMM08", "hfull_area_TempVMM08", "hfull_volume_TempVMM08",
-                                  "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08")) {
-    ggP <- ggP +
-      ggplot2::scale_fill_gradientn(
-        colours = colorRampPalette(c("blue", "white", "red"))(100),
-        na.value = "grey50"
-      ) +
-      ggplot2::theme(
-        legend.position = c(.99, .95),
-        legend.direction = "vertical",
-        legend.justification = c(1, 1),
-        legend.key.height = ggplot2::unit(1, "cm"),
-        legend.box.background = ggplot2::element_rect(color = "grey")
-      )
   } else if (color_variable %in% c("owner_type_code", "wria_number", "bad_match", "percent_fish_passable_code", "potential_species")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
@@ -756,9 +716,9 @@ figure_scatterplot <- function(
     } else if(color_variable == "percent_fish_passable_code") {
       scaleFill <- ggplot2::scale_fill_manual(
         values = c(
-          `0%` = "#FF0000",   # Red for 0%
-          `33%` = "#FFA500",  # Orange for 33%
-          `67%` = "#FFFF00",  # Yellow for 67%
+          `0%` = "#C15F6E",
+          `33%` = "#EFDEB0",
+          `67%` = "#2332BF",
           `Unknown` = "#808080" # Grey for Unknown
         ),
         drop = TRUE, limits = force
@@ -808,18 +768,20 @@ figure_scatterplot <- function(
   } else {
     # continuous variables
     ggP <- ggP +
-      ggplot2::scale_fill_gradient(
-        low = "#f9e8e4", #"#e0e0ff"
-        high = "#ce5537", #"#1c1cff",
-        labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
+      ggplot2::scale_fill_gradientn(
+        colours = colorRampPalette(c("blue", "white", "#C15F6E"))(100),
+        na.value = "grey50",
+        guide = ggplot2::guide_colourbar(title = "Quantile")  # Specify the legend title here
       ) +
       ggplot2::theme(
         legend.position = c(.99, .95),
         legend.direction = "vertical",
         legend.justification = c(1, 1),
         legend.key.height = ggplot2::unit(1, "cm"),
-        legend.box.background = ggplot2::element_rect(color = "grey")
-      )
+        legend.box.background = ggplot2::element_rect(color = "grey"),
+        legend.title = ggplot2::element_text(size = 10)  # Adjust the size as needed
+      ) +
+      ggplot2::labs(fill = "Quantile")
   }
 
   # x axis tick label orientation

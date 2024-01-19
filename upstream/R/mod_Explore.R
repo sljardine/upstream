@@ -88,12 +88,6 @@ mod_Explore_ui <- function(id){
       ),
       hr(),
       fluidRow(
-        radioButtons(inputId = ns("remove_bad_match"),
-                     label = "Remove Bad Culvert Matches",
-                     choices = list("No" = 1, "Yes" = 2), selected = 2,
-                     width = "100%", inline = TRUE)
-      ),
-      fluidRow(
         radioButtons(inputId = ns("hq"),
                      label = "Select Habitat Quantity Definition",
                      choiceNames = list(
@@ -188,7 +182,7 @@ mod_Explore_ui <- function(id){
       fluidRow(
         selectInput(
           inputId = ns("color_variable"),
-          label = "Select Variable for Map and Plot Fill Color",
+          label = "Select Variable for Point Fill Color",
           choices = commonVariables
         )
       ),
@@ -217,6 +211,13 @@ mod_Explore_ui <- function(id){
             )
           )
         )
+      ),
+      hr(),
+      fluidRow(
+        radioButtons(inputId = ns("remove_bad_match"),
+                     label = "Remove Bad Culvert Matches",
+                     choices = list("No" = 1, "Yes" = 2), selected = 2,
+                     width = "100%", inline = TRUE)
       ),
       hr(),
       fluidRow(
