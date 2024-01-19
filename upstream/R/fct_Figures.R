@@ -344,25 +344,23 @@ update_map_culvert_markers <- function(
       domain = c("0%", "33%", "67%", "Unknown"),
       ordered = TRUE
     )
-  } else if(color_variable == "potential_species") {
+  } else if(color_variable == "percent_fish_passable_code"){
     pal <- leaflet::colorFactor(
-      palette = c(
-        "Steelhead" = "#FF0000",   # Red
-        "Coho" = "#FFA500",        # Orange
-        "Chinook" = "#FFFF00",     # Yellow
-        "Sockeye" = "#808080",     # Grey
-        "Chum" = "#E04F4A",        # A shade of red
-        "Pink" = "#9E0142"         # A darker shade of red
-      ),
-      domain = c("Steelhead", "Coho", "Chinook", "Sockeye", "Chum", "Pink"),
+      palette = c("#FF0000", "#FFA500", "#FFFF00", "#808080"), # Red, Orange, Yellow, Grey
+      domain = c("0%", "33%", "67%", "Unknown"),
       ordered = TRUE
+    )
+  } else if(color_variable %in% c("hfull_length_TempVMM08", "hfull_area_TempVMM08", "hfull_volume_TempVMM08",
+            "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08")) {
+    pal <- leaflet::colorNumeric(
+      palette = colorRampPalette(c("blue", "white", "red"))(100),
+      domain = NULL
     )
   } else if(color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri", "hmarg_length_urb",
                                   "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural", "hmarg_area_natural",
-                                  "hmarg_volume_natural", "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08",
-                                  "hfull_length_agri", "hfull_area_agri", "hfull_volume_agri", "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
-                                  "hfull_length_natural", "hfull_area_natural", "hfull_volume_natural", "hfull_length_TempVMM08",
-                                  "hfull_area_TempVMM08", "hfull_volume_TempVMM08")) {
+                                  "hmarg_volume_natural","hfull_length_agri", "hfull_area_agri", "hfull_volume_agri",
+                                  "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
+                                  "hfull_length_natural", "hfull_area_natural", "hfull_volume_natural")) {
     pal <- leaflet::colorNumeric(
       palette = colorRampPalette(c("#f9e8e4", "#ce5537"))(100),
       domain = range(points$C, na.rm = TRUE),
@@ -691,16 +689,29 @@ figure_scatterplot <- function(
       ggplot2::theme(legend.position = "none")
   } else if (color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri",
                                    "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural",
-                                   "hmarg_area_natural", "hmarg_volume_natural", "hmarg_length_TempVMM08", "hmarg_area_TempVMM08",
-                                   "hmarg_volume_TempVMM08", "hfull_length_agri", "hfull_area_agri", "hfull_volume_agri", "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
-                                   "hfull_length_natural", "hfull_area_natural", "hfull_volume_natural", "hfull_length_TempVMM08",
-                                   "hfull_area_TempVMM08", "hfull_volume_TempVMM08")) {
+                                   "hmarg_area_natural", "hmarg_volume_natural", "hfull_length_agri", "hfull_area_agri",
+                                   "hfull_volume_agri", "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
+                                   "hfull_length_natural", "hfull_area_natural", "hfull_volume_natural")) {
     # Gradient palette for habitat quality variables
     ggP <- ggP +
       ggplot2::scale_fill_gradient(
         low = "#f9e8e4", #"#e0e0ff"
         high = "#ce5537", #"#1c1cff",
         labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
+      ) +
+      ggplot2::theme(
+        legend.position = c(.99, .95),
+        legend.direction = "vertical",
+        legend.justification = c(1, 1),
+        legend.key.height = ggplot2::unit(1, "cm"),
+        legend.box.background = ggplot2::element_rect(color = "grey")
+      )
+  } else if(color_variable %in% c("hfull_length_TempVMM08", "hfull_area_TempVMM08", "hfull_volume_TempVMM08",
+                                  "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08")) {
+    ggP <- ggP +
+      ggplot2::scale_fill_gradientn(
+        colours = colorRampPalette(c("blue", "white", "red"))(100),
+        na.value = "grey50"
       ) +
       ggplot2::theme(
         legend.position = c(.99, .95),
@@ -727,16 +738,6 @@ figure_scatterplot <- function(
           "Tribal" = "#3682BA",
           "Unknown" = "#5E4FA2",
           "Multiple" = "#B8B8B8"
-        ),
-        drop = TRUE, limits = force
-      )
-    } else if(color_variable == "percent_fish_passable_code") {
-      scaleFill <- ggplot2::scale_fill_manual(
-        values = c(
-          `0%` = "#FF0000",   # Red for 0%
-          `33%` = "#FFA500",  # Orange for 33%
-          `67%` = "#FFFF00",  # Yellow for 67%
-          `Unknown` = "#808080" # Grey for Unknown
         ),
         drop = TRUE, limits = force
       )

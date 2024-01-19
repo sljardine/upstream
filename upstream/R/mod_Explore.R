@@ -103,7 +103,7 @@ mod_Explore_ui <- function(id){
                      ),
                      choiceValues = c(1 : 3),
                      inline = TRUE,
-                     selected = "Length"
+                     selected = 1
         )
       ),
       hr(),
@@ -297,21 +297,24 @@ cColorVariables <- commonVariables
       }
 
       # Update the x-axis variable choices
-      updateSelectizeInput(session, "x_axis_variable", choices = filteredNames)
+      updateSelectizeInput(session, "x_axis_variable", choices = filteredNames, selected = "cost")
     })
 
     # update y variable based on hq
     observeEvent(input$hq, {
       if(input$hq == 3) {
         filteredNames <- volume_vars
+        defaultSelection <- "hfull_volume"
       } else if(input$hq == 2) {
         filteredNames <- area_vars
+        defaultSelection <- "hfull_area"
       } else {
         filteredNames <- length_vars
+        defaultSelection <- "hfull_length"
       }
 
       # Update the x-axis variable choices
-      updateSelectizeInput(session, "y_axis_variable", choices = filteredNames)
+      updateSelectizeInput(session, "y_axis_variable", choices = filteredNames, selected = defaultSelection)
     })
 
     # update barrier ids to filter to wria, huc12, and owner
@@ -368,14 +371,18 @@ cColorVariables <- commonVariables
       if(input$plot_type == "Scatterplot") {
         if(!is.null(input$hq) && input$hq != "") {
           if(input$hq == 3) {  # Assuming 3 corresponds to 'Volume'
-            cVars <- volume_vars
+            volume_vars_select <- volume_vars[!volume_vars %in% c("wria_number", "potential_species")]
+            cVars <- c("None" = "none", volume_vars_select)
           } else if(input$hq == 2) {  # Assuming 2 corresponds to 'Area'
-            cVars <- area_vars
+            area_vars_select <- area_vars[!area_vars %in% c("wria_number", "potential_species")]
+            cVars <- c("None" = "none", area_vars_select)
           } else {  # Default case, assuming any other value including 1 corresponds to 'Length'
-            cVars <- length_vars
+            length_vars_select <- length_vars[!length_vars %in% c("wria_number", "potential_species")]
+            cVars <- c("None" = "none", length_vars_select)
           }
         } else {
-          cVars <- commonVariables
+          commonVariables_select <- commonVariables[!commonVariables %in% c("wria_number", "potential_species")]
+          cVars <- c("None" = "none", commonVariables_select)
         }
       } else {
         cVars <- setNames(
@@ -396,7 +403,7 @@ cColorVariables <- commonVariables
         }
       }
 
-      updateSelectInput(inputId = "color_variable", choices = cVars)
+      updateSelectInput(inputId = "color_variable", choices = cVars, selected = "none")
     })
 
     # update reactive values object with Explore inputs
