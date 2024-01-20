@@ -46,7 +46,7 @@ get_leaflet_map <- function(){
       group = "culverts",
       radius = 5,
       weight = 1.5,
-      color = 'black',
+      color = ~ifelse(bad_match, "yellow", "black"), # marks bad matches
       opacity = 1,
       fillColor = 'grey',
       fillOpacity = 1,
@@ -292,7 +292,7 @@ update_map_culvert_markers <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-  
+
   # filter bad culvert matches
   if(remove_bad_match){
     points <- points %>% dplyr::filter(!bad_match)
@@ -311,10 +311,18 @@ update_map_culvert_markers <- function(
   }
 
   # assign color variable to C
-  if(color_variable %in% c("none", "")){
+  if(color_variable %in% c("none", "")) {
     points$C <- "none"
   } else {
-    points$C <- points %>% dplyr::pull(color_variable)
+    # Check if color_variable is not in the specified list and needs quantile binning
+    if(!color_variable %in% c("owner_type_code", "wria_number", "bad_match", "potential_species", "percent_fish_passable_code")) {
+      # If color_variable is not in the list, break it into 5 quantiles
+      points$C <- points %>%
+        dplyr::mutate(C = dplyr::ntile(.data[[color_variable]], 5)) %>% dplyr::pull(C)
+    } else {
+      # If color_variable is in the list, use it directly
+      points$C <- points %>% dplyr::pull(color_variable)
+    }
   }
 
   # palette
@@ -338,10 +346,16 @@ update_map_culvert_markers <- function(
       domain = c(FALSE, TRUE),
       ordered = TRUE
     )
+  } else if(color_variable == "percent_fish_passable_code"){
+    pal <- leaflet::colorFactor(
+      palette = c("#C15F6E", "#EFDEB0", "#2332BF", "#808080"), # Red, Orange, Yellow, Grey
+      domain = c("0%", "33%", "67%", "Unknown"),
+      ordered = TRUE
+    )
   } else {
     pal <- leaflet::colorNumeric(
-      palette = c("#f9e8e4", "#ce5537"), # c("#e0e0ff", "#1c1cff"),  # "Spectral",
-      domain = points$C %>% range(),
+      palette = colorRampPalette(c("blue", "white", "#C15F6E"))(100),
+      domain = range(points$C, na.rm = TRUE),
       reverse = FALSE
     )
   }
@@ -367,6 +381,12 @@ update_map_culvert_markers <- function(
   # return if no culverts to draw
   if(nrow(points) == 0){return()}
 
+  # Define a custom function to determine the stroke color: highlight overrides bad match
+  getStrokeColor <- function(highlighted, badMatch) {
+    ifelse(highlighted == "Highlighted", strokePal(highlighted),
+           ifelse(badMatch, "yellow", "black"))
+  }
+
   # add culverts to map if zoomed in enough
   leaf_proxy %>%
     leaflet::addCircleMarkers(
@@ -374,7 +394,7 @@ update_map_culvert_markers <- function(
       group = "culverts",
       radius = 5,
       weight = 1.5,
-      color = ~strokePal(IsHighlighted),
+      color = ~getStrokeColor(IsHighlighted, bad_match),
       opacity = 1,
       fillColor = ~pal(C),
       fillOpacity = 1,
@@ -434,7 +454,7 @@ filter_and_format_culverts_for_histogram <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-  
+
   # filter bad culvert matches
   if(remove_bad_match){
     points <- points %>% dplyr::filter(!bad_match)
@@ -522,7 +542,7 @@ filter_and_format_culverts_for_scatterplot <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-  
+
   # filter bad culvert matches
   if(remove_bad_match){
     points <- points %>% dplyr::filter(!bad_match)
@@ -546,7 +566,14 @@ filter_and_format_culverts_for_scatterplot <- function(
   # calculate new variables
   points$X <- points %>% dplyr::pull(x_axis_variable)
   points$Y <- points %>% dplyr::pull(y_axis_variable)
-  points$C <- points %>% dplyr::pull(color_variable)
+  if(!color_variable %in% c("none", "owner_type_code", "wria_number", "bad_match", "potential_species", "percent_fish_passable_code")) {
+    # If color_variable is not in the list, break it into 5 quantiles
+    points$C <- points %>%
+      dplyr::mutate(C = dplyr::ntile(.data[[color_variable]], 5)) %>% dplyr::pull(C)
+  } else {
+    # If color_variable is in the list, use it directly
+    points$C <- points %>% dplyr::pull(color_variable)
+  }
 
   # select the variables
   points <- points %>% dplyr::select(site_id, X, Y, C)
@@ -641,16 +668,16 @@ figure_scatterplot <- function(
     )
 
   # y axis variable
-  if(y_axis_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  if(y_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_y_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
   } else {
     ggP <- ggP + ggplot2::scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
   }
 
   # x axis variable
-  if(x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  if(x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
-  } else if(!x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  } else if(!x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
   }
 
@@ -659,7 +686,7 @@ figure_scatterplot <- function(
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c("none" = "grey")) +
       ggplot2::theme(legend.position = "none")
-  } else if (color_variable %in% c("owner_type_code", "wria_number", "bad_match")) {
+  } else if (color_variable %in% c("owner_type_code", "wria_number", "bad_match", "percent_fish_passable_code", "potential_species")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
       # colorRampPalette(brewer.pal(10, "Spectral"))(11)
@@ -677,6 +704,28 @@ figure_scatterplot <- function(
           "Tribal" = "#3682BA",
           "Unknown" = "#5E4FA2",
           "Multiple" = "#B8B8B8"
+        ),
+        drop = TRUE, limits = force
+      )
+    } else if(color_variable == "potential_species") {
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(
+          "Steelhead" = "#FF0000",   # Red for 0%
+          "Coho" = "#FFA500",  # Orange for 33%
+          "Chinook" = "#FFFF00",  # Yellow for 67%
+          "Sockeye" = "#808080",
+          "Chum" = "#E04F4A",
+          "Pink" = "#9E0142"
+        ),
+        drop = TRUE, limits = force
+      )
+    } else if(color_variable == "percent_fish_passable_code") {
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(
+          `0%` = "#C15F6E",
+          `33%` = "#EFDEB0",
+          `67%` = "#2332BF",
+          `Unknown` = "#808080" # Grey for Unknown
         ),
         drop = TRUE, limits = force
       )
@@ -725,22 +774,24 @@ figure_scatterplot <- function(
   } else {
     # continuous variables
     ggP <- ggP +
-      ggplot2::scale_fill_gradient(
-        low = "#f9e8e4", #"#e0e0ff"
-        high = "#ce5537", #"#1c1cff",
-        labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
+      ggplot2::scale_fill_gradientn(
+        colours = colorRampPalette(c("blue", "white", "#C15F6E"))(100),
+        na.value = "grey50",
+        guide = ggplot2::guide_colourbar(title = "Quantile")  # Specify the legend title here
       ) +
       ggplot2::theme(
         legend.position = c(.99, .95),
         legend.direction = "vertical",
         legend.justification = c(1, 1),
         legend.key.height = ggplot2::unit(1, "cm"),
-        legend.box.background = ggplot2::element_rect(color = "grey")
-      )
+        legend.box.background = ggplot2::element_rect(color = "grey"),
+        legend.title = ggplot2::element_text(size = 10)  # Adjust the size as needed
+      ) +
+      ggplot2::labs(fill = "Quantile")
   }
 
   # x axis tick label orientation
-  if(x_axis_variable %in% c("wria_number", "owner_type_code", "potential_species")){
+  if(x_axis_variable %in% c("wria_number", "owner_type_code", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP +
       ggplot2::theme(
         axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
@@ -802,7 +853,22 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
     ggP <- ggP +
       ggplot2::scale_fill_manual(values = c("none" = "#5b5b5b")) +
       ggplot2::theme(legend.position = "none")
-  } else if (color_variable %in% c("owner_type_code", "wria_number", "barrier_count")) {
+  } else if(color_variable %in% c("hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri", "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb", "hmarg_length_natural", "hmarg_area_natural", "hmarg_volume_natural")){
+    # Gradient palette for habitat quality variables
+    ggP <- ggP +
+      ggplot2::scale_fill_gradient(
+        low = "#f9e8e4", #"#e0e0ff"
+        high = "#ce5537", #"#1c1cff",
+        labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE)
+      ) +
+      ggplot2::theme(
+        legend.position = c(.99, .95),
+        legend.direction = "vertical",
+        legend.justification = c(1, 1),
+        legend.key.height = ggplot2::unit(1, "cm"),
+        legend.box.background = ggplot2::element_rect(color = "grey")
+      )
+  } else if (color_variable %in% c("owner_type_code", "wria_number", "barrier_count", "percent_fish_passable_code")) {
     # discrete variables
     if(color_variable == "owner_type_code"){
       # colorRampPalette(brewer.pal(10, "Spectral"))(11)
@@ -849,6 +915,16 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
           "Stillaguamish" = "#3682BA",
           "Upper Chehalis" = "#4A68AE",
           "Upper Skagit" =  "#5E4FA2"
+        ),
+        drop = TRUE, limits = force
+      )
+    } else if(color_variable == "percent_fish_passable_code") {
+      scaleFill <- ggplot2::scale_fill_manual(
+        values = c(
+          `0%` = "#FF0000",   # Red for 0%
+          `33%` = "#FFA500",  # Orange for 33%
+          `67%` = "#FFFF00",  # Yellow for 67%
+          `Unknown` = "#808080" # Grey for Unknown
         ),
         drop = TRUE, limits = force
       )
@@ -1005,6 +1081,54 @@ get_pretty_variable_name <- function(varName){
     prettyName <- "WSDOT Downstream Corrections"
   }else if(varName == "corrected_dn_other"){
     prettyName <- "non-WSDOT Downstream Corrections"
+  }else if(varName == "hmarg_length_agri"){
+    prettyName <- "Marginal Agricultural Habitat (Length)"
+  }else if(varName == "hmarg_area_agri"){
+    prettyName <- "Marginal Agricultural Habitat (Area)"
+  }else if(varName == "hmarg_volume_agri"){
+    prettyName <- "Marginal Agricultural Habitat (Volume)"
+  }else if(varName == "hmarg_length_urb"){
+    prettyName <- "Marginal Urban Habitat (Length)"
+  }else if(varName == "hmarg_area_urb"){
+    prettyName <- "Marginal Urban Habitat (Area)"
+  }else if(varName == "hmarg_volume_urb"){
+    prettyName <- "Marginal Urban Habitat (Volume)"
+  }else if(varName == "hmarg_length_natural"){
+    prettyName <- "Marginal Natural Habitat (Length)"
+  }else if(varName == "hmarg_area_natural"){
+    prettyName <- "Marginal Natural Habitat (Area)"
+  }else if(varName == "hmarg_volume_natural"){
+    prettyName <- "Marginal Natural Habitat (Volume)"
+  }else if(varName == "hmarg_length_TempVMM08"){
+    prettyName <- "Marginal Weighted Temperature (Length)"
+  }else if(varName == "hmarg_area_TempVMM08"){
+    prettyName <- "Marginal Weighted Temperature (Area)"
+  }else if(varName == "hmarg_volume_TempVMM08"){
+    prettyName <- "Marginal Weighted Temperature (Volume)"
+  }else if(varName == "hfull_length_agri"){
+    prettyName <- "Full Agricultural Habitat (Length)"
+  }else if(varName == "hfull_area_agri"){
+    prettyName <- "Full Agricultural Habitat (Area)"
+  }else if(varName == "hfull_volume_agri"){
+    prettyName <- "Full Agricultural Habitat (Volume)"
+  }else if(varName == "hfull_length_urb"){
+    prettyName <- "Full Urban Habitat (Length)"
+  }else if(varName == "hfull_area_urb"){
+    prettyName <- "Full Urban Habitat (Area)"
+  }else if(varName == "hfull_volume_urb"){
+    prettyName <- "Full Urban Habitat (Volume)"
+  }else if(varName == "hfull_length_natural"){
+    prettyName <- "Full Natural Habitat (Length)"
+  }else if(varName == "hfull_area_natural"){
+    prettyName <- "Full Natural Habitat (Area)"
+  }else if(varName == "hfull_volume_natural"){
+    prettyName <- "Full Natural Habitat (Volume)"
+  }else if(varName == "hfull_length_TempVMM08"){
+    prettyName <- "Full Weighted Temperature (Length)"
+  }else if(varName == "hfull_area_TempVMM08"){
+    prettyName <- "Full Weighted Temperature (Area)"
+  }else if(varName == "hfull_volume_TempVMM08"){
+    prettyName <- "Full Weighted Temperature (Volume)"
   }
 
   return(prettyName)
@@ -1018,7 +1142,7 @@ get_pretty_variable_name <- function(varName){
 get_plot_click_site_id <- function(owner_sel, area_sel, remove_bad_match, x_axis_variable, y_axis_variable, plotClickX, plotClickY){
   points <- culverts_cmb
 
-  # get sites for selected owners
+  # Filter by owner selection
   cSiteIds <- c()
   if("1" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
   if("2" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
@@ -1032,26 +1156,35 @@ get_plot_click_site_id <- function(owner_sel, area_sel, remove_bad_match, x_axis
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
 
-  # filter by area and owner
+  # Filter by area and owner
   points <- points %>%
-    dplyr::filter(wria_number %in% area_sel & site_id %in% cSiteIds) %>%
-    dplyr::rename(X_var = x_axis_variable, Y_var = y_axis_variable)
-  
-  # filter bad culvert matches
+    dplyr::filter(wria_number %in% area_sel & site_id %in% cSiteIds)
+
+  # Filter bad culvert matches
   if(remove_bad_match){
     points <- points %>% dplyr::filter(!bad_match)
   }
 
-  points1 <- points %>%
-    dplyr::mutate(RelX = X_var / max(X_var), RelY = Y_var / max(Y_var)) %>%
-    dplyr::mutate(Diff = sqrt((RelX - plotClickX / max(X_var))^2 + (RelY - plotClickY / max(Y_var))^2)) %>%
-    dplyr::arrange(Diff) %>%
-    dplyr::slice(1) %>%
-    dplyr::select(site_id, X_var, Y_var, Diff) %>%
-    dplyr::rename(X = X_var, Y = Y_var)
+  # Ensure the x and y axis variables are numeric and handle NA values
+  points <- points %>%
+    dplyr::mutate(X_var = as.numeric(.data[[x_axis_variable]]),
+                  Y_var = as.numeric(.data[[y_axis_variable]])) %>%
+    dplyr::filter(!is.na(X_var) & !is.na(Y_var))
 
-  if(points1$Diff < .03){
-    siteId <- paste0("Site Id: ", points1$site_id)
+  # Calculate relative positions and differences
+  max_X_var <- max(points$X_var, na.rm = TRUE)
+  max_Y_var <- max(points$Y_var, na.rm = TRUE)
+
+  points <- points %>%
+    dplyr::mutate(RelX = X_var / max_X_var,
+                  RelY = Y_var / max_Y_var,
+                  Diff = sqrt((RelX - plotClickX / max_X_var)^2 + (RelY - plotClickY / max_Y_var)^2)) %>%
+    dplyr::arrange(Diff) %>%
+    dplyr::slice(1)
+
+  # Check if click is close to a point
+  if(nrow(points) > 0 && points$Diff[1] < .03){
+    siteId <- paste0("Site Id: ", points$site_id[1])
   } else {
     siteId <- ''
   }
