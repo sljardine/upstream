@@ -46,7 +46,7 @@ get_leaflet_map <- function(){
       group = "culverts",
       radius = 5,
       weight = 1.5,
-      color = 'black',
+      color = ~ifelse(bad_match, "yellow", "black"), # marks bad matches
       opacity = 1,
       fillColor = 'grey',
       fillOpacity = 1,
@@ -381,6 +381,12 @@ update_map_culvert_markers <- function(
   # return if no culverts to draw
   if(nrow(points) == 0){return()}
 
+  # Define a custom function to determine the stroke color: highlight overrides bad match
+  getStrokeColor <- function(highlighted, badMatch) {
+    ifelse(highlighted == "Highlighted", strokePal(highlighted),
+           ifelse(badMatch, "yellow", "black"))
+  }
+
   # add culverts to map if zoomed in enough
   leaf_proxy %>%
     leaflet::addCircleMarkers(
@@ -388,7 +394,7 @@ update_map_culvert_markers <- function(
       group = "culverts",
       radius = 5,
       weight = 1.5,
-      color = ~strokePal(IsHighlighted),
+      color = ~getStrokeColor(IsHighlighted, bad_match),
       opacity = 1,
       fillColor = ~pal(C),
       fillOpacity = 1,
