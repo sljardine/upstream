@@ -1,4 +1,5 @@
 load("upstream_inputs.Rdata")
+load("upstream_inputs_gm.Rdata")
 
 usethis::use_data(culverts_cmb, overwrite = TRUE)
 usethis::use_data(D, overwrite = TRUE)
@@ -11,3 +12,10 @@ usethis::use_data(wrias, overwrite = TRUE)
 usethis::use_data(huc12, overwrite = TRUE)
 usethis::use_data(huc12_wrias, overwrite = TRUE)
 
+usethis::use_data(culverts_cmb_gm, overwrite = TRUE)
+usethis::use_data(D_gm, overwrite = TRUE)
+usethis::use_data(E_gm, overwrite = TRUE)
+usethis::use_data(lines_simp_gm, overwrite = TRUE)
+usethis::use_data(lines_ds_gm, overwrite = TRUE)
+usethis::use_data(marginal_line_ids_gm, overwrite = TRUE)
+usethis::use_data(downstream_line_ids_gm, overwrite = TRUE)
