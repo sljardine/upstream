@@ -197,20 +197,38 @@ mod_Figures_server <- function(id, r){
         r$subarea_choice_custom
       )
       remove_map_points(leaflet::leafletProxy(ns("base_map")))
-      map_leaflet_custom(
-        leaflet::leafletProxy(ns("base_map")),
-        culverts_cmb, #culverts
-        lines_simp, #lines with linestring geometries
-        lines_ds, #downstream lines with linestring geometries
-        r$barrier_ids_custom, #inputs from mod_Custom
-        E, #full connectivity matrix
-        marginal_line_ids #comids for all lines marginally upstream of each point
-      )
-      # selected wria bounding box
-      bbox <- get_wria_bounding_box(r$area_sel_custom)
-      # zoom map to selected wrias
-      leaflet::leafletProxy(mapId = ns("base_map")) %>%
-      leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+      
+      if(r$remove_bad_match_custom) {
+        map_leaflet_custom(
+          leaf_proxy = leaflet::leafletProxy(ns("base_map")),
+          points = culverts_cmb_gm, #culverts
+          lines = lines_simp_gm, #lines with linestring geometries
+          dslines = lines_ds_gm, #downstream lines with linestring geometries
+          prtf_cust = r$barrier_ids_custom, #inputs from mod_Custom
+          E = E_gm, #full connectivity matrix
+          marginal_line_ids = marginal_line_ids_gm #comids for all lines marginally upstream of each point
+        )
+        # selected wria bounding box
+        bbox <- get_wria_bounding_box(r$area_sel_custom)
+        # zoom map to selected wrias
+        leaflet::leafletProxy(mapId = ns("base_map")) %>%
+          leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+      } else {
+        map_leaflet_custom(
+          leaf_proxy = leaflet::leafletProxy(ns("base_map")),
+          points = culverts_cmb, #culverts
+          lines = lines_simp, #lines with linestring geometries
+          dslines = lines_ds, #downstream lines with linestring geometries
+          prtf_cust = r$barrier_ids_custom, #inputs from mod_Custom
+          E = E, #full connectivity matrix
+          marginal_line_ids = marginal_line_ids #comids for all lines marginally upstream of each point
+        )
+        # selected wria bounding box
+        bbox <- get_wria_bounding_box(r$area_sel_custom)
+        # zoom map to selected wrias
+        leaflet::leafletProxy(mapId = ns("base_map")) %>%
+          leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+      }
     })
 
     # reset plot click text output

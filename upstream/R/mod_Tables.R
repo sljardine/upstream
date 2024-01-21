@@ -61,8 +61,27 @@ mod_Tables_server <- function(id, r){
           }
         }
         else if(r$tab_sel == "Custom") {
-          points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
-          get_summary_table(culverts_cmb, points_sel_custom, barrier_idp = 0, remove_bad_match = FALSE)
+          if(r$remove_bad_match_custom){
+            points_sel_custom <- get_points_sel_custom(
+              points = culverts_cmb_gm, 
+              prtf_cust = r$barrier_ids_custom
+              )
+            get_summary_table(
+              points = culverts_cmb_gm, 
+              points_sel = points_sel_custom, 
+              barrier_idp = 0
+              )
+          } else {
+            points_sel_custom <- get_points_sel_custom(
+              points = culverts_cmb, 
+              prtf_cust = r$barrier_ids_custom
+              )
+            get_summary_table(
+              points = culverts_cmb, 
+              points_sel = points_sel_custom, 
+              barrier_idp = 0
+              )
+          }
         }
       }
     )
@@ -89,8 +108,27 @@ mod_Tables_server <- function(id, r){
           }
        }
         else if(r$tab_sel == "Custom") {
-          points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
-          get_plan_list(culverts_cmb, points_sel_custom, barrier_idp = 0)
+          if(r$remove_bad_match_custom){ 
+            points_sel_custom <- get_points_sel_custom(
+              points = culverts_cmb_gm, 
+              prtf_cust = r$barrier_ids_custom
+            )
+            get_plan_list(
+              points = culverts_cmb_gm, 
+              points_sel = points_sel_custom, 
+              barrier_idp = 0
+            )
+            } else {
+          points_sel_custom <- get_points_sel_custom(
+            points = culverts_cmb, 
+            prtf_cust = r$barrier_ids_custom
+            )
+          get_plan_list(
+            points = culverts_cmb, 
+            points_sel = points_sel_custom, 
+            barrier_idp = 0
+            )
+            }
       }
     }
   )

@@ -89,7 +89,7 @@ mod_Custom_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
-    # render leaflet output (DO I NEED THIS?)
+    # render leaflet output 
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()
     })
@@ -98,32 +98,18 @@ mod_Custom_server <- function(id, r){
     observeEvent(r$tab_sel, {
       if(r$tab_sel == "Welcome"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       } else if(r$tab_sel == "Explore"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       } else if(r$tab_sel == "Suggest"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       }
       else if(r$tab_sel == "Custom"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       }
       else if(r$tab_sel == "Learn"){
         reset_map(leaflet::leafletProxy(ns("base_map")))
-        #user_plot(FALSE)
       }
     })
-
-
-    # # update input choices for barrier IDs
-    # updateSelectizeInput(
-    #   session,
-    #   inputId = "barrier_ids",
-    #   choices = culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort(),
-    #   server = TRUE
-    # )
 
 
     # update huc options
@@ -160,7 +146,7 @@ mod_Custom_server <- function(id, r){
       
       # filter bad culvert matches
       if(input$remove_bad_match == 2){
-        sfC <- sfC %>% dplyr::filter(!bad_match)
+        sfC <- culverts_cmb_gm %>% sf::st_drop_geometry()
       }
 
       # get areas to filter by
@@ -218,6 +204,7 @@ mod_Custom_server <- function(id, r){
         r$area_choice_custom <- "selection"
       }
     })
+    
     ##subarea_sel and subarea_choice ----
     observeEvent(c(input$area_sel, input$subarea_sel), {
       # get areas to filter by
@@ -228,13 +215,16 @@ mod_Custom_server <- function(id, r){
       }
 
       if("0" %in% input$subarea_sel){
-        r$subarea_sel_custom <- huc12_wrias %>% dplyr::filter(wria_number %in% cWRIA_NR) %>% dplyr::pull(huc_number)
+        r$subarea_sel_custom <- huc12_wrias %>% 
+          dplyr::filter(wria_number %in% cWRIA_NR) %>% 
+          dplyr::pull(huc_number)
         r$subarea_choice_custom <- "all"
       } else {
         r$subarea_sel_custom <- input$subarea_sel
         r$subarea_choice_custom <- "selection"
       }
     })
+    
     ##owner_sel ----
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
@@ -243,23 +233,38 @@ mod_Custom_server <- function(id, r){
         r$owner_sel_custom <- input$owner_sel
       }
     })
-    ##planned culvs ----
+    
+    ##planned projects ----
+    #add already planned projects
     observeEvent(input$barrier_idp, r$barrier_idp_custom <- input$barrier_idp)
-    updateSelectizeInput(
-      session,
-      inputId = "barrier_idp",
-      choices = setNames(
-        c(0,culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort()),
-        nm = c('None',
-               culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort())
-      ),
-      selected = 0,
-      server = TRUE
+    
+    observeEvent(c(input$remove_bad_match), {
+      
+      sfC <- culverts_cmb %>% sf::st_drop_geometry()
+      
+      # filter bad culvert matches
+      if(input$remove_bad_match == 2){
+        sfC <- culverts_cmb_gm %>% sf::st_drop_geometry()
+      }
+      
+      updateSelectizeInput(
+        session,
+        inputId = "barrier_idp",
+        choices = setNames(
+          c(0, sfC %>% dplyr::pull(site_id) %>% sort()),
+          nm = c('None',
+                 sfC %>% dplyr::pull(site_id) %>% sort())
+        ),
+        selected = 0,
+        server = TRUE
+      )
+    }
     )
+
     ##selected culvs ----
     observeEvent(input$barrier_ids, r$barrier_ids_custom <- input$barrier_ids, ignoreNULL = FALSE)
     
-    ##remove bad culvert matches ----
+    ##convert remove bad culvert matches to logical----
     observeEvent(input$remove_bad_match, {
       if(input$remove_bad_match == 1){
         r$remove_bad_match_custom <- FALSE
@@ -273,8 +278,10 @@ mod_Custom_server <- function(id, r){
       if(!is.null(input$barrier_ids))
       {r$submit_custom <- input$submit}
       else
-      {showModal(modalDialog(title = "Warning!",
-                             "Please enter at least one set of barrier IDs before you click the Submit button."))}
+      {showModal(
+        modalDialog(title = "Warning!",
+          "Please enter at least one set of barrier IDs before you click the Submit button.")
+        )}
     })
 
   })
