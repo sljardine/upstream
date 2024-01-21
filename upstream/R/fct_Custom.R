@@ -85,7 +85,7 @@ map_leaflet_custom <- function(
     leafgl::addGlPolylines(
       data = ds_leaflet_lines %>%
         dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids),
-      color = "#2739c7",
+      color = "#b0b0b0",
       opacity = 0.25,
       group = "unblocked_lines"
     )
