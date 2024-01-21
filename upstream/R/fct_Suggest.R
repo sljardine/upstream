@@ -243,7 +243,7 @@ map_leaflet_opt <- function(
 
   #test for null sets in ds lines. If FALSE draw lines
   testfilter <- ds_leaflet_lines %>% dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids)
-  if (inherits(sf::st_geometry(testfilter), c("sfc_LINESTRING", "sfc_MULTILINESTRING"))==TRUE){
+  if (inherits(sf::st_geometry(testfilter), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
 
  leaf_proxy <- leaf_proxy %>%
    leafgl::addGlPolylines(

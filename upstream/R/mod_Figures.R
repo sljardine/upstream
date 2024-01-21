@@ -206,7 +206,8 @@ mod_Figures_server <- function(id, r){
           dslines = lines_ds_gm, #downstream lines with linestring geometries
           prtf_cust = r$barrier_ids_custom, #inputs from mod_Custom
           E = E_gm, #full connectivity matrix
-          marginal_line_ids = marginal_line_ids_gm #comids for all lines marginally upstream of each point
+          marginal_line_ids = marginal_line_ids_gm, #comids for all lines marginally upstream of each point
+          downstream_line_ids = downstream_line_ids_gm #comids for all lines downstream of each point on main stem
         )
         # selected wria bounding box
         bbox <- get_wria_bounding_box(r$area_sel_custom)
@@ -221,7 +222,8 @@ mod_Figures_server <- function(id, r){
           dslines = lines_ds, #downstream lines with linestring geometries
           prtf_cust = r$barrier_ids_custom, #inputs from mod_Custom
           E = E, #full connectivity matrix
-          marginal_line_ids = marginal_line_ids #comids for all lines marginally upstream of each point
+          marginal_line_ids = marginal_line_ids, #comids for all lines marginally upstream of each point
+          downstream_line_ids = downstream_line_ids #comids for all lines downstream of each point on main stem
         )
         # selected wria bounding box
         bbox <- get_wria_bounding_box(r$area_sel_custom)

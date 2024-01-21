@@ -11,7 +11,8 @@ map_leaflet_custom(
   dslines,
   prtf_cust,
   E,
-  marginal_line_ids
+  marginal_line_ids,
+  downstream_line_ids
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ map_leaflet_custom(
 \item{E}{A full connectivity matrix.}
 
 \item{marginal_line_ids}{A vector of line IDs for all lines marginally upstream of each point.}
+
+\item{downstream_line_ids}{A vector of line IDs for all lines downstream of each point.}
 }
 \value{
 A leaflet map.

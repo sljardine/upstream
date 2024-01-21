@@ -20,6 +20,7 @@ get_points_sel_custom <- function(
 #' @param prtf_cust A vector of point IDs for selected points.
 #' @param E A full connectivity matrix.
 #' @param marginal_line_ids A vector of line IDs for all lines marginally upstream of each point.
+#' @param downstream_line_ids A vector of line IDs for all lines downstream of each point.
 #' @return A leaflet map.
 #' @export
 map_leaflet_custom <- function(
@@ -29,7 +30,8 @@ map_leaflet_custom <- function(
     dslines, #lines with linestring geometries downstream of culvs
     prtf_cust, #inputs from mod_Custom
     E, #full connectivity matrix
-    marginal_line_ids #comids for all lines marginally upstream of each point
+    marginal_line_ids, #comids for all lines marginally upstream of each point
+    downstream_line_ids #comids for all lines downstream of each point
   ){
 
   #Convert custom portfolio to TRUE/FALSE vector
@@ -48,7 +50,7 @@ map_leaflet_custom <- function(
   in_cust_wrias <- points$wria_number %in% cust_wrias
 
   #First get blocked/unblocked lines
-  blocked_lines <- marginal_line_ids[in_cust_wrias] %>% unlist()
+  blocked_lines <- marginal_line_ids[in_cust_wrias] %>% base::unlist()
   ds_blocked_lines <- downstream_line_ids[in_cust_wrias] %>% base::unlist()
 
   leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
@@ -56,18 +58,11 @@ map_leaflet_custom <- function(
 
   #Defined blocked/unblocked
   names(marginal_line_ids) <- points$site_id
-  milp_stream_ids <- marginal_line_ids[prtf_cust[h_inc]] %>% unlist()
+  names(downstream_line_ids) <- points$site_id
+  milp_stream_ids <- marginal_line_ids[prtf_cust[h_inc]] %>% base::unlist()
   ds_stream_ids <- downstream_line_ids[prtf_cust[h_inc]] %>% base::unlist()
 
-  #Barrier color
-  pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
-
   #Add lines
-  if(
-    base::nrow(leaflet_lines %>% dplyr::filter(COMID %in% milp_stream_ids)) > 0 &&
-    base::nrow(ds_leaflet_lines %>%
-               dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids)) > 0
-    ){
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(data = leaflet_lines %>%
       dplyr::filter(!COMID %in% milp_stream_ids),
@@ -81,41 +76,30 @@ map_leaflet_custom <- function(
         color = "#2739c7",
         opacity = 0.5,
         group = "unblocked_lines"
-      ) %>%
-    leafgl::addGlPolylines(
+      ) 
+  
+  #test for null sets in ds lines. If FALSE draw lines
+  testfilter <- ds_leaflet_lines %>% dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids)
+  if (inherits(sf::st_geometry(testfilter), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
+    
+    leaf_proxy <- leaf_proxy %>%
+      leafgl::addGlPolylines(
       data = ds_leaflet_lines %>%
         dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids),
       color = "#b0b0b0",
       opacity = 0.25,
       group = "unblocked_lines"
-    )
-  } else if (base::nrow(leaflet_lines %>% dplyr::filter(COMID %in% milp_stream_ids)) > 0) {
-    leaf_proxy <- leaf_proxy %>%
-      leafgl::addGlPolylines(
-        data = leaflet_lines %>%
-          dplyr::filter(!COMID %in% milp_stream_ids),
-        color = "#cf6e7d",
-        opacity = 0.5,
-        group = "blocked_lines"
-      )  %>%
-      leafgl::addGlPolylines(
-        data = leaflet_lines %>%
-          dplyr::filter(COMID %in% milp_stream_ids),
-        color = "#2739c7",
-        opacity = 0.5,
-        group = "unblocked_lines"
-      )
-  } else {
-    leaf_proxy <- leaf_proxy %>%
-      leafgl::addGlPolylines(
-        data = leaflet_lines %>%
-          dplyr::filter(!COMID %in% milp_stream_ids),
-        color = "#b0b0b0",
-        opacity = 0.5,
-        group = "blocked_lines"
-      )
-  }
+    ) } else {
+      NULL
+    }
+  
 
+  # define project color pallet
+  pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
+  
+  # define match border pallet 
+  match_pal <- leaflet::colorFactor(palette = c("black", "transparent"), domain = c(TRUE, FALSE), ordered = TRUE)
+  
   #Add culverts
   leaf_proxy <- leaf_proxy %>%
     leaflet::addCircleMarkers(
@@ -125,7 +109,8 @@ map_leaflet_custom <- function(
       group = "selected_culverts",
       radius = 5,
       weight = 1.5,
-      color = ~pal(cust),
+      color = ~match_pal(bad_match),
+      fillColor = ~pal(cust),
       fillOpacity = 1,
       opacity = 1,
       clusterOptions = leaflet::markerClusterOptions(

@@ -46,7 +46,7 @@ get_leaflet_map <- function(){
       group = "culverts",
       radius = 5,
       weight = 1.5,
-      color = ~ifelse(bad_match, "yellow", "black"), # marks bad matches
+      color = ~ifelse(bad_match, "black", "darkgrey"), # marks bad matches
       opacity = 1,
       fillColor = 'grey',
       fillOpacity = 1,
