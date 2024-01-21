@@ -88,16 +88,17 @@ mod_Explore_ui <- function(id){
       ),
       hr(),
       fluidRow(
-        radioButtons(inputId = ns("hq"),
-                     label = "Select Habitat Quantity Definition",
-                     choiceNames = list(
-                       "Length",
-                       "Area",
-                       "Volume"
-                     ),
-                     choiceValues = c(1 : 3),
-                     inline = TRUE,
-                     selected = 1
+        radioButtons(
+          inputId = ns("hq"),
+          label = "Select Habitat Quantity Definition",
+          choiceNames = list(
+            "Length",
+            "Area",
+            "Volume"
+            ),
+          choiceValues = c(1 : 3),
+          inline = TRUE,
+          selected = 1
         )
       ),
       hr(),
@@ -118,7 +119,6 @@ mod_Explore_ui <- function(id){
             selectizeInput(
               inputId = ns("x_axis_variable"),
               label = "Variable on X axis",
-              # TODO - Pass as argument or add to r reactive function?
               choices = commonVariables,
               selected = "cost",
               width = "100%"),
@@ -214,10 +214,11 @@ mod_Explore_ui <- function(id){
       ),
       hr(),
       fluidRow(
-        radioButtons(inputId = ns("remove_bad_match"),
-                     label = "Remove Bad Culvert Matches",
-                     choices = list("No" = 1, "Yes" = 2), selected = 2,
-                     width = "100%", inline = TRUE)
+        radioButtons(
+          inputId = ns("remove_bad_match"),
+          label = "Remove Bad Culvert Matches",
+          choices = list("No" = 1, "Yes" = 2), selected = 2,
+          width = "100%", inline = TRUE)
       ),
       hr(),
       fluidRow(

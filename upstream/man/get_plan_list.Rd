@@ -8,7 +8,6 @@ get_plan_list(
   points,
   points_sel,
   barrier_idp,
-  remove_bad_match,
   cost = 1,
   mean_design_cost = NULL,
   mean_construction_cost = NULL
@@ -20,6 +19,12 @@ get_plan_list(
 \item{points_sel}{A simple features point data frame containing selected culvert locations and attributes.}
 
 \item{barrier_idp}{A vector of planned culvert IDs}
+
+\item{cost}{A numeric value defining cost option (1 = default, 2 = user adjusted)}
+
+\item{mean_design_cost}{A numeric value.}
+
+\item{mean_construction_cost}{A numeric value.}
 }
 \value{
 A summary table
