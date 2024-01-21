@@ -24,6 +24,8 @@ update_map_culvert_markers(
 
 \item{owner_sel}{A vector of owner ID numbers of interest.}
 
+\item{remove_bad_match}{A logical value (TRUE = remove bad matches).}
+
 \item{color_variable}{An attribute in the points data that defines point color.}
 
 \item{highlight}{Set to NULL if there are no points to highlight.}

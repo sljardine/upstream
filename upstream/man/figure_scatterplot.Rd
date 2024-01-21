@@ -38,7 +38,7 @@ figure_scatterplot(
 
 \item{plot_xmin}{The minimum x value of the plot.}
 
-\item{plot_xmax}{The maximium x value of the plot.}
+\item{plot_xmax}{The maximum x value of the plot.}
 
 \item{plot_ymin}{The minimum y value of the plot.}
 

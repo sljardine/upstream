@@ -29,7 +29,6 @@ mod_Figures_ui <- function(id){
 #' @noRd
 mod_Figures_server <- function(id, r){
   moduleServer(id, function(input, output, session){
-    
     ns <- session$ns
 
     # incrementing variable to trigger plot redraw on brush event
@@ -190,20 +189,47 @@ mod_Figures_server <- function(id, r){
       if(user_plot()){
         if(r$tab_sel == "Explore"){
           if(r$plot_type_explore == "Scatterplot"){
+            if(r$remove_bad_match_explore){ 
+              culverts_cmb_gm %>%
+                filter_and_format_culverts_for_scatterplot(
+                  r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
+                  r$y_axis_variable_explore, r$color_variable_explore
+                ) %>%
+                figure_scatterplot(
+                  r$x_axis_variable_explore, r$y_axis_variable_explore,
+                  r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
+                  r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
+                  r$plot_ymin, r$plot_ymax
+                )
+              } else {
             culverts_cmb %>%
               filter_and_format_culverts_for_scatterplot(
-                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
                 r$y_axis_variable_explore, r$color_variable_explore
                 ) %>%
-              figure_scatterplot(r$x_axis_variable_explore, r$y_axis_variable_explore,
+              figure_scatterplot(
+                r$x_axis_variable_explore, r$y_axis_variable_explore,
                 r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
                 r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
                 r$plot_ymin, r$plot_ymax
                 )
+              }
           } else if(r$plot_type_explore == 'Histogram'){
+            if(r$remove_bad_match_explore){ 
+              culverts_cmb_gm %>%
+                filter_and_format_culverts_for_histogram(
+                  r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
+                  r$histogram_variable_explore
+                ) %>%
+                figure_histogram(
+                  r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore,
+                  r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore,
+                  r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax
+                )
+            } else {
             culverts_cmb %>%
               filter_and_format_culverts_for_histogram(
-                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$remove_bad_match_explore, r$color_variable_explore,
+                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
                 r$histogram_variable_explore
                 ) %>%
               figure_histogram(
@@ -211,6 +237,7 @@ mod_Figures_server <- function(id, r){
                 r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore,
                 r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax
                 )
+            }
           }
         }
       } else {

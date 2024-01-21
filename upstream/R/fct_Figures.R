@@ -274,7 +274,7 @@ update_map_culvert_markers <- function(
   if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
   if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
 
-  # filter bad culvert matches
+  # define points data based on bad match choice
   if(remove_bad_match){
     points <- culverts_cmb_gm
   } else {
@@ -427,7 +427,6 @@ filter_and_format_culverts_for_histogram <- function(
     area_sel,
     subarea_sel,
     owner_sel,
-    remove_bad_match,
     color_variable,
     histogram_variable){
 
@@ -452,11 +451,6 @@ filter_and_format_culverts_for_histogram <- function(
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
 
-  # filter bad culvert matches
-  if(remove_bad_match){
-    points <- points %>% dplyr::filter(!bad_match)
-  }
-
   # this swaps wria_name if X = wria_number
   if(histogram_variable == "wria_number" | color_variable == "wria_number"){
     points <- replace_WRIA_number_with_name(points, wrias)
@@ -479,7 +473,7 @@ filter_and_format_culverts_for_histogram <- function(
   points$C <- points %>% dplyr::pull(color_variable)
 
   # select variables
-  points <- points %>% dplyr::select(site_id, X, C)
+  points <- points %>% dplyr::select(site_id, X, C, bad_match)
 
   # this splits the X variable at commas into rows when X = potential_species
   if(is.character(points$X)){
@@ -514,7 +508,6 @@ filter_and_format_culverts_for_scatterplot <- function(
     area_sel,
     subarea_sel,
     owner_sel,
-    remove_bad_match,
     x_axis_variable,
     y_axis_variable,
     color_variable){
@@ -539,11 +532,6 @@ filter_and_format_culverts_for_scatterplot <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-
-  # filter bad culvert matches
-  if(remove_bad_match){
-    points <- points %>% dplyr::filter(!bad_match)
-  }
 
   # this swaps wria_name if X = wria_number
   if(x_axis_variable == "wria_number" | y_axis_variable == "wria_number" | color_variable == "wria_number"){
@@ -573,7 +561,7 @@ filter_and_format_culverts_for_scatterplot <- function(
   }
 
   # select the variables
-  points <- points %>% dplyr::select(site_id, X, Y, C)
+  points <- points %>% dplyr::select(site_id, X, Y, C, bad_match)
 
   # this splits the X variable at commas into rows when X = potential_species
   if(is.character(points$X)){
@@ -614,7 +602,7 @@ filter_and_format_culverts_for_scatterplot <- function(
 #' @param highlight Whether to highlight some points.
 #' @param barrier_ids IDs of points to highlight.
 #' @param plot_xmin The minimum x value of the plot.
-#' @param plot_xmax The maximium x value of the plot.
+#' @param plot_xmax The maximum x value of the plot.
 #' @param plot_ymin The minimum y value of the plot.
 #' @param plot_ymax The maximum y value of the plot.
 #' @return ggplot object of culvert data scatterplot
@@ -640,20 +628,29 @@ figure_scatterplot <- function(
     cBarrierIds <- barrier_ids
   }
 
-  # calculate highlight variable
-  points$IsHighlighted <- "N"
+  # set highlight variable
   if(highlight == 2){
     points <- points %>%
-      dplyr::mutate(IsHighlighted = dplyr::case_when(site_id %in% cBarrierIds ~ "Y", TRUE ~ "N")) %>%
-      dplyr::arrange(IsHighlighted)
+      dplyr::mutate(
+        to_highlight = site_id %in% cBarrierIds,
+        highlight_color = ifelse(to_highlight, "hl_border",
+            ifelse(bad_match, "bm_border", "none"))
+        ) %>%
+      dplyr::arrange(highlight_color)
+  } else {
+    points <- points %>% 
+      dplyr::mutate(highlight_color = ifelse(bad_match, "bm_border", "none")
+      ) %>%
+      dplyr::arrange(highlight_color)
   }
 
   # init the ggplot
   ggP <- points %>%
-    ggplot2::ggplot(ggplot2::aes(x = X, y = Y, fill = C, color = IsHighlighted)) +
+    ggplot2::ggplot(ggplot2::aes(x = X, y = Y, fill = C, color = highlight_color)) +
     ggplot2::geom_jitter(width = x_jitter, height = y_jitter, alpha = .9, stroke = 1.3, size = 3.5, pch = 21) +
-    #ggplot2::scale_y_continuous(labels = function(x) formatC(x, width = 10)) +
-    ggplot2::scale_color_manual(values = c("N" = "black", "Y" = "#00ffff")) +
+    ggplot2::scale_color_manual(
+      values = c("none" = "darkgrey", "hl_border" = "#00ffff", "bm_border" = "black")
+      ) +
     ggplot2::guides(color = "none") +
     ggplot2::xlab(get_pretty_variable_name(x_axis_variable)) +
     ggplot2::ylab(get_pretty_variable_name(y_axis_variable)) +
@@ -681,7 +678,7 @@ figure_scatterplot <- function(
   # color (fill) scale and legend
   if(color_variable == "none"){
     ggP <- ggP +
-      ggplot2::scale_fill_manual(values = c("none" = "grey")) +
+      ggplot2::scale_fill_manual(values = c("none" = "darkgrey")) +
       ggplot2::theme(legend.position = "none")
   } else if (color_variable %in% c("owner_type_code", "wria_number", "bad_match", "percent_fish_passable_code", "potential_species")) {
     # discrete variables
@@ -755,11 +752,7 @@ figure_scatterplot <- function(
         ),
         drop = TRUE, limits = force
       )
-    } else if(color_variable == 'bad_match'){
-      scaleFill <- ggplot2::scale_fill_manual(
-        values = c(`FALSE` = "#f9e8e4", `TRUE` = "#ce5537")
-      )
-    }
+    } 
     ggP <- ggP +
       scaleFill +
       ggplot2::theme(
