@@ -3,14 +3,16 @@
 #' @param budget A number specifying the budget constraint.
 #' @param D A connectivity matrix.
 #' @param area_sel A vector of WRIA ID numbers of interest.
+#' @param subarea_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
-#' @param barrier_idp A vector of planned culvert IDs
 #' @param obj An indicator for whether objective function is to max quant (obj = 1) or max weighted sum of attributes (obj = 2).
 #' @param w_urb A weight on urban habitat quantity.
 #' @param w_ag A weight on agricultural habitat quantity.
 #' @param w_nat A weight on natural habitat quantity.
 #' @param w_temp A weight on ideal temperature.
+#' @param hq A value for habitat quality definition (1 = length, 2 = area, 3 = volume).
 #' @param species_sel A vector of species ID numbers of interest.
+#' @param barrier_idp A vector of planned culvert IDs
 #' @return A logical vector of TRUE/FALSE values.
 #' @export
 solve_opt <- function(
@@ -21,7 +23,6 @@ solve_opt <- function(
   wria_sel, #wria(s) to run the optimization problem on
   huc_sel, #huc(s) to run the optimization problem on
   owner_sel, #owner(s) to run the optimization problem on
-  remove_bad_match, #flag to remove bad culvert matches
   obj, #indicator for whether objective function is to max quant (1) or max weighted sum of attributes (2)
   w_urb, #weight on urban habitat quantity
   w_ag, #weight on agricultural habitat quantity
@@ -35,13 +36,6 @@ solve_opt <- function(
   mean_construction_cost  #user-defined mean construction cost
 ){
   
-  # filter bad culvert matches
-  if(remove_bad_match){
-    bad_match <- points$bad_match
-    points <- points %>% dplyr::filter(!bad_match)
-    D <- D[!bad_match, !bad_match]
-  }
-
   #habitat quantity definition
   ##length
   if(hq == 1){
@@ -170,10 +164,11 @@ solve_opt <- function(
 #' @param points A simple features point data frame containing culvert locations and attributes.
 #' @param lines A simple features data frame with linestring geometries upstream of culvs
 #' @param dslines A simple features data frame with linestring geometries downstream of culvs
-#' @param D A connectivity matrix.
 #' @param soln A logical vector of TRUE/FALSE values that is the output from solve_opt(.
 #' @param marginal_line_ids A vector of line IDs for all lines marginally upstream of each point.
 #' @param downstream_line_ids A vector of line IDs for all lines marginally upstream of each point.
+#' @param area_sel A vector of WRIA ID numbers of interest.
+#' @param subarea_sel A vector of WRIA ID numbers of interest.
 #' @return A leaflet map.
 #' @export
 map_leaflet_opt <- function(
@@ -185,19 +180,9 @@ map_leaflet_opt <- function(
     marginal_line_ids, #comids for all lines marginally upstream of each point
     downstream_line_ids, #comids for all lines downstream of each point on main stem
     wria_sel, #wria(s) to run the optimization problem on
-    huc_sel, #huc(s) to run the optimization problem on
-    remove_bad_match #boolean option to remove bad culvert matches
-
+    huc_sel #huc(s) to run the optimization problem on
   ){
   
-  # remove bad culvert matches
-  if(remove_bad_match){
-    bad_match <- points$bad_match
-    points <- points %>% dplyr::filter(!bad_match)
-    marginal_line_ids <- marginal_line_ids[!bad_match]
-    downstream_line_ids <- downstream_line_ids[!bad_match]
-  }
-
   #Lines to display depend on whether the solution is a null set
   if(sum(soln) == 0){
 
@@ -275,9 +260,12 @@ map_leaflet_opt <- function(
 
   }
 
-  #Culvert color
+  # define project color pallet
   pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb"), 0 : 1)
 
+  # define match border pallet 
+  match_pal <- leaflet::colorFactor(palette = c("black", "transparent"), domain = c(TRUE, FALSE), ordered = TRUE)
+  
   #Add culverts
   leaf_proxy <- leaf_proxy %>%
     leaflet::addCircleMarkers(
@@ -287,7 +275,8 @@ map_leaflet_opt <- function(
       group = "selected_culverts",
       radius = 5,
       weight = 1.5,
-      color = ~ pal(soln),
+      color = ~match_pal(bad_match),
+      fillColor = ~pal(soln),
       fillOpacity = 1,
       opacity = 1,
       clusterOptions = leaflet::markerClusterOptions(

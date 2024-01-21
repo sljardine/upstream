@@ -107,45 +107,84 @@ mod_Figures_server <- function(id, r){
         r$area_choice_suggest,
         r$subarea_choice_suggest
       )
-      r$points_sel_suggest <- solve_opt(
-        culverts_cmb,
-        as.numeric(r$budget_suggest),
-        D,
-        as.integer(r$area_sel_suggest),
-        as.integer(r$subarea_sel_suggest),
-        as.integer(r$owner_sel_suggest),
-        r$remove_bad_match_suggest,
-        as.integer(r$obj_suggest),
-        as.numeric(r$w_urb_suggest),
-        as.numeric(r$w_ag_suggest),
-        as.numeric(r$w_nat_suggest),
-        as.numeric(r$w_temp_suggest),
-        as.integer(r$hq_suggest),
-        r$species_sel_suggest,
-        r$barrier_idp_suggest,
-        as.integer(r$cost_suggest),
-        as.numeric(r$mean_design_cost_suggest),
-        as.numeric(r$mean_construction_cost_suggest)
+      
+      if(r$remove_bad_match_suggest){
+        r$points_sel_suggest <- solve_opt(
+          points = culverts_cmb_gm,
+          budget = as.numeric(r$budget_suggest),
+          D = D_gm,
+          wria_sel = as.integer(r$area_sel_suggest),
+          huc_sel = as.integer(r$subarea_sel_suggest),
+          owner_sel = as.integer(r$owner_sel_suggest),
+          obj = as.integer(r$obj_suggest),
+          w_urb = as.numeric(r$w_urb_suggest),
+          w_ag = as.numeric(r$w_ag_suggest),
+          w_nat = as.numeric(r$w_nat_suggest),
+          w_temp = as.numeric(r$w_temp_suggest),
+          hq = as.integer(r$hq_suggest),
+          species_sel = r$species_sel_suggest,
+          barrier_idp = r$barrier_idp_suggest,
+          cost = as.integer(r$cost_suggest),
+          mean_design_cost = as.numeric(r$mean_design_cost_suggest),
+          mean_construction_cost = as.numeric(r$mean_construction_cost_suggest)
         )
-      reset_map(leaflet::leafletProxy(ns('base_map')))
-      remove_map_points(leaflet::leafletProxy(ns('base_map')))
-      map_leaflet_opt(
-        leaflet::leafletProxy(ns('base_map')),
-        culverts_cmb, #culverts
-        lines_simp, #lines with linestring geometries
-        lines_ds, #downstream lines with linestring geometries
-        r$points_sel_suggest, #output from solve_opt()
-        marginal_line_ids, #comids for all lines marginally upstream of each point
-        downstream_line_ids, #comids for all lines downstream of each point on main stem
-        as.integer(r$area_sel_suggest),
-        as.integer(r$subarea_sel_suggest),
-        r$remove_bad_match_suggest
-      )
-      # selected wria bounding box
-      bbox <- get_wria_bounding_box(r$area_sel_suggest)
-      # zoom map to selected wrias
-      leaflet::leafletProxy(mapId = ns("base_map")) %>%
-      leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+        reset_map(leaflet::leafletProxy(ns('base_map')))
+        remove_map_points(leaflet::leafletProxy(ns('base_map')))
+        map_leaflet_opt(
+          leaf_proxy = leaflet::leafletProxy(ns('base_map')),
+          points = culverts_cmb_gm, #culverts
+          lines = lines_simp_gm, #lines with linestring geometries
+          dslines = lines_ds_gm, #downstream lines with linestring geometries
+          soln = r$points_sel_suggest, #output from solve_opt()
+          marginal_line_ids = marginal_line_ids_gm, #comids for all lines marginally upstream of each point
+          downstream_line_ids = downstream_line_ids_gm, #comids for all lines downstream of each point on main stem
+          wria_sel = as.integer(r$area_sel_suggest),
+          huc_sel = as.integer(r$subarea_sel_suggest)
+        )
+        # selected wria bounding box
+        bbox <- get_wria_bounding_box(r$area_sel_suggest)
+        # zoom map to selected wrias
+        leaflet::leafletProxy(mapId = ns("base_map")) %>%
+          leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+      } else{
+        r$points_sel_suggest <- solve_opt(
+          points = culverts_cmb,
+          budget = as.numeric(r$budget_suggest),
+          D = D,
+          wria_sel = as.integer(r$area_sel_suggest),
+          huc_sel = as.integer(r$subarea_sel_suggest),
+          owner_sel = as.integer(r$owner_sel_suggest),
+          obj = as.integer(r$obj_suggest),
+          w_urb = as.numeric(r$w_urb_suggest),
+          w_ag = as.numeric(r$w_ag_suggest),
+          w_nat = as.numeric(r$w_nat_suggest),
+          w_temp = as.numeric(r$w_temp_suggest),
+          hq = as.integer(r$hq_suggest),
+          species_sel = r$species_sel_suggest,
+          barrier_idp = r$barrier_idp_suggest,
+          cost = as.integer(r$cost_suggest),
+          mean_design_cost = as.numeric(r$mean_design_cost_suggest),
+          mean_construction_cost = as.numeric(r$mean_construction_cost_suggest)
+        )
+        reset_map(leaflet::leafletProxy(ns('base_map')))
+        remove_map_points(leaflet::leafletProxy(ns('base_map')))
+        map_leaflet_opt(
+          leaf_proxy = leaflet::leafletProxy(ns('base_map')),
+          points = culverts_cmb, #culverts
+          lines = lines_simp, #lines with linestring geometries
+          dslines = lines_ds, #downstream lines with linestring geometries
+          soln = r$points_sel_suggest, #output from solve_opt()
+          marginal_line_ids = marginal_line_ids, #comids for all lines marginally upstream of each point
+          downstream_line_ids = downstream_line_ids, #comids for all lines downstream of each point on main stem
+          wria_sel = as.integer(r$area_sel_suggest),
+          huc_sel = as.integer(r$subarea_sel_suggest)
+        )
+        # selected wria bounding box
+        bbox <- get_wria_bounding_box(r$area_sel_suggest)
+        # zoom map to selected wrias
+        leaflet::leafletProxy(mapId = ns("base_map")) %>%
+          leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+      }
     })
 
     # Custom submit button event

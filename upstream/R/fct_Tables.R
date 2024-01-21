@@ -9,15 +9,9 @@ get_summary_table <- function(
     points,
     points_sel,
     barrier_idp,
-    hq = 1,
-    remove_bad_match
+    hq = 1
     ){
   
-  # remove bad culvert matches
-  if(remove_bad_match){
-    points <- points %>% dplyr::filter(!bad_match)
-  }
-
   #habitat quantity definition
   ##length
   if(hq == 1){
@@ -91,22 +85,19 @@ get_summary_table <- function(
 #' @param points A simple features point data frame containing culvert locations and attributes.
 #' @param points_sel A simple features point data frame containing selected culvert locations and attributes.
 #' @param barrier_idp A vector of planned culvert IDs
+#' @param cost A numeric value defining cost option (1 = default, 2 = user adjusted)
+#' @param mean_design_cost A numeric value.
+#' @param mean_construction_cost A numeric value.
 #' @return A summary table
 #' @export
 get_plan_list <- function(
   points,
   points_sel,
   barrier_idp,
-  remove_bad_match,
   cost = 1, #cost definition
   mean_design_cost = NULL, #user-defined mean design cost
   mean_construction_cost = NULL  #user-defined mean construction cost
 ){
-  
-  # remove bad culvert matches
-  if(remove_bad_match){
-    points <- points %>% dplyr::filter(!bad_match)
-  }
 
   # cost adjustment
   if(cost == 2){

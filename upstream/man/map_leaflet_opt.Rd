@@ -13,8 +13,7 @@ map_leaflet_opt(
   marginal_line_ids,
   downstream_line_ids,
   wria_sel,
-  huc_sel,
-  remove_bad_match
+  huc_sel
 )
 }
 \arguments{
@@ -32,7 +31,9 @@ map_leaflet_opt(
 
 \item{downstream_line_ids}{A vector of line IDs for all lines marginally upstream of each point.}
 
-\item{D}{A connectivity matrix.}
+\item{area_sel}{A vector of WRIA ID numbers of interest.}
+
+\item{subarea_sel}{A vector of WRIA ID numbers of interest.}
 }
 \value{
 A leaflet map.

@@ -46,7 +46,19 @@ mod_Tables_server <- function(id, r){
     store_table <- eventReactive(c(r$submit_suggest, r$submit_custom),
       {
         if(r$tab_sel == "Suggest"){
-          get_summary_table(culverts_cmb, r$points_sel_suggest, r$barrier_idp_suggest, r$hq_suggest, r$remove_bad_match_suggest)
+          if(r$remove_bad_match_suggest){
+            get_summary_table(
+              points = culverts_cmb_gm, 
+              points_sel = r$points_sel_suggest, 
+              barrier_idp = r$barrier_idp_suggest, 
+              hq = r$hq_suggest)
+          } else {
+            get_summary_table(
+              points = culverts_cmb, 
+              points_sel = r$points_sel_suggest, 
+              barrier_idp = r$barrier_idp_suggest, 
+              hq = r$hq_suggest)
+          }
         }
         else if(r$tab_sel == "Custom") {
           points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
@@ -58,18 +70,27 @@ mod_Tables_server <- function(id, r){
     store_list <- eventReactive(c(r$submit_suggest, r$submit_custom),
       {
         if(r$tab_sel == "Suggest"){
-          get_plan_list(
-            culverts_cmb, 
-            r$points_sel_suggest, 
-            r$barrier_idp_suggest,
-            r$remove_bad_match_suggest,
-            r$cost_suggest,
-            r$mean_design_cost_suggest,
-            r$mean_construction_cost_suggest)
+          if(r$remove_bad_match_suggest){
+            get_plan_list(
+              points = culverts_cmb_gm, 
+              points_sel = r$points_sel_suggest, 
+              barrier_idp = r$barrier_idp_suggest,
+              cost = r$cost_suggest,
+              mean_design_cost = r$mean_design_cost_suggest,
+              mean_construction_cost = r$mean_construction_cost_suggest)
+          } else {
+            get_plan_list(
+              points = culverts_cmb, 
+              points_sel = r$points_sel_suggest, 
+              barrier_idp = r$barrier_idp_suggest,
+              cost = r$cost_suggest,
+              mean_design_cost = r$mean_design_cost_suggest,
+              mean_construction_cost = r$mean_construction_cost_suggest)
+          }
        }
         else if(r$tab_sel == "Custom") {
           points_sel_custom <- get_points_sel_custom(culverts_cmb, r$barrier_ids_custom)
-          get_plan_list(culverts_cmb, points_sel_custom, barrier_idp = 0, remove_bad_match = FALSE)
+          get_plan_list(culverts_cmb, points_sel_custom, barrier_idp = 0)
       }
     }
   )
