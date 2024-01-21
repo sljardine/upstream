@@ -252,6 +252,7 @@ update_map_selected_polygons <- function(
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param subarea_sel A vector of WRIA ID numbers of interest.
 #' @param owner_sel A vector of owner ID numbers of interest.
+#' @param remove_bad_match A logical value (TRUE = remove bad matches).
 #' @param color_variable An attribute in the points data that defines point color.
 #' @param highlight Set to NULL if there are no points to highlight.
 #' @param barrier_ids A vector of point ids to highlight.
@@ -273,8 +274,15 @@ update_map_culvert_markers <- function(
   if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
   if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
 
+  # filter bad culvert matches
+  if(remove_bad_match){
+    points <- culverts_cmb_gm
+  } else {
+    points <- culverts_cmb
+  }
+  
   # filter culverts to selected wrias
-  points <- culverts_cmb %>%
+  points <- points %>%
     dplyr::filter(huc_number %in% subarea_sel)
 
   # filter by owner class
@@ -292,11 +300,6 @@ update_map_culvert_markers <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-
-  # filter bad culvert matches
-  if(remove_bad_match){
-    points <- points %>% dplyr::filter(!bad_match)
-  }
 
   # replace owner_type_code with name
   if(color_variable == "owner_type_code"){
@@ -340,12 +343,6 @@ update_map_culvert_markers <- function(
       domain = c("Cedar - Sammamish", "Chambers - Clover", "Deschutes", "Duwamish - Green", "Elwha - Dungeness", "Island", "Kennedy - Goldsborough", "Kitsap", "Lower Chehalis", "Lower Skagit - Samish", "Lyre - Hoko", "Nisqually", "Nooksack", "Puyallup - White", "Queets - Quinault", "Quilcene - Snow", "San Juan", "Skokomish - Dosewallips", "Snohomish", "Soleduc", "Stillaguamish", "Upper Chehalis", "Upper Skagit"),
       ordered = TRUE
     )
-  } else if(color_variable == "bad_match"){
-    pal <- leaflet::colorFactor(
-      palette = c("#f9e8e4", "#ce5537"),
-      domain = c(FALSE, TRUE),
-      ordered = TRUE
-    )
   } else if(color_variable == "percent_fish_passable_code"){
     pal <- leaflet::colorFactor(
       palette = c("#C15F6E", "#EFDEB0", "#2332BF", "#808080"), # Red, Orange, Yellow, Grey
@@ -384,7 +381,7 @@ update_map_culvert_markers <- function(
   # Define a custom function to determine the stroke color: highlight overrides bad match
   getStrokeColor <- function(highlighted, badMatch) {
     ifelse(highlighted == "Highlighted", strokePal(highlighted),
-           ifelse(badMatch, "yellow", "black"))
+           ifelse(badMatch, "black", "transparent"))
   }
 
   # add culverts to map if zoomed in enough

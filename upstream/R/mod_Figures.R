@@ -29,6 +29,7 @@ mod_Figures_ui <- function(id){
 #' @noRd
 mod_Figures_server <- function(id, r){
   moduleServer(id, function(input, output, session){
+    
     ns <- session$ns
 
     # incrementing variable to trigger plot redraw on brush event
