@@ -1,6 +1,6 @@
 # Upstream
 
-Upstream is a tool to inform data-based barrier culvert restoration planning in Western Washington.
+Upstream is a flexible tool designed to support fish passage planning in Western Washington.
 
 # Release Notes
 
