@@ -565,26 +565,28 @@ filter_and_format_culverts_for_scatterplot <- function(
 
   # this splits the X variable at commas into rows when X = potential_species
   if(is.character(points$X)){
-    points <- points %>% purrr::pmap_dfr(function(site_id, X, Y, C){
+    points <- points %>% purrr::pmap_dfr(function(site_id, X, Y, C, bad_match){
       cX <- strsplit(X, ',', fixed = TRUE)[[1]]
       data.frame(
         site_id = site_id,
         X = cX,
         Y = Y,
-        C = C
+        C = C,
+        bad_match = bad_match
       )
     })
   }
 
   # this splits the Y variable at commas into rows when Y = potential_species
   if(is.character(points$Y)){
-    points <- points %>% purrr::pmap_dfr(function(site_id, X, Y, C){
+    points <- points %>% purrr::pmap_dfr(function(site_id, X, Y, C, bad_match){
       cY <- strsplit(Y, ',', fixed = TRUE)[[1]]
       data.frame(
         site_id = site_id,
         X = X,
         Y = cY,
-        C = C
+        C = C,
+        bad_match = bad_match
       )
     })
   }
