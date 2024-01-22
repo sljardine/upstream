@@ -18,10 +18,12 @@ mod_Learn_ui <- function(id){
         tags$li("Dan Holland (Project advisor)"),
         tags$li("Mark Scheuerell (Project advisor)"),
         tags$li("Braeden Van Deynze (Project advisor)"),
-        tags$li("Connor Lewis Smith (Developer, IT)"),
-        tags$li("Jeffery Comnick (Developer)"),
+        tags$li("Connor Lewis-Smith (Developer, IT)"),
         tags$li("Logan Blair (Developer)"),
+        tags$li("Andrew Cooke (Developer)"),
+        tags$li("Jeffery Comnick (Developer)"),
         tags$li("J Kahn (Developer)"),
+        tags$li("Luke Rogers (Developer)"),
         tags$li("Zephyr Pfotenhauer (Illustrator)")
         ),
         style = 'margin-left: 50px;'

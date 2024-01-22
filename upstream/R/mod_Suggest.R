@@ -65,7 +65,7 @@ mod_Suggest_ui <- function(id){
       fluidRow(
         selectizeInput(
           inputId = ns("barrier_idp"),
-          label = "Already Planned / Will Complete",
+          label = "Select Projects to Ignore",
           selected = 0,
           multiple = TRUE,
           choices = NULL,
@@ -130,7 +130,7 @@ mod_Suggest_ui <- function(id){
             style = "margin-left: 15px;",
             sliderInput(
               inputId = ns("w_temp"), 
-              label = "Acceptable Temperature Range", 
+              label = "Select Temperature Range", 
               min = 9, max = 22, step = .1, 
               value = c(9, 22), ticks = FALSE,
               width = '80%'
@@ -156,7 +156,7 @@ mod_Suggest_ui <- function(id){
           ns = ns,
           column(6,
           numericInput(inputId = ns("mean_design_cost"),
-            label = "Mean Design and Permitting Cost ($)",
+            label = "Mean Design & Permitting Cost ($)",
             min = 0,
             value = NULL)
           ),

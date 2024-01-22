@@ -13,7 +13,7 @@ mod_Welcome_ui <- function(id){
     fluidPage(
       fluidRow(
       h3(HTML("<b>Welcome to Upstream</b>"), align = "center"),
-      p("Upstream is a tool to inform data-based barrier culvert restoration planning
+      p("Upstream is a flexible tool designed to support fish passage planning 
         in Western Washington.", align = "center")
       ),
       fluidRow(

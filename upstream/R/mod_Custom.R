@@ -60,7 +60,7 @@ mod_Custom_ui <- function(id){
       fluidRow(
         selectizeInput(
           inputId = ns("barrier_idp"),
-          label = "Already Planned / Will Complete",
+          label = "Select Projects to Ignore",
           selected = 0,
           multiple = TRUE,
           choices = NULL,
@@ -70,7 +70,7 @@ mod_Custom_ui <- function(id){
         fluidRow(
           selectizeInput(
           inputId = ns("barrier_ids"),
-          label = "Enter ID(s) for your custom plan",
+          label = "Enter ID(s) for Your Custom Plan",
           multiple = TRUE,
           choices = NULL,
           width = "100%")

@@ -63,7 +63,7 @@ golem_add_external_resources <- function() {
     # Meta Description
     tags$meta(
       name = "description",
-      content = "A prioritization tool to aid decision making around fish barrier culvert improvement projects within Western Washington"
+      content = "A flexible tool designed to support fish passage planning in Western Washington"
     ),
     # Canonical Link
     tags$link(
