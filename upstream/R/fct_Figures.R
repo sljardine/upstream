@@ -42,7 +42,7 @@ get_leaflet_map <- function(){
   # add circle markers
   m <- m %>%
     leaflet::addCircleMarkers(
-      data = culverts_cmb,
+      data = welcome_map_points,
       group = "culverts",
       radius = 5,
       weight = 1.5,
@@ -83,13 +83,13 @@ reset_map <- function(leaf_proxy){
     leaflet::clearGroup("ds_lines")%>%
     leaflet::clearGroup("selected_culverts") %>%
     leaflet::addCircleMarkers(
-      data = culverts_cmb,
+      data = welcome_map_points,
       group = "culverts",
       radius = 5,
       weight = 1.5,
-      color = "black",
+      color = ~ifelse(bad_match, "black", "darkgrey"), # marks bad matches
       opacity = 1,
-      fillColor = "grey",
+      fillColor = 'grey',
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
