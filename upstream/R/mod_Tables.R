@@ -69,7 +69,8 @@ mod_Tables_server <- function(id, r){
             get_summary_table(
               points = culverts_cmb_gm,
               points_sel = points_sel_custom,
-              barrier_idp = 0
+              barrier_idp = 0,
+              hq = r$hq_custom
               )
           } else {
             points_sel_custom <- get_points_sel_custom(
@@ -79,7 +80,8 @@ mod_Tables_server <- function(id, r){
             get_summary_table(
               points = culverts_cmb,
               points_sel = points_sel_custom,
-              barrier_idp = 0
+              barrier_idp = 0,
+              hq = r$hq_custom
               )
           }
         }

@@ -322,28 +322,22 @@ mod_Custom_server <- function(id, r){
     observeEvent(input$mean_design_cost, r$mean_design_cost_custom <- input$mean_design_cost)
     observeEvent(input$mean_construction_cost, r$mean_construction_cost_custom <- input$mean_construction_cost)
 
+    ##hq (habitat quality definition) ----
+    observeEvent(input$hq, r$hq_custom <- input$hq)
+
     # Custom tab submit event
     observeEvent(input$submit, {
-      # Check if at least one set of barrier IDs is entered
-      if(!is.null(input$barrier_ids)) {
-        # Check for custom costs with mean entered
-        if(input$cost == 2 && !is.na(input$mean_design_cost) && !is.na(input$mean_construction_cost)) {
-          r$submit_custom <- input$submit
-        } else {
-          # Show warning if custom costs are not properly entered
-          showModal(
-            modalDialog(
-              title = "Warning!",
-              "Please enter the mean design and construction costs when selecting custom costs."
-            )
-          )
-        }
+      # Check all conditions together
+      if(!is.null(input$barrier_ids) &&
+         ((input$cost != 2) ||
+          (input$cost == 2 && !is.na(input$mean_design_cost) && !is.na(input$mean_construction_cost)))) {
+        r$submit_custom <- input$submit
       } else {
-        # Show warning if no barrier IDs are entered
+        # Show warning if conditions are not met
         showModal(
           modalDialog(
             title = "Warning!",
-            "Please enter at least one set of barrier IDs before you click the Submit button."
+            "Please fill all the fields correctly before you click the Submit button."
           )
         )
       }
