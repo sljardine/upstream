@@ -35,7 +35,7 @@ mod_Learn_ui <- function(id){
     ),
     fluidRow(
       h3(HTML("<b>Upstream User Guide</b>"), align = "left", style = 'margin-left: 50px;'),
-      p("Coming Soon", align = "left", style = 'margin-left: 50px;')
+      p(HTML("Work in Progress. <a href='https://sljardine.github.io/upstream_manual/' target='_blank'>View at https://sljardine.github.io/upstream_manual/</a>"), align = "left", style = 'margin-left: 50px;')
     ),
     fluidRow(
       h3(HTML("<b>Upstream Video Tutorial</b>"), align = "left", style = 'margin-left: 50px;'),

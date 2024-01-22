@@ -280,7 +280,7 @@ update_map_culvert_markers <- function(
   } else {
     points <- culverts_cmb
   }
-  
+
   # filter culverts to selected wrias
   points <- points %>%
     dplyr::filter(huc_number %in% subarea_sel)
@@ -638,7 +638,7 @@ figure_scatterplot <- function(
         ) %>%
       dplyr::arrange(highlight_color)
   } else {
-    points <- points %>% 
+    points <- points %>%
       dplyr::mutate(highlight_color = ifelse(bad_match, "bm_border", "none")
       ) %>%
       dplyr::arrange(highlight_color)
@@ -661,9 +661,20 @@ figure_scatterplot <- function(
       legend.key.width = ggplot2::unit(55, "native")
     )
 
+  # Custom label function
+  custom_dollar_label <- function() {
+    function(x) {
+      ifelse(x >= 1e6,
+             paste0("$", formatC(x / 1e6, format = "f", digits = 1), "M"),
+             scales::label_dollar()(x))
+    }
+  }
+
   # y axis variable
   if(y_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_y_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
+  } else if(y_axis_variable == "cost"){
+    ggP <- ggP + ggplot2::scale_y_continuous(labels = custom_dollar_label())
   } else {
     ggP <- ggP + ggplot2::scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
   }
@@ -671,7 +682,9 @@ figure_scatterplot <- function(
   # x axis variable
   if(x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
-  } else if(!x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
+  } else if(x_axis_variable == "cost"){
+    ggP <- ggP + ggplot2::scale_x_continuous(labels = custom_dollar_label())
+  } else {
     ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
   }
 
@@ -752,7 +765,7 @@ figure_scatterplot <- function(
         ),
         drop = TRUE, limits = force
       )
-    } 
+    }
     ggP <- ggP +
       scaleFill +
       ggplot2::theme(
