@@ -92,12 +92,6 @@ solve_opt <- function(
         hmarg, 0))
   }
 
-  # planned barrier selection: set cost to zero if barrier is already planned by user
-  if(! 0 %in% barrier_idp){
-    points <- points %>%
-      dplyr::mutate(cost = ifelse(site_id %in% barrier_idp, 0, cost)
- )
-  }
 
   # species selection: set benefit to zero if not providing habitat for a species of interest (species_sel)
   if(! "all" %in% species_sel){
@@ -110,10 +104,18 @@ solve_opt <- function(
     )
   }
 
+  # adjust cost with user inputs
   if(cost == 2){
     points <- points %>%
       dplyr::mutate(
         cost = cost * mean_construction_cost / mean(cost) + mean_design_cost
+      )
+  }
+  
+  # planned barrier selection: set cost to zero if barrier is already planned by user
+  if(! 0 %in% barrier_idp){
+    points <- points %>%
+      dplyr::mutate(cost = ifelse(site_id %in% barrier_idp, 0, cost)
       )
   }
 
