@@ -11,8 +11,8 @@ app_ui <- function(request) {
     # Your application UI logic
     shinydashboard::dashboardPage(
       shinydashboard::dashboardHeader(
-      title = "Upstream",
-      tags$li(class = "dropdown")
+        title = "Upstream",
+        tags$li(class = "dropdown")
       ),
       shinydashboard::dashboardSidebar(disable = TRUE),
       shinydashboard::dashboardBody(
@@ -27,16 +27,9 @@ app_ui <- function(request) {
           shiny::tabPanel("Custom", mod_Custom_ui("Custom_1")),
           shiny::tabPanel("Learn", mod_Learn_ui("Learn_1"))
         ),
-        shinydashboard::tabBox(
-          title = "",
-          # The id lets us use input$tabset1 on the server to find the current tab
-          id = "tabset2",
-          side = "left", height = "1100px",
-          shiny::tabPanel("Figures", mod_Figures_ui("Figures_1")),
-          shiny::tabPanel("Report", mod_Tables_ui("Tables_1"))
-       )
-     )
-   )
+        shiny::uiOutput("dynamicTabBox")  # Dynamic second tabBox
+      )
+    )
   )
 }
 
