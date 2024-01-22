@@ -251,8 +251,12 @@ mod_Figures_server <- function(id, r){
             if(r$remove_bad_match_explore){ 
               culverts_cmb_gm %>%
                 filter_and_format_culverts_for_scatterplot(
-                  r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
-                  r$y_axis_variable_explore, r$color_variable_explore
+                  area_sel = r$area_sel_explore, 
+                  subarea_sel = r$subarea_sel_explore, 
+                  owner_sel = r$owner_sel_explore, 
+                  x_axis_variable = r$x_axis_variable_explore,
+                  y_axis_variable = r$y_axis_variable_explore, 
+                  color_variable = r$color_variable_explore
                 ) %>%
                 figure_scatterplot(
                   r$x_axis_variable_explore, r$y_axis_variable_explore,
