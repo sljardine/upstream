@@ -51,10 +51,47 @@ mod_Custom_ui <- function(id){
       ),
       hr(),
       fluidRow(
-        radioButtons(inputId = ns("remove_bad_match"),
-                     label = "Remove Bad Culvert Matches",
-                     choices = list("No" = 1, "Yes" = 2), selected = 2,
-                     width = "100%", inline = TRUE)
+        radioButtons(inputId = ns("hq"),
+                     label = "Select Habitat Quantity Definition",
+                     choiceNames = list(
+                       "Length",
+                       "Area",
+                       "Volume"
+                     ),
+                     choiceValues = c(1 : 3),
+                     inline = TRUE,
+                     selected = NULL
+        )
+      ),
+      hr(),
+      fluidRow(
+        radioButtons(inputId = ns("cost"),
+                     label = "Cost",
+                     choiceNames = list(
+                       "Default Predictions",
+                       "Provide Mean Project Cost"
+                     ),
+                     choiceValues = c(1, 2),
+                     inline = TRUE,
+                     selected = NULL)
+      ),
+      fluidRow(
+        conditionalPanel(
+          condition = "input.cost == 2",
+          ns = ns,
+          column(6,
+                 numericInput(inputId = ns("mean_design_cost"),
+                              label = "Mean Design & Permitting Cost ($)",
+                              min = 0,
+                              value = NULL)
+          ),
+          column(6,
+                 numericInput(inputId = ns("mean_construction_cost"),
+                              label = "Mean Construction Cost ($)",
+                              min = 0,
+                              value = NULL)
+          )
+        )
       ),
       hr(),
       fluidRow(
@@ -75,6 +112,13 @@ mod_Custom_ui <- function(id){
           choices = NULL,
           width = "100%")
          ),
+      hr(),
+      fluidRow(
+        radioButtons(inputId = ns("remove_bad_match"),
+                     label = "Remove Bad Culvert Matches",
+                     choices = list("No" = 1, "Yes" = 2), selected = 2,
+                     width = "100%", inline = TRUE)
+      ),
       fluidRow(
         actionButton(ns("submit"), "Submit")
       )
@@ -89,7 +133,7 @@ mod_Custom_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
-    # render leaflet output 
+    # render leaflet output
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()
     })
@@ -143,7 +187,7 @@ mod_Custom_server <- function(id, r){
     observeEvent(c(input$area_sel, input$subarea_sel, input$owner_sel, input$remove_bad_match), {
 
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
-      
+
       # filter bad culvert matches
       if(input$remove_bad_match == 2){
         sfC <- culverts_cmb_gm %>% sf::st_drop_geometry()
@@ -204,7 +248,7 @@ mod_Custom_server <- function(id, r){
         r$area_choice_custom <- "selection"
       }
     })
-    
+
     ##subarea_sel and subarea_choice ----
     observeEvent(c(input$area_sel, input$subarea_sel), {
       # get areas to filter by
@@ -215,8 +259,8 @@ mod_Custom_server <- function(id, r){
       }
 
       if("0" %in% input$subarea_sel){
-        r$subarea_sel_custom <- huc12_wrias %>% 
-          dplyr::filter(wria_number %in% cWRIA_NR) %>% 
+        r$subarea_sel_custom <- huc12_wrias %>%
+          dplyr::filter(wria_number %in% cWRIA_NR) %>%
           dplyr::pull(huc_number)
         r$subarea_choice_custom <- "all"
       } else {
@@ -224,7 +268,7 @@ mod_Custom_server <- function(id, r){
         r$subarea_choice_custom <- "selection"
       }
     })
-    
+
     ##owner_sel ----
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){
@@ -233,20 +277,20 @@ mod_Custom_server <- function(id, r){
         r$owner_sel_custom <- input$owner_sel
       }
     })
-    
+
     ##planned projects ----
     #add already planned projects
     observeEvent(input$barrier_idp, r$barrier_idp_custom <- input$barrier_idp)
-    
+
     observeEvent(c(input$remove_bad_match), {
-      
+
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
-      
+
       # filter bad culvert matches
       if(input$remove_bad_match == 2){
         sfC <- culverts_cmb_gm %>% sf::st_drop_geometry()
       }
-      
+
       updateSelectizeInput(
         session,
         inputId = "barrier_idp",
@@ -263,7 +307,7 @@ mod_Custom_server <- function(id, r){
 
     ##selected culvs ----
     observeEvent(input$barrier_ids, r$barrier_ids_custom <- input$barrier_ids, ignoreNULL = FALSE)
-    
+
     ##convert remove bad culvert matches to logical----
     observeEvent(input$remove_bad_match, {
       if(input$remove_bad_match == 1){
@@ -273,15 +317,36 @@ mod_Custom_server <- function(id, r){
       }
     })
 
+    ##cost (cost definition) ----
+    observeEvent(input$cost, r$cost_custom <- input$cost)
+    observeEvent(input$mean_design_cost, r$mean_design_cost_custom <- input$mean_design_cost)
+    observeEvent(input$mean_construction_cost, r$mean_construction_cost_custom <- input$mean_construction_cost)
+
     # Custom tab submit event
     observeEvent(input$submit, {
-      if(!is.null(input$barrier_ids))
-      {r$submit_custom <- input$submit}
-      else
-      {showModal(
-        modalDialog(title = "Warning!",
-          "Please enter at least one set of barrier IDs before you click the Submit button.")
-        )}
+      # Check if at least one set of barrier IDs is entered
+      if(!is.null(input$barrier_ids)) {
+        # Check for custom costs with mean entered
+        if(input$cost == 2 && !is.na(input$mean_design_cost) && !is.na(input$mean_construction_cost)) {
+          r$submit_custom <- input$submit
+        } else {
+          # Show warning if custom costs are not properly entered
+          showModal(
+            modalDialog(
+              title = "Warning!",
+              "Please enter the mean design and construction costs when selecting custom costs."
+            )
+          )
+        }
+      } else {
+        # Show warning if no barrier IDs are entered
+        showModal(
+          modalDialog(
+            title = "Warning!",
+            "Please enter at least one set of barrier IDs before you click the Submit button."
+          )
+        )
+      }
     })
 
   })
