@@ -182,7 +182,8 @@ map_leaflet_opt <- function(
     marginal_line_ids, #comids for all lines marginally upstream of each point
     downstream_line_ids, #comids for all lines downstream of each point on main stem
     wria_sel, #wria(s) to run the optimization problem on
-    huc_sel #huc(s) to run the optimization problem on
+    huc_sel, #huc(s) to run the optimization problem on
+    barrier_idp
   ){
   
   #Lines to display depend on whether the solution is a null set
@@ -247,19 +248,34 @@ map_leaflet_opt <- function(
   testfilter <- ds_leaflet_lines %>% dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids)
   if (inherits(sf::st_geometry(testfilter), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
 
- leaf_proxy <- leaf_proxy %>%
-   leafgl::addGlPolylines(
-      data = ds_leaflet_lines %>%
-        dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids),
-      color = "#b0b0b0",
-      opacity = 0.25,
-      group = "unblocked_lines"
-    )
-
-} else {
-   NULL
- }
-
+    leaf_proxy <- leaf_proxy %>%
+      leafgl::addGlPolylines(
+        data = ds_leaflet_lines %>%
+          dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids),
+        color = "#b0b0b0",
+        opacity = 0.25,
+        group = "unblocked_lines"
+      )
+    
+  } else {
+    NULL
+  }
+  
+  # planned barrier selection: define idp points and lines
+  if(! 0 %in% barrier_idp){
+    names(marginal_line_ids) <- points$site_id
+    idp_stream_ids <- marginal_line_ids[barrier_idp] %>% base::unlist()
+    
+    leaf_proxy <- leaf_proxy %>%
+      leafgl::addGlPolylines(
+        data = leaflet_lines %>%
+          dplyr::filter(COMID %in% idp_stream_ids),
+        color = "#f1e2b9",
+        opacity = 0.25,
+        group = "unblocked_lines"
+      )
+  }
+  
   }
 
   # define project color pallet

@@ -139,7 +139,8 @@ mod_Figures_server <- function(id, r){
           marginal_line_ids = marginal_line_ids_gm, #comids for all lines marginally upstream of each point
           downstream_line_ids = downstream_line_ids_gm, #comids for all lines downstream of each point on main stem
           wria_sel = as.integer(r$area_sel_suggest),
-          huc_sel = as.integer(r$subarea_sel_suggest)
+          huc_sel = as.integer(r$subarea_sel_suggest),
+          barrier_idp = r$barrier_idp_suggest
         )
         # selected wria bounding box
         bbox <- get_wria_bounding_box(r$area_sel_suggest)
@@ -177,7 +178,8 @@ mod_Figures_server <- function(id, r){
           marginal_line_ids = marginal_line_ids, #comids for all lines marginally upstream of each point
           downstream_line_ids = downstream_line_ids, #comids for all lines downstream of each point on main stem
           wria_sel = as.integer(r$area_sel_suggest),
-          huc_sel = as.integer(r$subarea_sel_suggest)
+          huc_sel = as.integer(r$subarea_sel_suggest),
+          barrier_idp = r$barrier_idp_suggest
         )
         # selected wria bounding box
         bbox <- get_wria_bounding_box(r$area_sel_suggest)

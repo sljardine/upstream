@@ -13,7 +13,8 @@ map_leaflet_opt(
   marginal_line_ids,
   downstream_line_ids,
   wria_sel,
-  huc_sel
+  huc_sel,
+  barrier_idp
 )
 }
 \arguments{
