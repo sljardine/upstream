@@ -42,25 +42,13 @@ mod_Figures_server <- function(id, r){
       get_leaflet_map()
     })
 
+    # initiates plot
+    user_plot <- reactiveVal(FALSE)
+
     # tab events
     observeEvent(r$tab_sel, {
-      if(r$tab_sel == "Welcome"){
-        reset_map(leaflet::leafletProxy(ns("base_map")))
-        user_plot(FALSE)
-      } else if(r$tab_sel == "Explore"){
-        reset_map(leaflet::leafletProxy(ns("base_map")))
-        user_plot(FALSE)
-      } else if(r$tab_sel == "Suggest"){
-        reset_map(leaflet::leafletProxy(ns("base_map")))
-        user_plot(FALSE)
-      } else if(r$tab_sel == "Custom"){
-        reset_map(leaflet::leafletProxy(ns("base_map")))
-        user_plot(FALSE)
-      }
-      else if(r$tab_sel == "Learn"){
-        reset_map(leaflet::leafletProxy(ns("base_map")))
-        user_plot(FALSE)
-      }
+      reset_map(leaflet::leafletProxy(ns("base_map")))
+      user_plot(FALSE)
     })
 
     # Explore submit button event for base_map
@@ -83,6 +71,8 @@ mod_Figures_server <- function(id, r){
         r$highlight_explore,
         r$barrier_ids_explore
         )
+      user_plot(TRUE)
+
     })
 
     # fly to selected wrias on Explore submit
@@ -107,7 +97,7 @@ mod_Figures_server <- function(id, r){
         r$area_choice_suggest,
         r$subarea_choice_suggest
       )
-      
+
       if(r$remove_bad_match_suggest){
         r$points_sel_suggest <- solve_opt(
           points = culverts_cmb_gm,
@@ -243,79 +233,75 @@ mod_Figures_server <- function(id, r){
     # reset plot click text output
     observeEvent(r$submit_explore, {r$plot_click_text_output_explore <- ''})
 
-    # initiates plot
-    user_plot <- reactiveVal(FALSE)
-    observeEvent(c(r$submit_explore, r$submit_suggest, r$submit_custom), user_plot(TRUE))
 
     # render plot on submit button events or brush event
     store_plot <- eventReactive(
-      c(r$tab_sel, r$submit_explore, r$submit_suggest, r$submit_custom, r$plot_brush),
+      c(user_plot(), r$submit_explore),
       {
-      # explore tab plots (scatter plot and histogram)
-      if(user_plot()){
-        if(r$tab_sel == "Explore"){
-          if(r$plot_type_explore == "Scatterplot"){
-            if(r$remove_bad_match_explore){ 
-              culverts_cmb_gm %>%
-                filter_and_format_culverts_for_scatterplot(
-                  area_sel = r$area_sel_explore, 
-                  subarea_sel = r$subarea_sel_explore, 
-                  owner_sel = r$owner_sel_explore, 
-                  x_axis_variable = r$x_axis_variable_explore,
-                  y_axis_variable = r$y_axis_variable_explore, 
-                  color_variable = r$color_variable_explore
-                ) %>%
-                figure_scatterplot(
-                  r$x_axis_variable_explore, r$y_axis_variable_explore,
-                  r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
-                  r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
-                  r$plot_ymin, r$plot_ymax
-                )
+        # explore tab plots (scatter plot and histogram)
+        if(user_plot()){
+          if(r$tab_sel == "Explore"){
+            if(r$plot_type_explore == "Scatterplot"){
+              if(r$remove_bad_match_explore){
+                culverts_cmb_gm %>%
+                  filter_and_format_culverts_for_scatterplot(
+                    area_sel = r$area_sel_explore,
+                    subarea_sel = r$subarea_sel_explore,
+                    owner_sel = r$owner_sel_explore,
+                    x_axis_variable = r$x_axis_variable_explore,
+                    y_axis_variable = r$y_axis_variable_explore,
+                    color_variable = r$color_variable_explore
+                  ) %>%
+                  figure_scatterplot(
+                    r$x_axis_variable_explore, r$y_axis_variable_explore,
+                    r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
+                    r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
+                    r$plot_ymin, r$plot_ymax
+                  )
               } else {
-            culverts_cmb %>%
-              filter_and_format_culverts_for_scatterplot(
-                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
-                r$y_axis_variable_explore, r$color_variable_explore
-                ) %>%
-              figure_scatterplot(
-                r$x_axis_variable_explore, r$y_axis_variable_explore,
-                r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
-                r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
-                r$plot_ymin, r$plot_ymax
-                )
+                culverts_cmb %>%
+                  filter_and_format_culverts_for_scatterplot(
+                    r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
+                    r$y_axis_variable_explore, r$color_variable_explore
+                  ) %>%
+                  figure_scatterplot(
+                    r$x_axis_variable_explore, r$y_axis_variable_explore,
+                    r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
+                    r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
+                    r$plot_ymin, r$plot_ymax
+                  )
               }
-          } else if(r$plot_type_explore == 'Histogram'){
-            if(r$remove_bad_match_explore){ 
-              culverts_cmb_gm %>%
-                filter_and_format_culverts_for_histogram(
-                  r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
-                  r$histogram_variable_explore
-                ) %>%
-                figure_histogram(
-                  r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore,
-                  r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore,
-                  r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax
-                )
-            } else {
-            culverts_cmb %>%
-              filter_and_format_culverts_for_histogram(
-                r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
-                r$histogram_variable_explore
-                ) %>%
-              figure_histogram(
-                r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore,
-                r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore,
-                r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax
-                )
+            } else if(r$plot_type_explore == 'Histogram'){
+              if(r$remove_bad_match_explore){
+                culverts_cmb_gm %>%
+                  filter_and_format_culverts_for_histogram(
+                    r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
+                    r$histogram_variable_explore
+                  ) %>%
+                  figure_histogram(
+                    r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore,
+                    r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore,
+                    r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax
+                  )
+              } else {
+                culverts_cmb %>%
+                  filter_and_format_culverts_for_histogram(
+                    r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$color_variable_explore,
+                    r$histogram_variable_explore
+                  ) %>%
+                  figure_histogram(
+                    r$x_axis_variable_explore, r$y_axis_variable_explore, r$color_variable_explore,
+                    r$histogram_variable_explore, r$histogram_nbins_explore, r$highlight_explore,
+                    r$barrier_ids_explore, r$plot_xmin, r$plot_xmax, r$plot_ymin, r$plot_ymax
+                  )
+              }
             }
           }
+        } else {
+          NULL
         }
-      } else {
-        NULL
       }
-    }
     )
-
     # logo (not being used)
     output$logo <- renderImage({
       list(src = "inst/app/www/placeholder.png",
