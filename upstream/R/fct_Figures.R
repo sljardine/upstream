@@ -381,7 +381,7 @@ update_map_culvert_markers <- function(
   # Define a custom function to determine the stroke color: highlight overrides bad match
   getStrokeColor <- function(highlighted, badMatch) {
     ifelse(highlighted == "Highlighted", strokePal(highlighted),
-           ifelse(badMatch, "black", "transparent"))
+           ifelse(badMatch, "black", "grey"))
   }
 
   # add culverts to map if zoomed in enough
@@ -477,12 +477,13 @@ filter_and_format_culverts_for_histogram <- function(
 
   # this splits the X variable at commas into rows when X = potential_species
   if(is.character(points$X)){
-    points <- points %>% purrr::pmap_dfr(function(site_id, X, C){
+    points <- points %>% purrr::pmap_dfr(function(site_id, X, C, bad_match){
       cX <- strsplit(X, ',', fixed = TRUE)[[1]]
       data.frame(
         site_id = site_id,
         X = cX,
-        C = C
+        C = C,
+        bad_match = bad_match
       )
     })
   }
@@ -846,9 +847,9 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
   ggP <- ggP + ggplot2::scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
 
   # x axis variable
-  if(histogram_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  if(histogram_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
-  } else if(!histogram_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  } else if(!histogram_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
   }
 
@@ -926,9 +927,9 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
     } else if(color_variable == "percent_fish_passable_code") {
       scaleFill <- ggplot2::scale_fill_manual(
         values = c(
-          `0%` = "#FF0000",   # Red for 0%
-          `33%` = "#FFA500",  # Orange for 33%
-          `67%` = "#FFFF00",  # Yellow for 67%
+          `0%` = "#C15F6E",
+          `33%` = "#EFDEB0",
+          `67%` = "#2332BF",
           `Unknown` = "#808080" # Grey for Unknown
         ),
         drop = TRUE, limits = force
@@ -1087,23 +1088,23 @@ get_pretty_variable_name <- function(varName){
   }else if(varName == "corrected_dn_other"){
     prettyName <- "non-WSDOT Downstream Corrections"
   }else if(varName == "hmarg_length_agri"){
-    prettyName <- "Marginal Agricultural Habitat (Length)"
+    prettyName <- "Marginal Agricultural Habitat Length (km)"
   }else if(varName == "hmarg_area_agri"){
-    prettyName <- "Marginal Agricultural Habitat (Area)"
+    prettyName <- "Marginal Agricultural Habitat Area (km^2)"
   }else if(varName == "hmarg_volume_agri"){
-    prettyName <- "Marginal Agricultural Habitat (Volume)"
+    prettyName <- "Marginal Agricultural Habitat Volume (km^3)"
   }else if(varName == "hmarg_length_urb"){
-    prettyName <- "Marginal Urban Habitat (Length)"
+    prettyName <- "Marginal Urban Habitat Length (km)"
   }else if(varName == "hmarg_area_urb"){
-    prettyName <- "Marginal Urban Habitat (Area)"
+    prettyName <- "Marginal Urban Habitat Area (km^2)"
   }else if(varName == "hmarg_volume_urb"){
-    prettyName <- "Marginal Urban Habitat (Volume)"
+    prettyName <- "Marginal Urban Habitat Volume (km^3)"
   }else if(varName == "hmarg_length_natural"){
-    prettyName <- "Marginal Natural Habitat (Length)"
+    prettyName <- "Marginal Natural Habitat Length (km)"
   }else if(varName == "hmarg_area_natural"){
-    prettyName <- "Marginal Natural Habitat (Area)"
+    prettyName <- "Marginal Natural Habitat Area (km^2)"
   }else if(varName == "hmarg_volume_natural"){
-    prettyName <- "Marginal Natural Habitat (Volume)"
+    prettyName <- "Marginal Natural Habitat Volume (km^3)"
   }else if(varName == "hmarg_length_TempVMM08"){
     prettyName <- "Marginal Weighted Temperature (Length)"
   }else if(varName == "hmarg_area_TempVMM08"){
@@ -1111,23 +1112,23 @@ get_pretty_variable_name <- function(varName){
   }else if(varName == "hmarg_volume_TempVMM08"){
     prettyName <- "Marginal Weighted Temperature (Volume)"
   }else if(varName == "hfull_length_agri"){
-    prettyName <- "Full Agricultural Habitat (Length)"
+    prettyName <- "Full Agricultural Habitat Length (km)"
   }else if(varName == "hfull_area_agri"){
-    prettyName <- "Full Agricultural Habitat (Area)"
+    prettyName <- "Full Agricultural Habitat Area (km^2)"
   }else if(varName == "hfull_volume_agri"){
-    prettyName <- "Full Agricultural Habitat (Volume)"
+    prettyName <- "Full Agricultural Habitat Volume (km^3)"
   }else if(varName == "hfull_length_urb"){
-    prettyName <- "Full Urban Habitat (Length)"
+    prettyName <- "Full Urban Habitat Length (km)"
   }else if(varName == "hfull_area_urb"){
-    prettyName <- "Full Urban Habitat (Area)"
+    prettyName <- "Full Urban Habitat Area (km^2)"
   }else if(varName == "hfull_volume_urb"){
-    prettyName <- "Full Urban Habitat (Volume)"
+    prettyName <- "Full Urban Habitat Volume (km^3)"
   }else if(varName == "hfull_length_natural"){
-    prettyName <- "Full Natural Habitat (Length)"
+    prettyName <- "Full Natural Habitat Length (km)"
   }else if(varName == "hfull_area_natural"){
-    prettyName <- "Full Natural Habitat (Area)"
+    prettyName <- "Full Natural Habitat Area (km^2)"
   }else if(varName == "hfull_volume_natural"){
-    prettyName <- "Full Natural Habitat (Volume)"
+    prettyName <- "Full Natural Habitat Volume (km^3)"
   }else if(varName == "hfull_length_TempVMM08"){
     prettyName <- "Full Weighted Temperature (Length)"
   }else if(varName == "hfull_area_TempVMM08"){
