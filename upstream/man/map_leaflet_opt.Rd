@@ -32,6 +32,8 @@ map_leaflet_opt(
 
 \item{downstream_line_ids}{A vector of line IDs for all lines marginally upstream of each point.}
 
+\item{barrier_idp}{A vector of planned culvert IDs.}
+
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 
 \item{subarea_sel}{A vector of WRIA ID numbers of interest.}

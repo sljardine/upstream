@@ -64,7 +64,9 @@ mod_Tables_server <- function(id, r){
           if(r$remove_bad_match_custom){
             points_sel_custom <- get_points_sel_custom(
               points = culverts_cmb_gm,
-              prtf_cust = r$barrier_ids_custom
+              prtf_cust = r$barrier_ids_custom,
+              barrier_idp = r$barrier_idp_custom,
+              E = E_gm
               )
             get_summary_table(
               points = culverts_cmb_gm,
@@ -75,7 +77,9 @@ mod_Tables_server <- function(id, r){
           } else {
             points_sel_custom <- get_points_sel_custom(
               points = culverts_cmb,
-              prtf_cust = r$barrier_ids_custom
+              prtf_cust = r$barrier_ids_custom,
+              barrier_idp = r$barrier_idp_custom,
+              E = E
               )
             get_summary_table(
               points = culverts_cmb,
@@ -113,7 +117,9 @@ mod_Tables_server <- function(id, r){
           if(r$remove_bad_match_custom){
             points_sel_custom <- get_points_sel_custom(
               points = culverts_cmb_gm,
-              prtf_cust = r$barrier_ids_custom
+              prtf_cust = r$barrier_ids_custom,
+              barrier_idp = r$barrier_idp_custom,
+              E = E_gm
             )
             get_plan_list(
               points = culverts_cmb_gm,
@@ -126,7 +132,9 @@ mod_Tables_server <- function(id, r){
             } else {
           points_sel_custom <- get_points_sel_custom(
             points = culverts_cmb,
-            prtf_cust = r$barrier_ids_custom
+            prtf_cust = r$barrier_ids_custom,
+            barrier_idp = r$barrier_idp_custom,
+            E = E
             )
           get_plan_list(
             points = culverts_cmb,

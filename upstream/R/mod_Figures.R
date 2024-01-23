@@ -136,7 +136,7 @@ mod_Figures_server <- function(id, r){
         bbox <- get_wria_bounding_box(r$area_sel_suggest)
         # zoom map to selected wrias
         leaflet::leafletProxy(mapId = ns("base_map")) %>%
-          leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+        leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
       } else{
         r$points_sel_suggest <- solve_opt(
           points = culverts_cmb,
@@ -188,9 +188,10 @@ mod_Figures_server <- function(id, r){
         r$area_choice_custom,
         r$subarea_choice_custom
       )
-      remove_map_points(leaflet::leafletProxy(ns("base_map")))
 
       if(r$remove_bad_match_custom) {
+        reset_map(leaflet::leafletProxy(ns('base_map')))
+        remove_map_points(leaflet::leafletProxy(ns('base_map')))
         map_leaflet_custom(
           leaf_proxy = leaflet::leafletProxy(ns("base_map")),
           points = culverts_cmb_gm, #culverts
@@ -199,7 +200,8 @@ mod_Figures_server <- function(id, r){
           prtf_cust = r$barrier_ids_custom, #inputs from mod_Custom
           E = E_gm, #full connectivity matrix
           marginal_line_ids = marginal_line_ids_gm, #comids for all lines marginally upstream of each point
-          downstream_line_ids = downstream_line_ids_gm #comids for all lines downstream of each point on main stem
+          downstream_line_ids = downstream_line_ids_gm, #comids for all lines downstream of each point on main stem
+          barrier_idp = r$barrier_idp_custom #planned barrier IDs
         )
         # selected wria bounding box
         bbox <- get_wria_bounding_box(r$area_sel_custom)
@@ -207,6 +209,8 @@ mod_Figures_server <- function(id, r){
         leaflet::leafletProxy(mapId = ns("base_map")) %>%
           leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
       } else {
+        reset_map(leaflet::leafletProxy(ns('base_map')))
+        remove_map_points(leaflet::leafletProxy(ns('base_map')))
         map_leaflet_custom(
           leaf_proxy = leaflet::leafletProxy(ns("base_map")),
           points = culverts_cmb, #culverts
@@ -215,7 +219,8 @@ mod_Figures_server <- function(id, r){
           prtf_cust = r$barrier_ids_custom, #inputs from mod_Custom
           E = E, #full connectivity matrix
           marginal_line_ids = marginal_line_ids, #comids for all lines marginally upstream of each point
-          downstream_line_ids = downstream_line_ids #comids for all lines downstream of each point on main stem
+          downstream_line_ids = downstream_line_ids, #comids for all lines downstream of each point on main stem
+          barrier_idp = r$barrier_idp_custom #planned barrier IDs
         )
         # selected wria bounding box
         bbox <- get_wria_bounding_box(r$area_sel_custom)

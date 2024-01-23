@@ -47,7 +47,7 @@ solve_opt(
 
 \item{species_sel}{A vector of species ID numbers of interest.}
 
-\item{barrier_idp}{A vector of planned culvert IDs}
+\item{barrier_idp}{A vector of planned culvert IDs.}
 
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
 

@@ -278,15 +278,12 @@ mod_Custom_server <- function(id, r){
       }
     })
 
-    ##planned projects ----
-    #add already planned projects
+    ##projects to ignore ----
     observeEvent(input$barrier_idp, r$barrier_idp_custom <- input$barrier_idp)
-
     observeEvent(c(input$remove_bad_match), {
 
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
 
-      # filter bad culvert matches
       if(input$remove_bad_match == 2){
         sfC <- culverts_cmb_gm %>% sf::st_drop_geometry()
       }
