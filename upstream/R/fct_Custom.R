@@ -18,14 +18,15 @@ get_points_sel_custom <- function(
   } else {
     prtf_cust_idp <- prtf_cust
   }
-
+  cust_sel <- prtf_cust_idp %in% prtf_cust 
+  
   #Identify points in custom plan that unlock habitat
   h_inc <- lapply(
     1 : length(prtf_cust_idp),
     FUN = function(x) ifelse(
       sum(E[, prtf_cust_idp[x]]) == 0, TRUE,
       ifelse(
-        sum(which(E[, prtf_cust_idp[x]] == 1) %in% prtf_cust_idp) ==
+        sum(points$site_id[which(E[, prtf_cust_idp[x]] == 1)] %in% prtf_cust_idp) ==
           length(which(E[, prtf_cust_idp[x]] == 1)), TRUE, FALSE)
     )
   ) %>%
@@ -33,7 +34,7 @@ get_points_sel_custom <- function(
     as.logical()
   
   points_prtf_cust <- points$site_id %in% prtf_cust
-  points_sel <- ifelse(points_prtf_cust == TRUE & h_inc == TRUE, TRUE, FALSE)
+  points_sel <- points$site_id %in% prtf_cust_idp[which(as.logical(h_inc * cust_sel))]
 
   return(points_sel)
 }
