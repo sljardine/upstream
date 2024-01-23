@@ -146,7 +146,7 @@ mod_Figures_server <- function(id, r){
         bbox <- get_wria_bounding_box(r$area_sel_suggest)
         # zoom map to selected wrias
         leaflet::leafletProxy(mapId = ns("base_map")) %>%
-          leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+        leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
       } else{
         r$points_sel_suggest <- solve_opt(
           points = culverts_cmb,
@@ -198,7 +198,8 @@ mod_Figures_server <- function(id, r){
         r$area_choice_custom,
         r$subarea_choice_custom
       )
-      remove_map_points(leaflet::leafletProxy(ns("base_map")))
+      reset_map(leaflet::leafletProxy(ns('base_map')))
+      remove_map_points(leaflet::leafletProxy(ns('base_map')))
       
       if(r$remove_bad_match_custom) {
         map_leaflet_custom(

@@ -37,9 +37,15 @@ map_leaflet_custom <- function(
 ){
   
   #Convert custom portfolio to TRUE/FALSE vector
-  prtf_cust_idp <- c(prtf_cust, barrier_idp)
-  cust <- points$site_id %in% prtf_cust_idp 
-  idp <- points$site_id %in% barrier_idp
+  cust <- points$site_id %in% prtf_cust
+  if(! 0 %in% barrier_idp){
+    idp <- (points$site_id %in% barrier_idp) * 2
+    prtf_cust_idp <- c(prtf_cust, barrier_idp)
+  } else {
+    idp <- rep(0, base::nrow(points))
+    prtf_cust_idp <- prtf_cust
+  }
+   cust_idp <- cust + idp
   
   #Identify points in custom plan that unlock habitat
   h_inc <- lapply(
@@ -55,7 +61,7 @@ map_leaflet_custom <- function(
     as.logical()
   
   #Crop lines to wrias in plan regardless of whether they unlock habitat
-  cust_wrias <- unique(points[points$site_id %in% prtf_cust_idp , ]$wria_number)
+  cust_wrias <- unique(points[points$site_id %in% prtf_cust_idp, ]$wria_number)
   in_cust_wrias <- points$wria_number %in% cust_wrias
   
   #First get blocked/unblocked lines
@@ -69,10 +75,14 @@ map_leaflet_custom <- function(
   names(marginal_line_ids) <- points$site_id
   names(downstream_line_ids) <- points$site_id
   cust_stream_ids <- marginal_line_ids[prtf_cust[h_inc]] %>% base::unlist()
-  idp_stream_ids <- marginal_line_ids[barrier_idp[h_inc]] %>% base::unlist()
   ds_stream_ids <- downstream_line_ids[prtf_cust_idp[h_inc]] %>% base::unlist()
   
-  #Add lines
+  if(! 0 %in% barrier_idp){
+    idp_stream_ids <- marginal_line_ids[barrier_idp[h_inc]] %>% base::unlist()
+  } else {
+    idp_stream_ids <- NULL
+  }
+  
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(
       data = leaflet_lines %>%
@@ -87,14 +97,18 @@ map_leaflet_custom <- function(
       color = "#2739c7",
       opacity = 0.5,
       group = "unblocked_lines"
-    ) %>%
-    leafgl::addGlPolylines(
-      data = leaflet_lines %>%
-        dplyr::filter(COMID %in% idp_stream_ids),
-      color = "#f1e2bA",
-      opacity = 0.5,
-      group = "unblocked_lines"
     ) 
+  
+  if(! 0 %in% barrier_idp){
+    leaf_proxy <- leaf_proxy %>%
+      leafgl::addGlPolylines(
+        data = leaflet_lines %>%
+          dplyr::filter(COMID %in% idp_stream_ids),
+        color = "#f1e2bA",
+        opacity = 0.5,
+        group = "unblocked_lines"
+      ) 
+  }
   
   #test for null sets in ds lines. If FALSE draw lines
   testfilter <- ds_leaflet_lines %>% dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% cust_stream_ids & !COMID %in% idp_stream_ids)
@@ -128,7 +142,7 @@ map_leaflet_custom <- function(
       radius = 5,
       weight = 1.5,
       color = ~match_pal(bad_match),
-      fillColor = ~pal(cust + idp),
+      fillColor = ~pal(cust_idp),
       fillOpacity = 1,
       opacity = 1,
       clusterOptions = leaflet::markerClusterOptions(

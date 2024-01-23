@@ -276,8 +276,7 @@ mod_Suggest_server <- function(id, r){
         inputId = "barrier_idp",
         choices = setNames(
           c(0, sfC %>% dplyr::pull(site_id) %>% sort()),
-          nm = c('None',
-                 sfC %>% dplyr::pull(site_id) %>% sort())
+          nm = c('None', sfC %>% dplyr::pull(site_id) %>% sort())
         ),
         selected = 0,
         server = TRUE
@@ -308,7 +307,7 @@ mod_Suggest_server <- function(id, r){
       }
     })
 
-    # render leaflet output (DO I NEED THIS?)
+    # render leaflet output 
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()
     })
