@@ -129,7 +129,7 @@ solve_opt <- function(
   if(obj == 1){
   v <- h
   } else {
-  v <- w_urb * urb_per * h + w_ag *  ag_per * h + w_nat * nat_per * h# + w_temp * temp
+  v <- w_urb * urb_per/100 * h + w_ag *  ag_per/100 * h + w_nat * nat_per/100 * h# + w_temp * temp
   v[v < w_temp[1]] <- 0
   v[v > w_temp[2]] <- 0
   v[is.na(v)] <- 0 #HOT FIX

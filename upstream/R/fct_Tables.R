@@ -59,9 +59,9 @@ get_summary_table <- function(
       `Sockeye` = round(sum(hmarg * grepl("Sockeye", potential_species)), 2),
       `Steelhead` = round(sum(hmarg * grepl("Steelhead", potential_species)), 2),
       `Total Habitat` = round(sum(hmarg), 2),
-      `Natural` = round(sum(hmarg * hmarg_nat_percent, na.rm = TRUE), 2),
-      `Agricultural` = round(sum(hmarg * hmarg_ag_percent, na.rm = TRUE), 2),
-      `Urban` = round(sum(hmarg * hmarg_urb_percent, na.rm = TRUE), 2)
+      `Natural` = round(sum(hmarg * hmarg_nat_percent/100, na.rm = TRUE), 2),
+      `Agricultural` = round(sum(hmarg * hmarg_ag_percent/100, na.rm = TRUE), 2),
+      `Urban` = round(sum(hmarg * hmarg_urb_percent/100, na.rm = TRUE), 2)
     ) %>%
     t() %>%
     as.data.frame()
