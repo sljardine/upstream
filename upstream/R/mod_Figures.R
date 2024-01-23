@@ -198,10 +198,10 @@ mod_Figures_server <- function(id, r){
         r$area_choice_custom,
         r$subarea_choice_custom
       )
-      reset_map(leaflet::leafletProxy(ns('base_map')))
-      remove_map_points(leaflet::leafletProxy(ns('base_map')))
-      
+
       if(r$remove_bad_match_custom) {
+        reset_map(leaflet::leafletProxy(ns('base_map')))
+        remove_map_points(leaflet::leafletProxy(ns('base_map')))
         map_leaflet_custom(
           leaf_proxy = leaflet::leafletProxy(ns("base_map")),
           points = culverts_cmb_gm, #culverts
@@ -219,6 +219,8 @@ mod_Figures_server <- function(id, r){
         leaflet::leafletProxy(mapId = ns("base_map")) %>%
           leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
       } else {
+        reset_map(leaflet::leafletProxy(ns('base_map')))
+        remove_map_points(leaflet::leafletProxy(ns('base_map')))
         map_leaflet_custom(
           leaf_proxy = leaflet::leafletProxy(ns("base_map")),
           points = culverts_cmb, #culverts
