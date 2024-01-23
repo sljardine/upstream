@@ -477,12 +477,13 @@ filter_and_format_culverts_for_histogram <- function(
 
   # this splits the X variable at commas into rows when X = potential_species
   if(is.character(points$X)){
-    points <- points %>% purrr::pmap_dfr(function(site_id, X, C){
+    points <- points %>% purrr::pmap_dfr(function(site_id, X, C, bad_match){
       cX <- strsplit(X, ',', fixed = TRUE)[[1]]
       data.frame(
         site_id = site_id,
         X = cX,
-        C = C
+        C = C,
+        bad_match = bad_match
       )
     })
   }
@@ -846,9 +847,9 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
   ggP <- ggP + ggplot2::scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
 
   # x axis variable
-  if(histogram_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  if(histogram_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
-  } else if(!histogram_variable %in% c("owner_type_code", "wria_number", "potential_species")){
+  } else if(!histogram_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
   }
 
@@ -926,9 +927,9 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
     } else if(color_variable == "percent_fish_passable_code") {
       scaleFill <- ggplot2::scale_fill_manual(
         values = c(
-          `0%` = "#FF0000",   # Red for 0%
-          `33%` = "#FFA500",  # Orange for 33%
-          `67%` = "#FFFF00",  # Yellow for 67%
+          `0%` = "#C15F6E",
+          `33%` = "#EFDEB0",
+          `67%` = "#2332BF",
           `Unknown` = "#808080" # Grey for Unknown
         ),
         drop = TRUE, limits = force
