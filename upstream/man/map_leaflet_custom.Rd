@@ -12,7 +12,8 @@ map_leaflet_custom(
   prtf_cust,
   E,
   marginal_line_ids,
-  downstream_line_ids
+  downstream_line_ids,
+  barrier_idp
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ map_leaflet_custom(
 \item{marginal_line_ids}{A vector of line IDs for all lines marginally upstream of each point.}
 
 \item{downstream_line_ids}{A vector of line IDs for all lines downstream of each point.}
+
+\item{barrier_idp}{A vector of planned culvert IDs.}
 }
 \value{
 A leaflet map.

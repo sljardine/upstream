@@ -261,18 +261,28 @@ mod_Suggest_server <- function(id, r){
         r$owner_sel_suggest <- input$owner_sel
       }
     })
-    ##planned culvs ----
+    ##projects to ignore ----
     observeEvent(input$barrier_idp, r$barrier_idp_suggest <- input$barrier_idp)
-    updateSelectizeInput(
-      session,
-      inputId = "barrier_idp",
-      choices = setNames(
-        c(0,culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort()),
-        nm = c('None',
-               culverts_cmb %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort())
-      ),
-      selected = 0,
-      server = TRUE
+    observeEvent(c(input$remove_bad_match), {
+      
+      sfC <- culverts_cmb %>% sf::st_drop_geometry()
+      
+      if(input$remove_bad_match == 2){
+        sfC <- culverts_cmb_gm %>% sf::st_drop_geometry()
+      }
+      
+      updateSelectizeInput(
+        session,
+        inputId = "barrier_idp",
+        choices = setNames(
+          c(0, sfC %>% dplyr::pull(site_id) %>% sort()),
+          nm = c('None',
+                 sfC %>% dplyr::pull(site_id) %>% sort())
+        ),
+        selected = 0,
+        server = TRUE
+      )
+    }
     )
     ##species_sel ----
     observeEvent(input$species_sel, r$species_sel_suggest <- input$species_sel)
