@@ -233,16 +233,11 @@ mod_Figures_server <- function(id, r){
     store_plot <- eventReactive(
       c(user_plot(), r$submit_explore),
       {
-        print(paste("store_plot triggered. user_plot:", user_plot()))
-
         # explore tab plots (scatter plot and histogram)
         if(user_plot()){
           if(r$tab_sel == "Explore"){
-            print("in explore tab")
             if(r$plot_type_explore == "Scatterplot"){
-              print("scatterplot selected")
               if(r$remove_bad_match_explore){
-                print("remove bad matches")
                 culverts_cmb_gm %>%
                   filter_and_format_culverts_for_scatterplot(
                     area_sel = r$area_sel_explore,
@@ -259,7 +254,6 @@ mod_Figures_server <- function(id, r){
                     r$plot_ymin, r$plot_ymax
                   )
               } else {
-                print("not removing bad matches")
                 culverts_cmb %>%
                   filter_and_format_culverts_for_scatterplot(
                     r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
@@ -299,7 +293,6 @@ mod_Figures_server <- function(id, r){
             }
           }
         } else {
-          print("in Null")
           NULL
         }
       }
