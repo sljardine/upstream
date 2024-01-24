@@ -7,6 +7,7 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
+
 commonVariables <- setNames(
   c(
     "wria_number", "owner_type_code", "potential_species",
@@ -45,7 +46,7 @@ volume_vars <- commonVariables[!grepl("(length|Length|area|Area)", names(commonV
 area_vars <- commonVariables[!grepl("(length|Length|volume|Volume)", names(commonVariables))]
 
 # UI ----
-mod_Explore_ui <- function(id) {
+mod_Explore_ui <- function(id){
   ns <- NS(id)
   tagList(
     fluidPage(
@@ -55,21 +56,21 @@ mod_Explore_ui <- function(id) {
           label = "Select Area",
           choices = setNames(
             c(0, wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
-            nm = c("All WRIAs", wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
+            nm = c('All WRIAs', wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
           ),
           selected = 0,
-          width = "50%",
+          width = '50%',
           multiple = TRUE
         )
       ),
       fluidRow(
         selectizeInput(
-          inputId = ns("subarea_sel"),
-          label = "Select Subarea",
-          choices = NULL,
-          width = "50%",
-          multiple = TRUE
-        )
+        inputId = ns("subarea_sel"),
+        label = "Select Subarea",
+        choices = NULL,
+        width = '50%',
+        multiple = TRUE
+       )
       ),
       fluidRow(
         selectizeInput(
@@ -77,13 +78,11 @@ mod_Explore_ui <- function(id) {
           label = "Select Ownership Type",
           choices = setNames(
             c(0:9, 11, 12),
-            nm = c(
-              "All Ownership Types", "City", "County", "Federal", "Private",
-              "State", "Tribal", "Other", "Port", "Drainage District", "Irrigation District", "Unknown"
-            )
+            nm = c("All Ownership Types","City", "County", "Federal", "Private",
+                   "State", "Tribal", "Other", "Port", "Drainage District", "Irrigation District", "Unknown")
           ),
           selected = 0,
-          width = "50%",
+          width = '50%',
           multiple = TRUE
         )
       ),
@@ -96,8 +95,8 @@ mod_Explore_ui <- function(id) {
             "Length",
             "Area",
             "Volume"
-          ),
-          choiceValues = c(1:3),
+            ),
+          choiceValues = c(1 : 3),
           inline = TRUE,
           selected = 1
         )
@@ -122,8 +121,7 @@ mod_Explore_ui <- function(id) {
               label = "Variable on X axis",
               choices = commonVariables,
               selected = "cost",
-              width = "100%"
-            ),
+              width = "100%"),
             offset = 0
           ),
           column(
@@ -190,13 +188,11 @@ mod_Explore_ui <- function(id) {
       ),
       fluidRow(
         column(12,
-          radioButtons(
-            inputId = ns("highlight"),
-            label = "Highlight Barrier(s)",
-            choices = list("No" = 1, "Yes" = 2),
-            width = "100%"
-          ),
-          offset = 0
+               radioButtons(inputId = ns("highlight"),
+                            label = "Highlight Barrier(s)",
+                            choices = list("No" = 1, "Yes" = 2),
+                            width = "100%"),
+               offset = 0
         )
       ),
       fluidRow(
@@ -204,15 +200,14 @@ mod_Explore_ui <- function(id) {
           condition = "input.highlight == 2",
           ns = ns,
           fluidRow(
-            column(
-              12,
-              selectizeInput(
-                inputId = ns("barrier_ids"),
-                label = "Enter ID(s) to Highlight",
-                multiple = TRUE,
-                choices = NULL,
-                width = "100%"
-              )
+            column(12,
+                   selectizeInput(
+                     inputId = ns("barrier_ids"),
+                     label = "Enter ID(s) to Highlight",
+                     multiple = TRUE,
+                     choices = NULL,
+                     width = "100%"
+                   )
             )
           )
         )
@@ -223,8 +218,7 @@ mod_Explore_ui <- function(id) {
           inputId = ns("remove_bad_match"),
           label = "Remove Bad Culvert Matches",
           choices = list("No" = 1, "Yes" = 2), selected = 2,
-          width = "100%", inline = TRUE
-        )
+          width = "100%", inline = TRUE)
       ),
       hr(),
       fluidRow(
@@ -240,23 +234,38 @@ mod_Explore_ui <- function(id) {
 #' Explore Server Functions
 #'
 #' @noRd
-mod_Explore_server <- function(id, r) {
-  moduleServer(id, function(input, output, session) {
+mod_Explore_server <- function(id, r){
+  moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    # scatter plot variable choices
-    cScatterPlotVariables <- commonVariables
+# scatter plot variable choices
+cScatterPlotVariables <- commonVariables
 
-    # histogram choices
-    cHistogramVariables <- commonVariables
+# histogram choices
+cHistogramVariables <- commonVariables
 
-    # color choices
-    cColorVariables <- commonVariables
+# color choices
+cColorVariables <- commonVariables
+
+    # Explore tab submit event
+    observeEvent(input$submit, {
+      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
+         input$highlight == 1)
+      {r$submit_explore <- input$submit}
+      else
+        if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
+           input$highlight == 2)
+        {r$submit_explore <- input$submit}
+      else
+      {showModal(modalDialog(title = "Warning!",
+                             "Please fill all the fields before you click the Submit button."))}
+    })
 
     # update huc options
     observeEvent(c(input$area_sel), {
+
       # get areas to filter by
-      if ("0" %in% input$area_sel) {
+      if("0" %in% input$area_sel){
         cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         cWRIA_NR <- as.integer(input$area_sel)
@@ -281,9 +290,9 @@ mod_Explore_server <- function(id, r) {
 
     # update x variable based on hq
     observeEvent(input$hq, {
-      if (input$hq == 3) {
+      if(input$hq == 3) {
         filteredNames <- volume_vars
-      } else if (input$hq == 2) {
+      } else if(input$hq == 2) {
         filteredNames <- area_vars
       } else {
         filteredNames <- length_vars
@@ -295,10 +304,10 @@ mod_Explore_server <- function(id, r) {
 
     # update y variable based on hq
     observeEvent(input$hq, {
-      if (input$hq == 3) {
+      if(input$hq == 3) {
         filteredNames <- volume_vars
         defaultSelection <- "hfull_volume"
-      } else if (input$hq == 2) {
+      } else if(input$hq == 2) {
         filteredNames <- area_vars
         defaultSelection <- "hfull_area"
       } else {
@@ -312,17 +321,18 @@ mod_Explore_server <- function(id, r) {
 
     # update barrier ids to filter to wria, huc12, and owner
     observeEvent(c(input$area_sel, input$subarea_sel, input$owner_sel), {
+
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
 
       # get areas to filter by
-      if ("0" %in% input$area_sel) {
+      if("0" %in% input$area_sel){
         cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         cWRIA_NR <- as.integer(input$area_sel)
       }
 
       # get subareas to filter by
-      if ("0" %in% input$subarea_sel) {
+      if("0" %in% input$subarea_sel){
         choice_huc_number <- huc12_wrias %>%
           dplyr::filter(wria_number %in% cWRIA_NR) %>%
           dplyr::pull(huc_number)
@@ -332,42 +342,18 @@ mod_Explore_server <- function(id, r) {
 
       # get site ids for owner types to filter by
       cSiteIds <- c()
-      if ("0" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::pull(site_id))
-      }
-      if ("1" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))
-      }
-      if ("2" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))
-      }
-      if ("3" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))
-      }
-      if ("4" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))
-      }
-      if ("5" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))
-      }
-      if ("6" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))
-      }
-      if ("7" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))
-      }
-      if ("8" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))
-      }
-      if ("9" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))
-      }
-      if ("11" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))
-      }
-      if ("12" %in% input$owner_sel) {
-        cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))
-      }
+      if("0" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::pull(site_id))}
+      if("1" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
+      if("2" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
+      if("3" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
+      if("4" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
+      if("5" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
+      if("6" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
+      if("7" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
+      if("8" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
+      if("9" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
+      if("11" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
+      if("12" %in% input$owner_sel){cSiteIds <- c(cSiteIds, sfC %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
 
       # filter sites
       sfC <- sfC %>% dplyr::filter(wria_number %in% cWRIA_NR & huc_number %in% choice_huc_number & site_id %in% cSiteIds)
@@ -379,19 +365,20 @@ mod_Explore_server <- function(id, r) {
         choices = sfC %>% dplyr::pull(site_id) %>% sort(),
         server = TRUE
       )
+
     })
 
     # update color variables for plot type
     observeEvent(c(input$plot_type, input$area_sel, input$owner_sel, input$hq), {
-      if (input$plot_type == "Scatterplot") {
-        if (!is.null(input$hq) && input$hq != "") {
-          if (input$hq == 3) { # Assuming 3 corresponds to 'Volume'
+      if(input$plot_type == "Scatterplot") {
+        if(!is.null(input$hq) && input$hq != "") {
+          if(input$hq == 3) {  # Assuming 3 corresponds to 'Volume'
             volume_vars_select <- volume_vars[!volume_vars %in% c("wria_number", "potential_species")]
             cVars <- c("None" = "none", volume_vars_select)
-          } else if (input$hq == 2) { # Assuming 2 corresponds to 'Area'
+          } else if(input$hq == 2) {  # Assuming 2 corresponds to 'Area'
             area_vars_select <- area_vars[!area_vars %in% c("wria_number", "potential_species")]
             cVars <- c("None" = "none", area_vars_select)
-          } else { # Default case, assuming any other value including 1 corresponds to 'Length'
+          } else {  # Default case, assuming any other value including 1 corresponds to 'Length'
             length_vars_select <- length_vars[!length_vars %in% c("wria_number", "potential_species")]
             cVars <- c("None" = "none", length_vars_select)
           }
@@ -406,14 +393,14 @@ mod_Explore_server <- function(id, r) {
         )
       }
 
-      if (!is.null(input$area_sel)) {
-        if (length(input$area_sel) < 2 & !("0" %in% input$area_sel)) {
+      if(!is.null(input$area_sel)){
+        if(length(input$area_sel) < 2 & !("0" %in% input$area_sel)){
           cVars <- cVars[cVars != "wria_number"]
         }
       }
 
-      if (!is.null(input$owner_sel)) {
-        if (length(input$owner_sel) < 2 & !("0" %in% input$owner_sel)) {
+      if(!is.null(input$owner_sel)){
+        if(length(input$owner_sel) < 2 & !("0" %in% input$owner_sel)){
           cVars <- cVars[cVars != "owner_type_code"]
         }
       }
@@ -422,9 +409,9 @@ mod_Explore_server <- function(id, r) {
     })
 
     # update reactive values object with Explore inputs
-    ## area_sel and area_choice
+    ##area_sel and area_choice
     observeEvent(input$area_sel, {
-      if ("0" %in% input$area_sel) {
+      if("0" %in% input$area_sel){
         r$area_sel_explore <- wrias %>% dplyr::pull(WRIA_NR)
         r$area_choice_explore <- "all"
       } else {
@@ -433,19 +420,18 @@ mod_Explore_server <- function(id, r) {
       }
     })
 
-    ## subarea_sel and subarea_choice
+    ##subarea_sel and subarea_choice
     observeEvent(c(input$area_sel, input$subarea_sel), {
+
       # get areas to filter by
-      if ("0" %in% input$area_sel) {
+      if("0" %in% input$area_sel){
         cWRIA_NR <- wrias %>% dplyr::pull(WRIA_NR)
       } else {
         cWRIA_NR <- as.integer(input$area_sel)
       }
 
-      if ("0" %in% input$subarea_sel) {
-        r$subarea_sel_explore <- huc12_wrias %>%
-          dplyr::filter(wria_number %in% cWRIA_NR) %>%
-          dplyr::pull(huc_number)
+      if("0" %in% input$subarea_sel){
+        r$subarea_sel_explore <- huc12_wrias %>% dplyr::filter(wria_number %in% cWRIA_NR) %>% dplyr::pull(huc_number)
         r$subarea_choice_explore <- "all"
       } else {
         r$subarea_sel_explore <- input$subarea_sel
@@ -454,7 +440,7 @@ mod_Explore_server <- function(id, r) {
     })
 
     observeEvent(input$owner_sel, {
-      if ("0" %in% input$owner_sel) {
+      if("0" %in% input$owner_sel){
         r$owner_sel_explore <- c(1:9, 11, 12)
       } else {
         r$owner_sel_explore <- input$owner_sel
@@ -462,7 +448,7 @@ mod_Explore_server <- function(id, r) {
     })
 
     observeEvent(input$remove_bad_match, {
-      if (input$remove_bad_match == 1) {
+      if(input$remove_bad_match == 1){
         r$remove_bad_match_explore <- FALSE
       } else {
         r$remove_bad_match_explore <- TRUE
@@ -481,6 +467,15 @@ mod_Explore_server <- function(id, r) {
     observeEvent(input$barrier_ids, r$barrier_ids_explore <- input$barrier_ids, ignoreNULL = FALSE)
     observeEvent(input$rezoom_on_submit, r$rezoom_on_submit_explore <- input$rezoom_on_submit)
 
+    # reset figures tab plot extent and triggers redraw
+    observeEvent(input$submit, {
+      r$plot_xmin <- NA
+      r$plot_xmax <- NA
+      r$plot_ymin <- NA
+      r$plot_ymax <- NA
+      r$plot_brush <- r$plot_brush + 1
+    })
+
     # reset figures tab plot extent
     observeEvent(c(
       input$area_sel,
@@ -495,26 +490,5 @@ mod_Explore_server <- function(id, r) {
       r$plot_ymin <- NA
       r$plot_ymax <- NA
     })
-
-    observeEvent(input$submit, {
-      # Reset figures tab plot extent
-      r$plot_xmin <- NA
-      r$plot_xmax <- NA
-      r$plot_ymin <- NA
-      r$plot_ymax <- NA
-      r$plot_brush <- r$plot_brush + 1
-
-      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
-         input$highlight == 1) {
-        r$submit_explore <- input$submit
-      } else if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
-                input$highlight == 2) {
-        r$submit_explore <- input$submit
-      } else {
-        showModal(modalDialog(title = "Warning!",
-                              "Please fill all the fields before you click the Submit button."))
-      }
-    })
-
   })
 }
