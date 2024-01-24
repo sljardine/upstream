@@ -236,7 +236,7 @@ mod_Figures_server <- function(id, r){
 
     # render plot on submit button events or brush event
     store_plot <- eventReactive(
-      c(user_plot(), r$submit_explore),
+      c(user_plot(), r$submit_explore, r$tab_sel, r$submit_explore, r$submit_suggest, r$submit_custom, r$plot_brush),
       {
         # explore tab plots (scatter plot and histogram)
         if(user_plot()){
