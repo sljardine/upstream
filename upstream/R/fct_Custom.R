@@ -1,11 +1,23 @@
-#' @title Convert custom portfolio to TRUE/FALSE vector
+#' @title Convert projects in custom portfolio to TRUE/FALSE vector
+#' @param points A simple features point data frame containing culvert locations and attributes.
+#' @param prtf_cust A vector of point IDs for selected points.
+get_points_sel_custom <- function(
+    points, #projects
+    prtf_cust #inputs from mod_Custom (projects in plan)
+    ){
+  
+  points_sel <- points$site_id %in% prtf_cust
+  
+}
+
+#' @title Convert projects in custom portfolio adding habitat to TRUE/FALSE vector
 #' @param points A simple features point data frame containing culvert locations and attributes.
 #' @param prtf_cust A vector of point IDs for selected points.
 #' @param barrier_idp A vector of planned culvert IDs.
 #' @param E A full connectivity matrix.
 #' @return A simple features point data frame containing culvert location and attributes for selected points.
 #' @export
-get_points_sel_custom <- function(
+get_points_sel_hab_custom <- function(
     points, #projects
     prtf_cust, #inputs from mod_Custom (projects in plan)
     barrier_idp, #inputs from mod_Custom (projects to ignore)

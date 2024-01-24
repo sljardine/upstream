@@ -2,22 +2,15 @@
 % Please edit documentation in R/fct_Custom.R
 \name{get_points_sel_custom}
 \alias{get_points_sel_custom}
-\title{Convert custom portfolio to TRUE/FALSE vector}
+\title{Convert projects in custom portfolio to TRUE/FALSE vector}
 \usage{
-get_points_sel_custom(points, prtf_cust, barrier_idp, E)
+get_points_sel_custom(points, prtf_cust)
 }
 \arguments{
 \item{points}{A simple features point data frame containing culvert locations and attributes.}
 
 \item{prtf_cust}{A vector of point IDs for selected points.}
-
-\item{barrier_idp}{A vector of planned culvert IDs.}
-
-\item{E}{A full connectivity matrix.}
-}
-\value{
-A simple features point data frame containing culvert location and attributes for selected points.
 }
 \description{
-Convert custom portfolio to TRUE/FALSE vector
+Convert projects in custom portfolio to TRUE/FALSE vector
 }

@@ -62,7 +62,7 @@ mod_Tables_server <- function(id, r){
         }
         else if(r$tab_sel == "Custom") {
           if(r$remove_bad_match_custom){
-            points_sel_custom <- get_points_sel_custom(
+            points_sel_custom <- get_points_sel_hab_custom(
               points = culverts_cmb_gm,
               prtf_cust = r$barrier_ids_custom,
               barrier_idp = r$barrier_idp_custom,
@@ -75,7 +75,7 @@ mod_Tables_server <- function(id, r){
               hq = r$hq_custom
               )
           } else {
-            points_sel_custom <- get_points_sel_custom(
+            points_sel_custom <- get_points_sel_hab_custom(
               points = culverts_cmb,
               prtf_cust = r$barrier_ids_custom,
               barrier_idp = r$barrier_idp_custom,
@@ -117,9 +117,7 @@ mod_Tables_server <- function(id, r){
           if(r$remove_bad_match_custom){
             points_sel_custom <- get_points_sel_custom(
               points = culverts_cmb_gm,
-              prtf_cust = r$barrier_ids_custom,
-              barrier_idp = r$barrier_idp_custom,
-              E = E_gm
+              prtf_cust = r$barrier_ids_custom
             )
             get_plan_list(
               points = culverts_cmb_gm,
@@ -132,10 +130,7 @@ mod_Tables_server <- function(id, r){
             } else {
           points_sel_custom <- get_points_sel_custom(
             points = culverts_cmb,
-            prtf_cust = r$barrier_ids_custom,
-            barrier_idp = r$barrier_idp_custom,
-            E = E
-            )
+            prtf_cust = r$barrier_ids_custom)
           get_plan_list(
             points = culverts_cmb,
             points_sel = points_sel_custom,
@@ -184,7 +179,7 @@ mod_Tables_server <- function(id, r){
         output$render_list <- DT::renderDataTable(
           DT::datatable(
             {store_list()},
-            caption = htmltools::tags$caption(style = 'caption-side: top; text-align: center; color:black;  font-size:200% ;','Selected Culverts'),
+            caption = htmltools::tags$caption(style = 'caption-side: top; text-align: center; color:black;  font-size:200% ;','Selected Projects'),
             options = list(pageLength = 5, lengthChange = FALSE, searching = FALSE),
             rownames = FALSE
             )
