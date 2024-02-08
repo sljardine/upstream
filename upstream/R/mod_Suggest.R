@@ -235,7 +235,8 @@ mod_Suggest_server <- function(id, r){
         r$area_sel_suggest <- input$area_sel
         r$area_choice_suggest <- "selection"
       }
-    })
+    }
+    )
     ##subarea_sel and subarea_choice ----
     observeEvent(c(input$area_sel, input$subarea_sel), {
       # get areas to filter by
@@ -252,7 +253,8 @@ mod_Suggest_server <- function(id, r){
         r$subarea_sel_suggest<- input$subarea_sel
         r$subarea_choice_suggest <- "selection"
       }
-    })
+    }
+    )
     ##owner_sel ----
     observeEvent(input$owner_sel, {
       if("0" %in% input$owner_sel){

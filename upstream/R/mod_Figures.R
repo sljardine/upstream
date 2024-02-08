@@ -53,24 +53,39 @@ mod_Figures_server <- function(id, r){
 
     # Explore submit button event for base_map
     observeEvent(r$submit_explore, {
-
+      
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_explore,
         r$subarea_sel_explore,
         r$area_choice_explore,
         r$subarea_choice_explore
+      )
+      if(r$remove_bad_match_explore){
+        update_map_culvert_markers(
+          culverts_cmb_gm,
+          leaflet::leafletProxy(ns('base_map')),
+          r$area_sel_explore,
+          r$subarea_sel_explore,
+          r$owner_sel_explore,
+          r$remove_bad_match_explore,
+          r$color_variable_explore,
+          r$highlight_explore,
+          r$barrier_ids_explore
         )
-      update_map_culvert_markers(
-        leaflet::leafletProxy(ns('base_map')),
-        r$area_sel_explore,
-        r$subarea_sel_explore,
-        r$owner_sel_explore,
-        r$remove_bad_match_explore,
-        r$color_variable_explore,
-        r$highlight_explore,
-        r$barrier_ids_explore
+      } else {
+        update_map_culvert_markers(
+          culverts_cmb,
+          leaflet::leafletProxy(ns('base_map')),
+          r$area_sel_explore,
+          r$subarea_sel_explore,
+          r$owner_sel_explore,
+          r$remove_bad_match_explore,
+          r$color_variable_explore,
+          r$highlight_explore,
+          r$barrier_ids_explore
         )
+      }
       user_plot(TRUE)
 
     })
@@ -347,10 +362,19 @@ mod_Figures_server <- function(id, r){
         } else if(r$x_axis_variable_explore %in% c("potential_species", "owner_type_code", "percent_fish_passable_code") | r$y_axis_variable_explore %in% c("potential_species", "owner_type_code", "percent_fish_passable_code")){
           r$plot_click_text_output_explore <- ''
         } else {
+          if(r$remove_bad_match_explore){
           r$plot_click_text_output_explore <- get_plot_click_site_id(
+            culverts_cmb_gm,
             r$owner_sel_explore, r$area_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
             r$y_axis_variable_explore, input$plot_click$x, input$plot_click$y
             )
+          } else {
+          r$plot_click_text_output_explore <- get_plot_click_site_id(
+            culverts_cmb,
+            r$owner_sel_explore, r$area_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
+            r$y_axis_variable_explore, input$plot_click$x, input$plot_click$y
+            )  
+          }
         }
       }
     })

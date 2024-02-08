@@ -43,7 +43,7 @@ mod_Learn_ui <- function(id){
     ),
     fluidRow(
       h3(HTML("<b>Found a Bug?</b>"), align = "left", style = 'margin-left: 50px;'),
-      p(HTML("If you've found a bug, we'd appreciate it if you could report it to help improve Upstream. Please visit <a href='https://github.com/sljardine/upstream/issues' target='_blank'>GitHub Issues page</a> to report the issue."), align = "left", style = 'margin-left: 50px;')
+      p(HTML("Reporting a bug or feature request can help improve Upstream. To do so, please visit <a href='https://github.com/sljardine/upstream/issues' target='_blank'>GitHub Issues page</a> to report the issue."), align = "left", style = 'margin-left: 50px;')
     )
   )
 }

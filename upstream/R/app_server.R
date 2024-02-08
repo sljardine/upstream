@@ -34,23 +34,4 @@ app_server <- function(input, output, session) {
     }
   })
 
-  # output$dynamicTabBox <- shiny::renderUI({
-  #   if (input$tabset1 %in% c("Welcome", "Learn")) {
-  #     # Exclude the Report tab
-  #     shinydashboard::tabBox(
-  #       id = "tabset2",
-  #       side = "left", height = "1100px",
-  #       shiny::tabPanel("Figures", mod_Figures_ui("Figures_1"))
-  #     )
-  #   } else {
-  #     # Include the Report tab
-  #     shinydashboard::tabBox(
-  #       id = "tabset2",
-  #       side = "left", height = "1100px",
-  #       shiny::tabPanel("Figures", mod_Figures_ui("Figures_1")),
-  #       shiny::tabPanel("Report", mod_Tables_ui("Tables_1"))
-  #     )
-  #   }
-  # })
-
 }

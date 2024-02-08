@@ -5,6 +5,7 @@
 \title{get plot click site id}
 \usage{
 get_plot_click_site_id(
+  points,
   owner_sel,
   area_sel,
   remove_bad_match,
@@ -15,6 +16,18 @@ get_plot_click_site_id(
 )
 }
 \arguments{
+\item{points}{points}
+
+\item{owner_sel}{owner selection}
+
+\item{area_sel}{wria selection}
+
+\item{remove_bad_match}{indicator for removing a bad match}
+
+\item{x_axis_variable}{variable on the x axis}
+
+\item{y_axis_variable}{variable on the y axis}
+
 \item{plotClickX}{x coordinate from plot click event}
 
 \item{plotClickY}{y coordinate from plot click event}

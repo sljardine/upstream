@@ -133,68 +133,6 @@ remove_map_points <- function(leaf_proxy){
     leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 }
 
-#' @title update map WRIA labels
-#' @param leaf_proxy A leaflet proxy reference.
-#' @param zoom_level A zoom level for tge leaflet map.
-#' @param area_sel A vector of WRIA ID numbers of interest.
-#' @param owner_sel A vector of owner ID numbers of interest.
-#' @param barrier_idp A vector of planned culvert IDs
-#' @return none
-#' @export
-update_map_WRIA_labels <- function(
-    leaf_proxy,
-    zoom_level,
-    area_sel,
-    owner_sel){
-  # get WRIA centroids
-  sfWC <- wrias %>%
-    sf::st_drop_geometry() %>%
-    dplyr::select(WRIA_NR, WRIA_NM) %>%
-    dplyr::bind_cols(
-      wrias %>%
-        dplyr::select() %>%
-        sf::st_centroid() %>%
-        sf::st_coordinates()
-    )
-
-  # summarize culvert count by WRIA
-  dfC <- culverts_cmb %>% sf::st_drop_geometry()
-  if(!is.null(area_sel)){
-    dfC <- dfC %>% dplyr::filter(wria_number %in% area_sel)
-  }
-  if(!is.null(owner_sel)){
-    dfC <- dfC %>% dplyr::filter(owner_type_code %in% owner_sel)
-  }
-
-  sfWC <- sfWC %>%
-    dplyr::inner_join(
-      dfC %>%
-        dplyr::group_by(wria_number) %>%
-        dplyr::summarize(Count = dplyr::n(), .groups = "drop"),
-      by = c("WRIA_NR" = "wria_number")
-    )
-
-  # create label based on zoom
-  if(is.null(zoom_level)){
-    sfWC <- sfWC %>% dplyr::mutate(Label = Count)
-  } else {
-    if(zoom_level < 9){
-      sfWC <- sfWC %>% dplyr::mutate(Label = Count)
-    } else {
-      sfWC <- sfWC %>% dplyr::mutate(Label = paste0(WRIA_NM, " (", Count, ")"))
-    }
-  }
-
-  # update map
-  leaf_proxy %>%
-    leaflet::clearGroup("wria") %>%
-    leaflet::addLabelOnlyMarkers(
-      data = sfWC, lat = ~Y, lng = ~X,
-      group = "wria",
-      label = ~Label,
-      labelOptions = leaflet::labelOptions(textsize = "16px", noHide = TRUE, direction = "center", textOnly = TRUE)
-    )
-}
 
 #' @title update map selected polygons
 #' @param leaf_proxy A leaflet proxy reference.
@@ -248,6 +186,7 @@ update_map_selected_polygons <- function(
 }
 
 #' @title update map culvert markers
+#' @param points points
 #' @param leaf_proxy leaflet proxy reference
 #' @param area_sel A vector of WRIA ID numbers of interest.
 #' @param subarea_sel A vector of WRIA ID numbers of interest.
@@ -259,6 +198,7 @@ update_map_selected_polygons <- function(
 #' @return none
 #' @export
 update_map_culvert_markers <- function(
+    points,
     leaf_proxy,
     area_sel,
     subarea_sel,
@@ -273,18 +213,11 @@ update_map_culvert_markers <- function(
   if(is.null(subarea_sel)){subarea_sel <- huc12_wrias %>% dplyr::select(huc_number) %>% dplyr::distinct()} else {subarea_sel <- subarea_sel}
   if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
   if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
-
-  # define points data based on bad match choice
-  if(remove_bad_match){
-    points <- culverts_cmb_gm
-  } else {
-    points <- culverts_cmb
-  }
-
+  
   # filter culverts to selected wrias
   points <- points %>%
     dplyr::filter(huc_number %in% subarea_sel)
-
+  
   # filter by owner class
   cSiteIds <- c()
   if("0" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::pull(site_id))}
@@ -300,19 +233,19 @@ update_map_culvert_markers <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-
+  
   # replace owner_type_code with name
   if(color_variable == "owner_type_code"){
     points <- points %>%
       dplyr::select(-owner_type_code) %>%
       dplyr::rename(owner_type_code = owner_name)
   }
-
+  
   # replace wria_number with name
   if(color_variable == "wria_number"){
     points <- replace_WRIA_number_with_name(points, wrias)
   }
-
+  
   # assign color variable to C
   if(color_variable %in% c("none", "")) {
     points$C <- "none"
@@ -327,7 +260,7 @@ update_map_culvert_markers <- function(
       points$C <- points %>% dplyr::pull(color_variable)
     }
   }
-
+  
   # palette
   if(color_variable %in% c("none", "")){
     pal <- function(x){return("grey")}
@@ -356,34 +289,34 @@ update_map_culvert_markers <- function(
       reverse = FALSE
     )
   }
-
+  
   # set barrier ids
   if(is.null(barrier_ids) | highlight == 0){
     cBarrierIds <- ''
   } else {
     cBarrierIds <- barrier_ids
   }
-
+  
   # calculate highlighted variable in culverts data frame
   points <- points %>%
     dplyr::mutate(IsHighlighted = dplyr::case_when(site_id %in% cBarrierIds ~ "Highlighted", TRUE ~ "Not Highlighted")) %>%
     dplyr::arrange(IsHighlighted)
-
+  
   # define stroke palette function
   strokePal <- leaflet::colorFactor(palette = c("#00ffff", "black"), domain = c("Highlighted", "Not Highlighted"), ordered = TRUE)
-
+  
   # remove the culverts from the map
   leaf_proxy %>% leaflet::clearGroup("culverts")
-
+  
   # return if no culverts to draw
   if(nrow(points) == 0){return()}
-
+  
   # Define a custom function to determine the stroke color: highlight overrides bad match
   getStrokeColor <- function(highlighted, badMatch) {
     ifelse(highlighted == "Highlighted", strokePal(highlighted),
            ifelse(badMatch, "black", "grey"))
   }
-
+  
   # add culverts to map if zoomed in enough
   leaf_proxy %>%
     leaflet::addCircleMarkers(
@@ -413,6 +346,7 @@ update_map_culvert_markers <- function(
       popup = ~popup
     )
 }
+
 
 #' @title filter and format culverts for histogram
 #' @param points A simple features point data frame containing culvert locations and attributes.
@@ -1141,13 +1075,27 @@ get_pretty_variable_name <- function(varName){
 }
 
 #' @title get plot click site id
+#' @param points points
+#' @param owner_sel owner selection
+#' @param area_sel wria selection
+#' @param remove_bad_match indicator for removing a bad match
+#' @param x_axis_variable variable on the x axis
+#' @param y_axis_variable variable on the y axis
 #' @param plotClickX x coordinate from plot click event
 #' @param plotClickY y coordinate from plot click event
 #' @return string value of culvert site id closest to plot click coordinates or empty string if beyond maximum distance
 #' @export
-get_plot_click_site_id <- function(owner_sel, area_sel, remove_bad_match, x_axis_variable, y_axis_variable, plotClickX, plotClickY){
-  points <- culverts_cmb
-
+get_plot_click_site_id <- function(
+    points,
+    owner_sel, 
+    area_sel, 
+    remove_bad_match, 
+    x_axis_variable, 
+    y_axis_variable, 
+    plotClickX, 
+    plotClickY
+    ){
+  
   # Filter by owner selection
   cSiteIds <- c()
   if("1" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}

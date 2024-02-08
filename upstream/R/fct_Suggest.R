@@ -205,12 +205,19 @@ map_leaflet_opt <- function(
     leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
     ds_leaflet_lines <- dslines %>% dplyr::filter(COMID %in% ds_blocked_lines)
 
+    if (inherits(sf::st_geometry(leaflet_lines), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
+      
     leaf_proxy <- leaf_proxy %>%
       leafgl::addGlPolylines(data = leaflet_lines,
         color = "#cf6e7d",
         opacity = 0.5,
         group = "blocked_lines"
       )
+    } else {
+      
+      NULL
+      
+    }
 
   } else {
 

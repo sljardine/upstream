@@ -5,6 +5,7 @@
 \title{update map culvert markers}
 \usage{
 update_map_culvert_markers(
+  points,
   leaf_proxy,
   area_sel,
   subarea_sel,
@@ -16,6 +17,8 @@ update_map_culvert_markers(
 )
 }
 \arguments{
+\item{points}{points}
+
 \item{leaf_proxy}{leaflet proxy reference}
 
 \item{area_sel}{A vector of WRIA ID numbers of interest.}
