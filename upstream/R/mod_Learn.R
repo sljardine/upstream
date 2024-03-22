@@ -39,7 +39,7 @@ mod_Learn_ui <- function(id){
     ),
     fluidRow(
       h3(HTML("<b>Upstream Video Tutorial</b>"), align = "left", style = 'margin-left: 50px;'),
-      p(HTML("The Upstream <a href='https://vimeo.com/907552408?share=copy' target='_blank'>Launch Webinar</a> provides a demonstration of the Upstream tool."),, align = "left", style = 'margin-left: 50px;')
+      p(HTML("The Upstream <a href='https://vimeo.com/907552408?share=copy' target='_blank'>Launch Webinar</a> provides a demonstration of the Upstream tool."), align = "left", style = 'margin-left: 50px;')
     ),
     fluidRow(
       h3(HTML("<b>Found a Bug?</b>"), align = "left", style = 'margin-left: 50px;'),
