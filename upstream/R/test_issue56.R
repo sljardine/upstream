@@ -1,14 +1,16 @@
+library(here)
 library(ROI)
 library(ROI.plugin.glpk)
 library(sf)
 library(tidyverse)
+load(here("data-raw", "upstream_inputs.Rdata"))
 load(here("data-raw", "upstream_inputs_gm.Rdata"))
 source(here("R", "fct_Suggest.R"))
 source(here("R", "fct_Tables.R"))
 
 test <- solve_opt(
   points = culverts_cmb_gm,
-  budget = 60e6,
+  budget = 6e7,
   D = D_gm,
   wria_sel = 0,
   huc_sel = 0,
@@ -33,4 +35,12 @@ get_summary_table(
   hq = 1
 )
 
+get_plan_list(
+  points = culverts_cmb_gm,
+    points_sel = test,
+    barrier_idp = 0,
+    cost = 2, #cost definition
+    mean_design_cost = 5e5, #user-defined mean design cost
+    mean_construction_cost = 5e5  #user-defined mean construction cost
+)
 
