@@ -115,7 +115,7 @@ mod_Suggest_ui <- function(id){
                  numericInput(inputId = ns("w_ag"),
                               min = 0,
                               max = 1,
-                              #step = 0.01,
+                              step = 0.01,
                               label = NULL,
                               value = 0.33)),
           
@@ -123,7 +123,7 @@ mod_Suggest_ui <- function(id){
                  numericInput(inputId = ns("w_nat"),
                               min = 0,
                               max = 1,
-                              #step = 0.01,
+                              step = 0.01,
                               label = NULL,
                               value = 0.34)),
           tagAppendAttributes(
