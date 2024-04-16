@@ -1,6 +1,6 @@
 # Upstream
 
-Upstream is a flexible tool designed to support fish passage planning in Western Washington.
+[Upstream](https://upstream-wca.app) is a flexible tool designed to support fish passage planning in Western Washington.
 
 # Release Notes
 
