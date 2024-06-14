@@ -31,7 +31,7 @@ mod_Learn_ui <- function(id){
     ),
     fluidRow(
       h3(HTML("<b>Funding</b>"), align = "left", style = 'margin-left: 50px;'),
-      p("Funding for Upstream comes from the Washington Sea Grant", align = "left", style = 'margin-left: 50px;')
+      p("Funding for Upstream comes from the Washington Sea Grant (Award #NA22OAR4170103). Additional funding was provided by the Rae S. and Bell M. Shimada Endowed Faculty Fellowship in Memory of Warren S. Wooster", align = "left", style = 'margin-left: 50px;')
     ),
     fluidRow(
       h3(HTML("<b>Upstream User Guide</b>"), align = "left", style = 'margin-left: 50px;'),
