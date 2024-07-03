@@ -1,13 +1,11 @@
-FROM rocker/r-base:4.1.0
+FROM rocker/r-base:4.4.0
 LABEL maintainer="USER <jardine@uw.edu>"
 
 ENV RENV_VERSION 0.15.5
 
 # Step 1: Install usrmerge to fix the merged-/usr layout issue
 RUN apt-get update --fix-missing && \
-    apt-get install -y --no-install-recommends usrmerge && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends usrmerge
 
 # Step 2: Install the remaining dependencies separately to isolate issues
 RUN apt-get update --fix-missing && \
