@@ -5,33 +5,76 @@ ENV RENV_VERSION 0.15.5
 
 # Step 1: Install usrmerge to fix the merged-/usr layout issue
 RUN apt-get update --fix-missing && \
-    apt-get install -y --no-install-recommends usrmerge
+    apt-get install -y --no-install-recommends usrmerge && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Step 2: Install the remaining dependencies
+# Step 2: Install the remaining dependencies separately to isolate issues
 RUN apt-get update --fix-missing && \
-    apt-get install -y --no-install-recommends \
-    sudo \
-    libfreetype-dev \
-    libicu-dev \
-    pandoc \
-    make \
-    git \
-    libssl-dev \
-    libcurl4-openssl-dev \
-    libxml2-dev \
-    libgit2-dev \
-    zlib1g-dev \
-    libgdal-dev \
-    gdal-bin \
-    libgeos-dev \
-    libproj-dev \
-    libsqlite3-dev \
-    libpng-dev \
-    libudunits2-dev \
-    libglpk-dev \
-    libfontconfig1-dev \
-    libfribidi-dev \
-    libharfbuzz-dev
+    apt-get install -y --no-install-recommends sudo
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libfreetype-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libicu-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends pandoc
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends make
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends git
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libssl-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libcurl4-openssl-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libxml2-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libgit2-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends zlib1g-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libgdal-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends gdal-bin
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libgeos-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libproj-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libsqlite3-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libpng-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libudunits2-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libglpk-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libfontconfig1-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libfribidi-dev
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends libharfbuzz-dev
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -50,7 +93,6 @@ COPY NAMESPACE NAMESPACE
 COPY R R
 COPY LICENSE LICENSE
 COPY DESCRIPTION DESCRIPTION
-COPY NAMESPACE NAMESPACE
 COPY renv.lock renv.lock
 
 # Install initial packages
