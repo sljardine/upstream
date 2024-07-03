@@ -72,4 +72,3 @@ RUN echo "local(options(shiny.port = 8080, shiny.host = '0.0.0.0'))" > /usr/lib/
 EXPOSE 8080
 CMD Rscript app.R
 
-
