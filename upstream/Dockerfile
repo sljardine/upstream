@@ -1,13 +1,17 @@
-FROM rocker/r-base:4.1.0
+FROM rocker/r-base:4.4.0
 LABEL maintainer="USER <jardine@uw.edu>"
 
 ENV RENV_VERSION 0.15.5
 
-# Install Linux packages
+# Install usrmerge to fix libc6 unpacking issue
 RUN apt-get update --fix-missing && \
-    apt-get install -y --no-install-recommends --fix-broken \
-    libfreetype-dev \
+    apt-get install -y --no-install-recommends usrmerge
+
+# Update and install dependencies one by one to isolate the problematic package
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends \
     sudo \
+    libfreetype-dev \
     libicu-dev \
     pandoc \
     make \
@@ -27,9 +31,13 @@ RUN apt-get update --fix-missing && \
     libglpk-dev \
     libfontconfig1-dev \
     libfribidi-dev \
-    libharfbuzz-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    libharfbuzz-dev || { \
+    echo 'ERROR: Failed to install dependencies'; \
+    exit 1; \
+    }
+
+# Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN install.r ROI.plugin.glpk
 
