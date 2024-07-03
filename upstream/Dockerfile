@@ -3,12 +3,15 @@ LABEL maintainer="USER <jardine@uw.edu>"
 
 ENV RENV_VERSION 0.15.5
 
-# Install Linux packages
+# Step 1: Install usrmerge to fix the merged-/usr layout issue
 RUN apt-get update --fix-missing && \
-    apt-get install -y --no-install-recommends --fix-broken \
-    usrmerge \
-    libfreetype-dev \
+    apt-get install -y --no-install-recommends usrmerge
+
+# Step 2: Install the remaining dependencies
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends \
     sudo \
+    libfreetype-dev \
     libicu-dev \
     pandoc \
     make \
@@ -28,9 +31,10 @@ RUN apt-get update --fix-missing && \
     libglpk-dev \
     libfontconfig1-dev \
     libfribidi-dev \
-    libharfbuzz-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    libharfbuzz-dev
+
+# Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN install.r ROI.plugin.glpk
 
@@ -49,13 +53,13 @@ COPY DESCRIPTION DESCRIPTION
 COPY NAMESPACE NAMESPACE
 COPY renv.lock renv.lock
 
-# install initial packages
-# install renv
+# Install initial packages
+# Install renv
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
 RUN R -e "remotes::install_github('r-spatial/leafgl')"
 
-# install packages from renv 
+# Install packages from renv 
 ENV RENV_PATHS_LIBRARY renv/library
 
 RUN R -e "renv::restore()"
