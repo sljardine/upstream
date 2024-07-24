@@ -20,8 +20,23 @@ get_leaflet_map <- function(){
   # initalize the map
   m <- wrias %>%
     leaflet::leaflet() %>%
-    leaflet::addProviderTiles("CartoDB.Positron", group = "Grayscale", options = leaflet::providerTileOptions(minZoom = 6.5))  %>%
-    leaflet::addScaleBar("bottomleft")
+    leaflet::addProviderTiles(
+      "CartoDB.Positron", 
+      options = leaflet::providerTileOptions(minZoom = 6.5),
+      group = "Street")  %>%
+    leaflet::addProviderTiles(
+      "Esri.WorldTopoMap", 
+      options = leaflet::providerTileOptions(minZoom = 6.5),
+      group = "Topo") %>% 
+    leaflet::addProviderTiles(
+      "Esri.WorldImagery", 
+      options = leaflet::providerTileOptions(minZoom = 6.5),
+      group = "World") %>% 
+    leaflet::addScaleBar("bottomleft") %>% 
+    leaflet::addLayersControl(
+      baseGroups = c("Street", "World", "Topo"),
+      options = leaflet::layersControlOptions(collapsed = TRUE)
+    )
 
   # add wria polygons
   m <- m %>%
