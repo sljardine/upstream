@@ -20,8 +20,12 @@ commonVariables <- setNames(
     "hmarg_length_agri", "hmarg_area_agri", "hmarg_volume_agri",
     "hfull_length_urb", "hfull_area_urb", "hfull_volume_urb",
     "hmarg_length_urb", "hmarg_area_urb", "hmarg_volume_urb",
-    "hfull_length_TempVMM08", "hfull_area_TempVMM08", "hfull_volume_TempVMM08",
-    "hmarg_length_TempVMM08", "hmarg_area_TempVMM08", "hmarg_volume_TempVMM08",
+    "hfull_length_hist_temp", "hfull_area_hist_temp", "hfull_volume_hist_temp",
+    "hmarg_length_hist_temp", "hmarg_area_hist_temp", "hmarg_volume_hist_temp",
+    "hfull_length_future1_temp", "hfull_area_future1_temp", "hfull_volume_future1_temp",
+    "hmarg_length_future1_temp", "hmarg_area_future1_temp", "hmarg_volume_future1_temp",
+    "hfull_length_future2_temp", "hfull_area_future2_temp", "hfull_volume_future2_temp",
+    "hmarg_length_future2_temp", "hmarg_area_future2_temp", "hmarg_volume_future2_temp",
     "percent_fish_passable_code", "corrected_dn_wsdot", "corrected_dn_other"
   ),
   nm = c(
@@ -37,6 +41,10 @@ commonVariables <- setNames(
     "Marginal Urban Habitat (Length)", "Marginal Urban Habitat (Area)", "Marginal Urban Habitat (Volume)",
     "Full Temperature (Length)", "Full Temperature (Area)", "Full Temperature (Volume)",
     "Marginal Temperature (Length)", "Marginal Temperature (Area)", "Marginal Temperature (Volume)",
+    "Full 2040 Temperature (Length)", "Full 2040 Temperature (Area)", "Full 2040 Temperature (Volume)",
+    "Marginal 2040 Temperature (Length)", "Marginal 2040 Temperature (Area)", "Marginal 2040 Temperature (Volume)",
+    "Full 2080 Temperature (Length)", "Full 2080 Temperature (Area)", "Full 2080 Temperature (Volume)",
+    "Marginal 2080 Temperature (Length)", "Marginal 2080 Temperature (Area)", "Marginal 2080 Temperature (Volume)",
     "Passability", "WSDOT Downstream Corrections", "non-WSDOT Downstream Corrections"
   )
 )
