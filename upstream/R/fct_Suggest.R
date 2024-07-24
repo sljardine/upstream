@@ -45,7 +45,7 @@ solve_opt <- function(
       hmarg_urb_nlcd_percent = hmarg_length_urb_nlcd_percent,
       hmarg_agri_nlcd_percent = hmarg_length_agri_nlcd_percent,
       hmarg_natural_percent = hmarg_length_natural_percent,
-      hmarg_TempVMM08 = hmarg_length_TempVMM08)
+      hmarg_hist_temp = hmarg_length_hist_temp)
   ##area
   } else if(hq == 2){
     points <- points %>%
@@ -54,7 +54,7 @@ solve_opt <- function(
         hmarg_urb_nlcd_percent = hmarg_area_urb_nlcd_percent,
         hmarg_agri_nlcd_percent = hmarg_area_agri_nlcd_percent,
         hmarg_natural_percent = hmarg_area_natural_percent,
-        hmarg_TempVMM08 = hmarg_area_TempVMM08)
+        hmarg_hist_temp = hmarg_area_hist_temp)
   ##volume
   } else {
     points <- points %>%
@@ -63,7 +63,7 @@ solve_opt <- function(
         hmarg_urb_nlcd_percent = hmarg_volume_urb_nlcd_percent,
         hmarg_agri_nlcd_percent = hmarg_volume_agri_nlcd_percent,
         hmarg_natural_percent = hmarg_volume_natural_percent,
-        hmarg_TempVMM08 = hmarg_volume_TempVMM08)
+        hmarg_hist_temp = hmarg_volume_hist_temp)
   }
 
 
@@ -124,12 +124,12 @@ solve_opt <- function(
   urb_per <- points %>% dplyr::pull(hmarg_urb_nlcd_percent)
   ag_per <- points %>% dplyr::pull(hmarg_agri_nlcd_percent)
   nat_per <- points %>% dplyr::pull(hmarg_natural_percent)
-  temp <- points %>% dplyr::pull(hmarg_TempVMM08)
+  temp <- points %>% dplyr::pull(hmarg_hist_temp)
 
   if(obj == 1){
   v <- h
   } else {
-  v <- w_urb * urb_per * h + w_ag *  ag_per * h + w_nat * nat_per * h# + w_temp * temp
+  v <- w_urb * urb_per * h + w_ag *  ag_per * h + w_nat * nat_per * h
   v[temp < w_temp[1]] <- 0
   v[temp > w_temp[2]] <- 0
   v[is.na(v)] <- 0 #HOT FIX

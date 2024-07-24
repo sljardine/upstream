@@ -20,8 +20,23 @@ get_leaflet_map <- function(){
   # initalize the map
   m <- wrias %>%
     leaflet::leaflet() %>%
-    leaflet::addProviderTiles("CartoDB.Positron", group = "Grayscale", options = leaflet::providerTileOptions(minZoom = 6.5))  %>%
-    leaflet::addScaleBar("bottomleft")
+    leaflet::addProviderTiles(
+      "CartoDB.Positron", 
+      options = leaflet::providerTileOptions(minZoom = 6.5),
+      group = "Street")  %>%
+    leaflet::addProviderTiles(
+      "Esri.WorldTopoMap", 
+      options = leaflet::providerTileOptions(minZoom = 6.5),
+      group = "Topo") %>% 
+    leaflet::addProviderTiles(
+      "Esri.WorldImagery", 
+      options = leaflet::providerTileOptions(minZoom = 6.5),
+      group = "World") %>% 
+    leaflet::addScaleBar("bottomleft") %>% 
+    leaflet::addLayersControl(
+      baseGroups = c("Street", "World", "Topo"),
+      options = leaflet::layersControlOptions(collapsed = TRUE)
+    )
 
   # add wria polygons
   m <- m %>%
@@ -1018,9 +1033,9 @@ get_pretty_variable_name <- function(varName){
   } else if(varName == "percent_fish_passable_code"){
     prettyName <- "Passability"
   }else if(varName == "corrected_dn_wsdot"){
-    prettyName <- "WSDOT Downstream Corrections"
+    prettyName <- "WSDOT Downstream Corrections (count)"
   }else if(varName == "corrected_dn_other"){
-    prettyName <- "non-WSDOT Downstream Corrections"
+    prettyName <- "non-WSDOT Downstream Corrections (count)"
   }else if(varName == "hmarg_length_agri"){
     prettyName <- "Marginal Agricultural Habitat Length (km)"
   }else if(varName == "hmarg_area_agri"){
@@ -1039,12 +1054,26 @@ get_pretty_variable_name <- function(varName){
     prettyName <- "Marginal Natural Habitat Area (km^2)"
   }else if(varName == "hmarg_volume_natural"){
     prettyName <- "Marginal Natural Habitat Volume (km^3)"
-  }else if(varName == "hmarg_length_TempVMM08"){
-    prettyName <- "Marginal Weighted Temperature (Length)"
-  }else if(varName == "hmarg_area_TempVMM08"){
-    prettyName <- "Marginal Weighted Temperature (Area)"
-  }else if(varName == "hmarg_volume_TempVMM08"){
-    prettyName <- "Marginal Weighted Temperature (Volume)"
+  }else if(varName == "hmarg_length_hist_temp"){
+    prettyName <- "Marginal Length-Weighted Temperature (C)"
+  }else if(varName == "hmarg_area_hist_temp"){
+    prettyName <- "Marginal Area-Weighted Temperature (C)"
+  }else if(varName == "hmarg_volume_hist_temp"){
+    prettyName <- "Marginal Volume-Weighted Temperature (C)"
+  }
+  
+  else if(varName == "hmarg_length_future1_temp"){
+    prettyName <- "Marginal Length-Weighted 2040 Temperature (C)"
+  }else if(varName == "hmarg_area_future1_temp"){
+    prettyName <- "Marginal Area-Weighted 2040 Temperature (C)"
+  }else if(varName == "hmarg_volume_future1_temp"){
+    prettyName <- "Marginal Volume-Weighted 2040 Temperature (C)"
+  }else if(varName == "hmarg_length_future2_temp"){
+    prettyName <- "Marginal Length-Weighted 2080 Temperature (C)"
+  }else if(varName == "hmarg_area_future2_temp"){
+    prettyName <- "Marginal Area-Weighted 2080 Temperature (C)"
+  }else if(varName == "hmarg_volume_future2_temp"){
+    prettyName <- "Marginal Volume-Weighted 2080 Temperature (C)"
   }else if(varName == "hfull_length_agri"){
     prettyName <- "Full Agricultural Habitat Length (km)"
   }else if(varName == "hfull_area_agri"){
@@ -1063,12 +1092,24 @@ get_pretty_variable_name <- function(varName){
     prettyName <- "Full Natural Habitat Area (km^2)"
   }else if(varName == "hfull_volume_natural"){
     prettyName <- "Full Natural Habitat Volume (km^3)"
-  }else if(varName == "hfull_length_TempVMM08"){
-    prettyName <- "Full Weighted Temperature (Length)"
-  }else if(varName == "hfull_area_TempVMM08"){
-    prettyName <- "Full Weighted Temperature (Area)"
-  }else if(varName == "hfull_volume_TempVMM08"){
-    prettyName <- "Full Weighted Temperature (Volume)"
+  }else if(varName == "hfull_length_hist_temp"){
+    prettyName <- "Full Length-Weighted Temperature (C)"
+  }else if(varName == "hfull_area_hist_temp"){
+    prettyName <- "Full Area-Weighted Temperature (C)"
+  }else if(varName == "hfull_volume_hist_temp"){
+    prettyName <- "Full Volume-Weighted Temperature (C)"
+  }else if(varName == "hfull_length_future1_temp"){
+    prettyName <- "Full Length-Weighted 2040 Temperature (C)"
+  }else if(varName == "hfull_area_future1_temp"){
+    prettyName <- "Full Area-Weighted 2040 Temperature (C)"
+  }else if(varName == "hfull_volume_future1_temp"){
+    prettyName <- "Full Volume-Weighted 2040 Temperature (C)"
+  }else if(varName == "hfull_length_future2_temp"){
+    prettyName <- "Full Length-Weighted 2080 Temperature (C)"
+  }else if(varName == "hfull_area_future2_temp"){
+    prettyName <- "Full Area-Weighted 2080 Temperature (C)"
+  }else if(varName == "hfull_volume_future2_temp"){
+    prettyName <- "Full Volume-Weighted 2080 Temperature (C)"
   }
 
   return(prettyName)
