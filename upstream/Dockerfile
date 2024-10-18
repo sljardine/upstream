@@ -5,7 +5,7 @@ LABEL maintainer="USER <jardine@uw.edu>"
 # Install Linux packages
 RUN apt-get update --fix-missing && \
     apt-get install -y --no-install-recommends --fix-broken \
-    libfreetype-dev \
+    libfreetype6-dev \  # Added this to ensure freetype headers are installed
     sudo \
     libicu-dev \
     pandoc \
@@ -30,10 +30,12 @@ RUN apt-get update --fix-missing && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Install additional R package dependencies if necessary
 RUN install.r ROI.plugin.glpk
 
 WORKDIR /upstream
 
+# Copy application files into the container
 COPY app.R app.R
 COPY data data
 COPY data-raw data-raw
@@ -47,11 +49,20 @@ COPY DESCRIPTION DESCRIPTION
 COPY NAMESPACE NAMESPACE
 COPY renv.lock renv.lock
 
-# install initial packages
-# install renv
+# Install initial packages
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "remotes::install_github('r-spatial/leafgl')"
+
+# Set environment variables and restore R environment using renv
+RUN R -e "Sys.setenv(RENV_CONFIG_REPOS_OVERRIDE = 'https://cloud.r-project.org'); renv::restore(repos = c(CRAN = 'https://cloud.r-project.org'))"
+
+# Set R options for Shiny app and expose port
+RUN echo "local(options(shiny.port = 8080, shiny.host = '0.0.0.0'))" > /usr/lib/R/etc/Rprofile.site
+
+EXPOSE 8080
+CMD Rscript app.R
+
 
 # Set environment variables and explicitly set the repositories in R
 RUN R -e "Sys.setenv(RENV_CONFIG_REPOS_OVERRIDE = 'https://cloud.r-project.org'); renv::restore(repos = c(CRAN = 'https://cloud.r-project.org'))"
