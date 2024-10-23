@@ -1,12 +1,15 @@
-FROM rocker/r-base:4.4.0
+# Base image
+FROM rocker/shiny:4.4.0
 
 LABEL maintainer="USER <jardine@uw.edu>"
 
 # Install Linux packages
 RUN apt-get update --fix-missing && \
     apt-get install -y --no-install-recommends --fix-broken \
-    libfreetype-dev \
-    libfreetype6-dev \ 
+    libfreetype6 \
+    libfreetype6-dev \
+    libfontconfig1 \
+    libfontconfig1-dev \
     sudo \
     libicu-dev \
     pandoc \
@@ -25,13 +28,11 @@ RUN apt-get update --fix-missing && \
     libpng-dev \
     libudunits2-dev \
     libglpk-dev \
-    libfontconfig1-dev \
     libfribidi-dev \
-    libharfbuzz-dev && \
+    libharfbuzz-dev \
+    pkg-config && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-RUN install.r ROI.plugin.glpk
 
 WORKDIR /upstream
 
@@ -48,18 +49,23 @@ COPY DESCRIPTION DESCRIPTION
 COPY NAMESPACE NAMESPACE
 COPY renv.lock renv.lock
 
-# install initial packages
-# install renv
+# Install initial packages and renv
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
-RUN R -e "remotes::install_github('r-spatial/leafgl')"
 
-# Set environment variables and explicitly set the repositories in R
+# Set environment variables and restore from renv
 RUN R -e "Sys.setenv(RENV_CONFIG_REPOS_OVERRIDE = 'https://cloud.r-project.org'); renv::restore(repos = c(CRAN = 'https://cloud.r-project.org'))"
 
-RUN echo "local(options(shiny.port = 8080, shiny.host = '0.0.0.0'))" > /usr/lib/R/etc/Rprofile.site
+# Install leafgl
+RUN R -e "remotes::install_github('r-spatial/leafgl')"
+
+# Create the missing directory for Rprofile.site
+RUN mkdir -p /usr/lib/R/etc
+
+# Set shiny app options
+RUN echo "local(options(shiny.port = 8080, shiny.host = '0.0.0.0'))" >> /usr/local/lib/R/etc/Rprofile.site
 
 EXPOSE 8080
 
-CMD Rscript app.R 
+CMD Rscript app.R
 
