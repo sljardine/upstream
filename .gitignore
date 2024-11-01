@@ -8,3 +8,4 @@
 shiny resources/*
 project notes/*
 .DS_Store
+.Rproj.user
