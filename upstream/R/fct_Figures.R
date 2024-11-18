@@ -64,7 +64,7 @@ get_leaflet_map <- function(){
       color = ~dplyr::case_when(
         is_upstream_non_culvert_barrier ~ "#ED6345",
         bad_match ~ "black",
-        TRUE ~ "darkgrey"), # marks bad matches
+        TRUE ~ "grey"), # marks bad matches
       opacity = 1,
       fillColor = ~ifelse(is_upstream_non_culvert_barrier, "#ED6345", 'grey'),
       fillOpacity = 1,
@@ -109,7 +109,7 @@ reset_map <- function(leaf_proxy){
       color = ~dplyr::case_when(
         is_upstream_non_culvert_barrier ~ "#ED6345",
         bad_match ~ "black",
-        TRUE ~ "darkgrey"), # marks bad matches
+        TRUE ~ "grey"), # marks bad matches
       opacity = 1,
       fillColor = ~ifelse(is_upstream_non_culvert_barrier, "#ED6345", 'grey'),
       fillOpacity = 1,
@@ -135,7 +135,7 @@ reset_map <- function(leaf_proxy){
     # to visual bugs.
     leaflet::addLegend(
       position = "bottomright",
-      colors = c("darkgrey", "darkgrey", "#ED6345"),
+      colors = c("grey", "grey", "#ED6345"),
       labels = c("Good Matches", "Bad Matches", "Culverts Upstream of Non-Culvert Barrier"),
       title = "Culvert Marker Colors",
       opacity = 1,
