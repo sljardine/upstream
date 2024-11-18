@@ -135,7 +135,7 @@ reset_map <- function(leaf_proxy){
     # to visual bugs.
     leaflet::addLegend(
       position = "bottomright",
-      colors = c("grey", "grey", "#ED6345"),
+      colors = c("darkgrey", "darkgrey", "#ED6345"),
       labels = c("Good Matches", "Bad Matches", "Culverts Upstream of Non-Culvert Barrier"),
       title = "Culvert Marker Colors",
       opacity = 1,
