@@ -5,9 +5,9 @@ get_points_sel_custom <- function(
     points, #projects
     prtf_cust #inputs from mod_Custom (projects in plan)
     ){
-  
+
   points_sel <- points$site_id %in% prtf_cust
-  
+
 }
 
 #' @title Convert projects in custom portfolio adding habitat to TRUE/FALSE vector
@@ -30,8 +30,8 @@ get_points_sel_hab_custom <- function(
   } else {
     prtf_cust_idp <- prtf_cust
   }
-  cust_sel <- prtf_cust_idp %in% prtf_cust 
-  
+  cust_sel <- prtf_cust_idp %in% prtf_cust
+
   #Identify points in custom plan that unlock habitat
   h_inc <- lapply(
     1 : length(prtf_cust_idp),
@@ -44,7 +44,7 @@ get_points_sel_hab_custom <- function(
   ) %>%
     do.call("rbind", .) %>%
     as.logical()
-  
+
   points_prtf_cust <- points$site_id %in% prtf_cust
   points_sel <- points$site_id %in% prtf_cust_idp[which(as.logical(h_inc * cust_sel))]
 
@@ -74,7 +74,7 @@ map_leaflet_custom <- function(
     downstream_line_ids, #comids for all lines downstream of each point
     barrier_idp #planned barrier IDs
 ){
-  
+
   #Convert custom portfolio to TRUE/FALSE vector
   cust <- points$site_id %in% prtf_cust
   if(! 0 %in% barrier_idp){
@@ -85,11 +85,11 @@ map_leaflet_custom <- function(
     prtf_cust_idp <- prtf_cust
   }
    cust_idp <- cust + idp
-   
-   cust_sel <- prtf_cust_idp %in% prtf_cust 
-   idp_sel <- prtf_cust_idp %in% barrier_idp 
-   
-  
+
+   cust_sel <- prtf_cust_idp %in% prtf_cust
+   idp_sel <- prtf_cust_idp %in% barrier_idp
+
+
   #Identify points in custom plan that unlock habitat
   h_inc <- lapply(
     1 : length(prtf_cust_idp),
@@ -102,30 +102,30 @@ map_leaflet_custom <- function(
     ) %>%
     do.call("rbind", .) %>%
     as.logical()
-  
+
   #Crop lines to wrias in plan regardless of whether they unlock habitat
   cust_wrias <- unique(points[points$site_id %in% prtf_cust_idp, ]$wria_number)
   in_cust_wrias <- points$wria_number %in% cust_wrias
-  
+
   #First get blocked/unblocked lines
   blocked_lines <- marginal_line_ids[in_cust_wrias] %>% base::unlist()
   ds_blocked_lines <- downstream_line_ids[in_cust_wrias] %>% base::unlist()
-  
+
   leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
   ds_leaflet_lines <- dslines %>% dplyr::filter(COMID %in% ds_blocked_lines)
-  
+
   #Defined blocked/unblocked
   names(marginal_line_ids) <- points$site_id
   names(downstream_line_ids) <- points$site_id
   cust_stream_ids <- marginal_line_ids[prtf_cust_idp[which(as.logical( h_inc * cust_sel))]] %>% base::unlist()
   ds_stream_ids <- downstream_line_ids[prtf_cust_idp[h_inc]] %>% base::unlist()
-  
+
   if(! 0 %in% barrier_idp){
     idp_stream_ids <- marginal_line_ids[prtf_cust_idp[which(as.logical( h_inc * idp_sel))]] %>% base::unlist()
   } else {
     idp_stream_ids <- NULL
   }
-  
+
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(
       data = leaflet_lines %>%
@@ -133,12 +133,12 @@ map_leaflet_custom <- function(
       color = "#cf6e7d",
       opacity = 0.5,
       group = "blocked_lines"
-    )  
-  
+    )
+
   #draw unblocked lines if there are any
   draw_ub_lines <- leaflet_lines %>% dplyr::filter(COMID %in% cust_stream_ids)
   if (inherits(sf::st_geometry(draw_ub_lines), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
-    
+
     leaf_proxy <- leaf_proxy %>%
       leafgl::addGlPolylines(
         data = leaflet_lines %>%
@@ -149,7 +149,7 @@ map_leaflet_custom <- function(
       ) } else {
         NULL
       }
-  
+
     #draw idp lines if there are any
     draw_idp_lines <- leaflet_lines %>% dplyr::filter(COMID %in% idp_stream_ids)
     if (inherits(sf::st_geometry(draw_idp_lines ), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
@@ -166,11 +166,11 @@ map_leaflet_custom <- function(
       NULL
     }
 
-  
+
   #draw downstream lines if there are any
   draw_ds_lines <- ds_leaflet_lines %>% dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% cust_stream_ids & !COMID %in% idp_stream_ids)
   if (inherits(sf::st_geometry(draw_ds_lines), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
-    
+
     leaf_proxy <- leaf_proxy %>%
       leafgl::addGlPolylines(
         data = ds_leaflet_lines %>%
@@ -181,16 +181,17 @@ map_leaflet_custom <- function(
       ) } else {
         NULL
       }
-  
-  
+
+
   # define project color pallet
   pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb", "#f1e2b9"), 0 : 2)
-  
-  # define match border pallet 
+
+  # define match border pallet
   match_pal <- leaflet::colorFactor(palette = c("black", "transparent"), domain = c(TRUE, FALSE), ordered = TRUE)
-  
+
   #Add culverts
   leaf_proxy <- leaf_proxy %>%
+    leaflet::clearControls() %>%
     leaflet::addCircleMarkers(
       data = points,
       lng = ~ site_longitude,
@@ -219,6 +220,6 @@ map_leaflet_custom <- function(
       ),
       popup = ~popup
     )
-  
+
   return(leaf_proxy)
 }
