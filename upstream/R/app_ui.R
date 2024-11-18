@@ -69,8 +69,18 @@ golem_add_external_resources <- function() {
     tags$link(
       rel = "canonical",
       href = "https://upstream-wca.app"
-    )
+    ),
+    tags$style(HTML("
+      .legend.leaflet-control i {
+        margin-bottom: 3px;
+        border-radius: 50%;
+      }
+      .legend.leaflet-control i:nth-child(4) {
+        border: 2px solid black;
+      }
+    "))
     # Add other external resources if needed
   )
+
 }
 

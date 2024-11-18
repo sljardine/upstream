@@ -21,18 +21,18 @@ get_leaflet_map <- function(){
   m <- wrias %>%
     leaflet::leaflet() %>%
     leaflet::addProviderTiles(
-      "CartoDB.Positron", 
+      "CartoDB.Positron",
       options = leaflet::providerTileOptions(minZoom = 6.5),
       group = "Street")  %>%
     leaflet::addProviderTiles(
-      "Esri.WorldTopoMap", 
+      "Esri.WorldTopoMap",
       options = leaflet::providerTileOptions(minZoom = 6.5),
-      group = "Topo") %>% 
+      group = "Topo") %>%
     leaflet::addProviderTiles(
-      "Esri.WorldImagery", 
+      "Esri.WorldImagery",
       options = leaflet::providerTileOptions(minZoom = 6.5),
-      group = "World") %>% 
-    leaflet::addScaleBar("bottomleft") %>% 
+      group = "World") %>%
+    leaflet::addScaleBar("bottomleft") %>%
     leaflet::addLayersControl(
       baseGroups = c("Street", "World", "Topo"),
       options = leaflet::layersControlOptions(collapsed = TRUE)
@@ -61,9 +61,12 @@ get_leaflet_map <- function(){
       group = "culverts",
       radius = 5,
       weight = 1.5,
-      color = ~ifelse(bad_match, "black", "darkgrey"), # marks bad matches
+      color = ~dplyr::case_when(
+        first_on_shared ~ "#ED6345",
+        bad_match ~ "black",
+        TRUE ~ "darkgrey"), # marks bad matches
       opacity = 1,
-      fillColor = 'grey',
+      fillColor = ~ifelse(first_on_shared, "#ED6345", 'grey'),
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
@@ -97,14 +100,18 @@ reset_map <- function(leaf_proxy){
     leaflet::clearGroup("unblocked_lines") %>%
     leaflet::clearGroup("ds_lines")%>%
     leaflet::clearGroup("selected_culverts") %>%
+    leaflet::clearControls() %>%
     leaflet::addCircleMarkers(
       data = welcome_map_points,
       group = "culverts",
       radius = 5,
       weight = 1.5,
-      color = ~ifelse(bad_match, "black", "darkgrey"), # marks bad matches
+      color = ~dplyr::case_when(
+        first_on_shared ~ "#ED6345",
+        bad_match ~ "black",
+        TRUE ~ "darkgrey"), # marks bad matches
       opacity = 1,
-      fillColor = 'grey',
+      fillColor = ~ifelse(first_on_shared, "#ED6345", 'grey'),
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
@@ -122,6 +129,14 @@ reset_map <- function(leaf_proxy){
         disableClusteringAtZoom = 10
       ),
       popup = ~popup
+    ) %>%
+    # Add legend
+    leaflet::addLegend(
+      position = "bottomright",
+      colors = c("grey", "grey", "#ED6345"),
+      labels = c("Good Matches", "Bad Matches", "Culverts Upstream of Non-Culvert Barrier"),
+      title = "Culvert Marker Colors",
+      opacity = 1,
     )
 
   # selected wria bounding box
@@ -228,11 +243,11 @@ update_map_culvert_markers <- function(
   if(is.null(subarea_sel)){subarea_sel <- huc12_wrias %>% dplyr::select(huc_number) %>% dplyr::distinct()} else {subarea_sel <- subarea_sel}
   if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
   if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
-  
+
   # filter culverts to selected wrias
   points <- points %>%
     dplyr::filter(huc_number %in% subarea_sel)
-  
+
   # filter by owner class
   cSiteIds <- c()
   if("0" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::pull(site_id))}
@@ -248,19 +263,19 @@ update_map_culvert_markers <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
-  
+
   # replace owner_type_code with name
   if(color_variable == "owner_type_code"){
     points <- points %>%
       dplyr::select(-owner_type_code) %>%
       dplyr::rename(owner_type_code = owner_name)
   }
-  
+
   # replace wria_number with name
   if(color_variable == "wria_number"){
     points <- replace_WRIA_number_with_name(points, wrias)
   }
-  
+
   # assign color variable to C
   if(color_variable %in% c("none", "")) {
     points$C <- "none"
@@ -275,7 +290,7 @@ update_map_culvert_markers <- function(
       points$C <- points %>% dplyr::pull(color_variable)
     }
   }
-  
+
   # palette
   if(color_variable %in% c("none", "")){
     pal <- function(x){return("grey")}
@@ -304,36 +319,37 @@ update_map_culvert_markers <- function(
       reverse = FALSE
     )
   }
-  
+
   # set barrier ids
   if(is.null(barrier_ids) | highlight == 0){
     cBarrierIds <- ''
   } else {
     cBarrierIds <- barrier_ids
   }
-  
+
   # calculate highlighted variable in culverts data frame
   points <- points %>%
     dplyr::mutate(IsHighlighted = dplyr::case_when(site_id %in% cBarrierIds ~ "Highlighted", TRUE ~ "Not Highlighted")) %>%
     dplyr::arrange(IsHighlighted)
-  
+
   # define stroke palette function
   strokePal <- leaflet::colorFactor(palette = c("#00ffff", "black"), domain = c("Highlighted", "Not Highlighted"), ordered = TRUE)
-  
+
   # remove the culverts from the map
   leaf_proxy %>% leaflet::clearGroup("culverts")
-  
+
   # return if no culverts to draw
   if(nrow(points) == 0){return()}
-  
+
   # Define a custom function to determine the stroke color: highlight overrides bad match
   getStrokeColor <- function(highlighted, badMatch) {
     ifelse(highlighted == "Highlighted", strokePal(highlighted),
            ifelse(badMatch, "black", "grey"))
   }
-  
+
   # add culverts to map if zoomed in enough
   leaf_proxy %>%
+    leaflet::clearControls() %>%
     leaflet::addCircleMarkers(
       data = points,
       group = "culverts",
@@ -1061,7 +1077,7 @@ get_pretty_variable_name <- function(varName){
   }else if(varName == "hmarg_volume_hist_temp"){
     prettyName <- "Marginal Volume-Weighted Temperature (C)"
   }
-  
+
   else if(varName == "hmarg_length_future1_temp"){
     prettyName <- "Marginal Length-Weighted 2040 Temperature (C)"
   }else if(varName == "hmarg_area_future1_temp"){
@@ -1128,15 +1144,15 @@ get_pretty_variable_name <- function(varName){
 #' @export
 get_plot_click_site_id <- function(
     points,
-    owner_sel, 
-    area_sel, 
-    remove_bad_match, 
-    x_axis_variable, 
-    y_axis_variable, 
-    plotClickX, 
+    owner_sel,
+    area_sel,
+    remove_bad_match,
+    x_axis_variable,
+    y_axis_variable,
+    plotClickX,
     plotClickY
     ){
-  
+
   # Filter by owner selection
   cSiteIds <- c()
   if("1" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
