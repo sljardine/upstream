@@ -35,7 +35,7 @@ solve_opt <- function(
   mean_design_cost, #user-defined mean design cost
   mean_construction_cost  #user-defined mean construction cost
 ){
-  
+
   #habitat quantity definition
   ##length
   if(hq == 1){
@@ -111,7 +111,7 @@ solve_opt <- function(
         cost = cost * mean_construction_cost / mean(cost) + mean_design_cost
       )
   }
-  
+
   # planned barrier selection: set cost to zero if barrier is already planned by user
   if(! 0 %in% barrier_idp){
     points <- points %>%
@@ -186,7 +186,7 @@ map_leaflet_opt <- function(
     huc_sel, #huc(s) to run the optimization problem on
     barrier_idp #planned barrier IDs
   ){
-  
+
   #Lines to display depend on whether the solution is a null set
   if(sum(soln) == 0){
 
@@ -206,7 +206,7 @@ map_leaflet_opt <- function(
     ds_leaflet_lines <- dslines %>% dplyr::filter(COMID %in% ds_blocked_lines)
 
     if (inherits(sf::st_geometry(leaflet_lines), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
-      
+
     leaf_proxy <- leaf_proxy %>%
       leafgl::addGlPolylines(data = leaflet_lines,
         color = "#cf6e7d",
@@ -214,9 +214,9 @@ map_leaflet_opt <- function(
         group = "blocked_lines"
       )
     } else {
-      
+
       NULL
-      
+
     }
 
   } else {
@@ -243,14 +243,14 @@ map_leaflet_opt <- function(
   } else {
     idp_stream_ids <- NULL
   }
-  
-  soln_lines <- leaflet_lines %>% 
-    dplyr::filter(COMID %in% milp_stream_ids) %>% 
+
+  soln_lines <- leaflet_lines %>%
+    dplyr::filter(COMID %in% milp_stream_ids) %>%
     dplyr::mutate(soln_type = ifelse(COMID %in% idp_stream_ids, 1, 0))
-  
+
   # define unblocked lines color pallet
   lines_pal <- leaflet::colorNumeric(c("#2739c7", "#f1e2bA"), 0 : 1)
-  
+
   leaf_proxy <- leaf_proxy %>%
     leafgl::addGlPolylines(
       data = leaflet_lines %>%
@@ -278,28 +278,29 @@ map_leaflet_opt <- function(
         opacity = 0.25,
         group = "unblocked_lines"
       )
-    
+
   } else {
     NULL
   }
-  
-  
+
+
   }
 
   # define project color pallet
   pal <- leaflet::colorNumeric(c("#d9a1a0", "#91afeb", "#f1e2b9"), 0 : 2)
 
-  # define match border pallet 
+  # define match border pallet
   match_pal <- leaflet::colorFactor(palette = c("black", "transparent"), domain = c(TRUE, FALSE), ordered = TRUE)
-  
+
   # define idp points
   if(! 0 %in% barrier_idp){
     idp_point <- points$site_id %in% barrier_idp
     soln <- soln + as.numeric(idp_point)
-  } 
-  
+  }
+
   #Add culverts
   leaf_proxy <- leaf_proxy %>%
+    leaflet::clearControls() %>%
     leaflet::addCircleMarkers(
       data = points,
       lng = ~ site_longitude,
