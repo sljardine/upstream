@@ -62,11 +62,11 @@ get_leaflet_map <- function(){
       radius = 5,
       weight = 1.5,
       color = ~dplyr::case_when(
-        first_on_shared ~ "#ED6345",
+        is_upstream_non_culvert_barrier ~ "#ED6345",
         bad_match ~ "black",
         TRUE ~ "darkgrey"), # marks bad matches
       opacity = 1,
-      fillColor = ~ifelse(first_on_shared, "#ED6345", 'grey'),
+      fillColor = ~ifelse(is_upstream_non_culvert_barrier, "#ED6345", 'grey'),
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
@@ -107,11 +107,11 @@ reset_map <- function(leaf_proxy){
       radius = 5,
       weight = 1.5,
       color = ~dplyr::case_when(
-        first_on_shared ~ "#ED6345",
+        is_upstream_non_culvert_barrier ~ "#ED6345",
         bad_match ~ "black",
         TRUE ~ "darkgrey"), # marks bad matches
       opacity = 1,
-      fillColor = ~ifelse(first_on_shared, "#ED6345", 'grey'),
+      fillColor = ~ifelse(is_upstream_non_culvert_barrier, "#ED6345", 'grey'),
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
@@ -130,7 +130,9 @@ reset_map <- function(leaf_proxy){
       ),
       popup = ~popup
     ) %>%
-    # Add legend
+    # Adds legend, CSS for styling the legend is found in app_ui. Changing the
+    # order of the legend labels without also updating the styling will lead
+    # to visual bugs.
     leaflet::addLegend(
       position = "bottomright",
       colors = c("grey", "grey", "#ED6345"),
