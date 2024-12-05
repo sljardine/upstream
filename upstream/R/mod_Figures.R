@@ -53,7 +53,7 @@ mod_Figures_server <- function(id, r){
 
     # Explore submit button event for base_map
     observeEvent(r$submit_explore, {
-      
+
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_explore,
@@ -359,8 +359,8 @@ mod_Figures_server <- function(id, r){
       if(r$tab_sel == 'Explore'){
         if(r$plot_type_explore == 'histogram'){
           r$plot_click_text_output <- ''
-        } else if(r$x_axis_variable_explore %in% c("potential_species", "owner_type_code", "percent_fish_passable_code") | r$y_axis_variable_explore %in% c("potential_species", "owner_type_code", "percent_fish_passable_code")){
-          r$plot_click_text_output_explore <- ''
+        ##} else if(r$x_axis_variable_explore %in% c("potential_species", "owner_type_code", "percent_fish_passable_code") | r$y_axis_variable_explore %in% c("potential_species", "owner_type_code", "percent_fish_passable_code")){
+          ## r$plot_click_text_output_explore <- ''
         } else {
           if(r$remove_bad_match_explore){
           r$plot_click_text_output_explore <- get_plot_click_site_id(
@@ -373,7 +373,7 @@ mod_Figures_server <- function(id, r){
             culverts_cmb,
             r$owner_sel_explore, r$area_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
             r$y_axis_variable_explore, input$plot_click$x, input$plot_click$y
-            )  
+            )
           }
         }
       }

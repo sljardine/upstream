@@ -653,14 +653,14 @@ figure_scatterplot <- function(
         values = c(
           "City" = "#9E0142",
           "County" = "#CF374D",
-          "Drainage District" = "#ED6345",
           "Federal" = "#FA9A58",
-          "Irrigation District" = "#FDCC7A",
-          "Other" = "#F2EA91",
-          "Port" = "#CEEB9C",
           "Private" = "#96D4A4",
           "State" = "#5BB6A9",
           "Tribal" = "#3682BA",
+          "Other" = "#F2EA91",
+          "Port" = "#CEEB9C",
+          "Drainage District" = "#ED6345",
+          "Irrigation District" = "#FDCC7A",
           "Unknown" = "#5E4FA2",
           "Multiple" = "#B8B8B8"
         ),
@@ -774,6 +774,8 @@ figure_scatterplot <- function(
 #' @return ggplot object of culvert data histogram
 #' @export
 figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_variable, histogram_variable, histogram_nbins, highlight, barrier_ids, plot_xmin, plot_xmax, plot_ymin, plot_ymax){
+  #
+
   # init the ggplot
   ggP <- points %>%
     ggplot2::ggplot(ggplot2::aes(x = X, fill = C, group = C)) +
@@ -1137,11 +1139,6 @@ get_plot_click_site_id <- function(
     plotClickY
     ){
 
-  print(x_axis_variable)
-  print(y_axis_variable)
-  print(plotClickX)
-  print(plotClickY)
-
   # Filter by owner selection
   cSiteIds <- c()
   if("1" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
@@ -1165,8 +1162,8 @@ get_plot_click_site_id <- function(
     points <- points %>% dplyr::filter(!bad_match)
   }
 
-  browser()
-
+  # Helper function used to convert the categorical variable of fish passability
+  # to the x or y axis values on the scatterplot
   convert_fish_passability <- function(variable) {
     dplyr::case_when(
       variable == "0%" ~ 1,
@@ -1177,16 +1174,58 @@ get_plot_click_site_id <- function(
     )
   }
 
-  # For percent passability, need to transform data into graph position
   categorical_x <- FALSE
   categorical_y <- FALSE
+
+  # Transform data for owner type into where on the scatterplot the axis is
+  if (x_axis_variable == "owner_type_code") {
+    points <- points %>%
+      dplyr::mutate(
+        X_var = dplyr::case_when(
+          .data[['is_city']] ~ 1,
+          .data[['is_county']] ~ 2,
+          .data[['is_drainage_district']] ~ 3,
+          .data[['is_federal']] ~ 4,
+          .data[['is_multiple']] ~ 5,
+          .data[['is_other']] ~ 6,
+          .data[['is_private']] ~ 7,
+          .data[['is_state']] ~ 8,
+          .data[['is_tribal']] ~ 9,
+          .data[['is_unknown']] ~ 10,
+          .default = NA_real_
+        )
+      )
+    categorical_x <- TRUE
+  }
+
+  if (y_axis_variable == "owner_type_code") {
+    dplyr::mutate(
+      Y_var = dplyr::case_when(
+        .data[['is_city']] ~ 1,
+        .data[['is_county']] ~ 2,
+        .data[['is_drainage_district']] ~ 3,
+        .data[['is_federal']]  ~ 4,
+        .data[['is_multiple']] ~ 5,
+        .data[['is_other']] ~ 6,
+        .data[['is_private']] ~ 7,
+        .data[['is_state']] ~ 8,
+        .data[['is_tribal']] ~ 9,
+        .data[['is_unknown']] ~ 10,
+        .default = NA_real_
+      )
+    )
+    categorical_y <- TRUE
+  }
+
+  # For percent passability, need to transform data into graph position
   if (x_axis_variable %in% c("percent_fish_passable_code")) {
     points <- points %>%
       dplyr::mutate(
         X_var = convert_fish_passability(.data[[x_axis_variable]])
       )
     categorical_x <- TRUE
-  } else if (y_axis_variable %in% c("percent_fish_passable_code")) {
+  }
+  if (y_axis_variable %in% c("percent_fish_passable_code")) {
     points <- points %>%
       dplyr::mutate(
         Y_var = convert_fish_passability(.data[[y_axis_variable]])
@@ -1194,6 +1233,7 @@ get_plot_click_site_id <- function(
     categorical_y <- TRUE
   }
 
+  # Adds X_var and Y_var for non-categorical variables
   if (!categorical_x) {
     points <- points %>%
       dplyr::mutate(X_var = as.numeric(.data[[x_axis_variable]]))
