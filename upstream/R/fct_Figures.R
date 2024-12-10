@@ -1196,16 +1196,17 @@ get_plot_click_site_id <- function(
           NA_real_
         )
       )
+    return(points)
   }
 
   # Transform data for owner type into where on the scatterplot the axis is
   if (x_axis_variable == "owner_type_code") {
-    set_x_or_y_var_owner_type(points, rounded_x, "X_var")
+    points <- set_x_or_y_var_owner_type(points, rounded_x, "X_var")
     is_categorical_x <- TRUE
   }
 
   if (y_axis_variable == "owner_type_code") {
-    set_x_or_y_var_owner_type(points, rounded_y, "Y_var")
+    points <- set_x_or_y_var_owner_type(points, rounded_y, "Y_var")
     is_categorical_y <- TRUE
   }
 
@@ -1294,8 +1295,6 @@ get_plot_click_site_id <- function(
     points <- set_x_or_y_var_potential_species(points, "potential_species", rounded_y, "Y_var")
     is_categorical_y <- TRUE
   }
-
-  browser()
 
   # Adds X_var and Y_var for non-categorical variables
   if (!is_categorical_x) {
