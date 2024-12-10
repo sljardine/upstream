@@ -653,14 +653,14 @@ figure_scatterplot <- function(
         values = c(
           "City" = "#9E0142",
           "County" = "#CF374D",
+          "Drainage District" = "#ED6345",
           "Federal" = "#FA9A58",
+          "Irrigation District" = "#FDCC7A",
+          "Other" = "#F2EA91",
+          "Port" = "#CEEB9C",
           "Private" = "#96D4A4",
           "State" = "#5BB6A9",
           "Tribal" = "#3682BA",
-          "Other" = "#F2EA91",
-          "Port" = "#CEEB9C",
-          "Drainage District" = "#ED6345",
-          "Irrigation District" = "#FDCC7A",
           "Unknown" = "#5E4FA2",
           "Multiple" = "#B8B8B8"
         ),
@@ -774,8 +774,6 @@ figure_scatterplot <- function(
 #' @return ggplot object of culvert data histogram
 #' @export
 figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_variable, histogram_variable, histogram_nbins, highlight, barrier_ids, plot_xmin, plot_xmax, plot_ymin, plot_ymax){
-  #
-
   # init the ggplot
   ggP <- points %>%
     ggplot2::ggplot(ggplot2::aes(x = X, fill = C, group = C)) +
