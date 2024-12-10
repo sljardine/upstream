@@ -1163,45 +1163,49 @@ get_plot_click_site_id <- function(
   }
 
   is_categorical_x <- FALSE
+  rounded_x <- round(plotClickX)
+
   is_categorical_y <- FALSE
+  rounded_y <- round(plotClickY)
+
+  get_owner_column_name <- function(rounded_point) {
+    switch(
+      as.character(rounded_point),
+      "0" = "is_city",
+      "1" = "is_city",
+      "2" = "is_county",
+      "3" = "is_drainage_district",
+      "4" = "is_federal",
+      "5" = "is_multiple",
+      "6" = "is_other",
+      "7" = "is_private",
+      "8" = "is_state",
+      "9" = "is_tribal",
+      "10" = "is_unknown",
+      default = NA_real_
+    )
+  }
+
+  set_x_or_y_var_owner_type = function(points, rounded_point, column_name) {
+    variable_name <- get_owner_column_name(rounded_point)
+    points <- points %>%
+      dplyr::mutate(
+        {{ column_name }} := ifelse(
+          .data[[variable_name]],
+          rounded_point,
+          NA_real_
+        )
+      )
+  }
 
   # Transform data for owner type into where on the scatterplot the axis is
   if (x_axis_variable == "owner_type_code") {
-    points <- points %>%
-      dplyr::mutate(
-        X_var = dplyr::case_when(
-          .data[['is_city']] ~ 1,
-          .data[['is_county']] ~ 2,
-          .data[['is_drainage_district']] ~ 3,
-          .data[['is_federal']] ~ 4,
-          .data[['is_multiple']] ~ 5,
-          .data[['is_other']] ~ 6,
-          .data[['is_private']] ~ 7,
-          .data[['is_state']] ~ 8,
-          .data[['is_tribal']] ~ 9,
-          .data[['is_unknown']] ~ 10,
-          .default = NA_real_
-        )
-      )
+    set_x_or_y_var_owner_type(points, rounded_x, "X_var")
     is_categorical_x <- TRUE
   }
 
   if (y_axis_variable == "owner_type_code") {
-    dplyr::mutate(
-      Y_var = dplyr::case_when(
-        .data[['is_city']] ~ 1,
-        .data[['is_county']] ~ 2,
-        .data[['is_drainage_district']] ~ 3,
-        .data[['is_federal']]  ~ 4,
-        .data[['is_multiple']] ~ 5,
-        .data[['is_other']] ~ 6,
-        .data[['is_private']] ~ 7,
-        .data[['is_state']] ~ 8,
-        .data[['is_tribal']] ~ 9,
-        .data[['is_unknown']] ~ 10,
-        .default = NA_real_
-      )
-    )
+    set_x_or_y_var_owner_type(points, rounded_y, "Y_var")
     is_categorical_y <- TRUE
   }
 
@@ -1233,7 +1237,6 @@ get_plot_click_site_id <- function(
     is_categorical_y <- TRUE
   }
 
-
   # Fish species are handled differently since there is a many:1 mapping of
   # fish species to culverts instead of a 1:1. We'll use the X or Y axis
   # click target to identify which fish species they've selected, then fill in
@@ -1241,7 +1244,8 @@ get_plot_click_site_id <- function(
   # that fish species, or NA if that culvert does not.
   get_species <- function(rounded_point) {
     switch(
-      as.character(rounded_x_point),
+      as.character(rounded_point),
+      "0" = "Bull Trout",
       "1" = "Bull Trout",
       "2" = "Chinook",
       "3" = "Chum",
@@ -1282,22 +1286,16 @@ get_plot_click_site_id <- function(
   }
 
   if (x_axis_variable == "potential_species") {
-    rounded_x_point <- round(plotClickX)
-    if (rounded_x_point == 0) {
-      rounded_x_point <- 1
-    }
-    points <- set_x_or_y_var_potential_species(points, "potential_species", rounded_x_point, "X_var")
+    points <- set_x_or_y_var_potential_species(points, "potential_species", rounded_x, "X_var")
     is_categorical_x <- TRUE
   }
 
   if (y_axis_variable == "potential_species") {
-    rounded_y_point <- round(plotClickY)
-    if (rounded_y_point == 0) {
-      rounded_y_point <- 1
-    }
-    points <- set_x_or_y_var_potential_species(points, "potential_species", rounded_x_point, "Y_var")
+    points <- set_x_or_y_var_potential_species(points, "potential_species", rounded_y, "Y_var")
     is_categorical_y <- TRUE
   }
+
+  browser()
 
   # Adds X_var and Y_var for non-categorical variables
   if (!is_categorical_x) {
@@ -1328,6 +1326,8 @@ get_plot_click_site_id <- function(
   } else {
     siteId <- ''
   }
+
+  browser()
 
   return(siteId)
 }
