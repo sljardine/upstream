@@ -1326,7 +1326,5 @@ get_plot_click_site_id <- function(
     siteId <- ''
   }
 
-  browser()
-
   return(siteId)
 }
