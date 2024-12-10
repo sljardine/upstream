@@ -1162,20 +1162,8 @@ get_plot_click_site_id <- function(
     points <- points %>% dplyr::filter(!bad_match)
   }
 
-  # Helper function used to convert the categorical variable of fish passability
-  # to the x or y axis values on the scatterplot
-  convert_fish_passability <- function(variable) {
-    dplyr::case_when(
-      variable == "0%" ~ 1,
-      variable == "33%" ~ 2,
-      variable == "67%" ~ 3,
-      variable == "Unknown" ~ 4,
-      .default = NA_real_
-    )
-  }
-
-  categorical_x <- FALSE
-  categorical_y <- FALSE
+  is_categorical_x <- FALSE
+  is_categorical_y <- FALSE
 
   # Transform data for owner type into where on the scatterplot the axis is
   if (x_axis_variable == "owner_type_code") {
@@ -1195,7 +1183,7 @@ get_plot_click_site_id <- function(
           .default = NA_real_
         )
       )
-    categorical_x <- TRUE
+    is_categorical_x <- TRUE
   }
 
   if (y_axis_variable == "owner_type_code") {
@@ -1214,44 +1202,118 @@ get_plot_click_site_id <- function(
         .default = NA_real_
       )
     )
-    categorical_y <- TRUE
+    is_categorical_y <- TRUE
   }
 
-  # For percent passability, need to transform data into graph position
+  # Helper function used to convert the categorical variable of fish passability
+  # to the x or y axis values on the scatterplot
+  convert_fish_passability <- function(variable) {
+    dplyr::case_when(
+      variable == "0%" ~ 1,
+      variable == "33%" ~ 2,
+      variable == "67%" ~ 3,
+      variable == "Unknown" ~ 4,
+      .default = NA_real_
+    )
+  }
+
+  # For percent passability, transform data into graph position
   if (x_axis_variable %in% c("percent_fish_passable_code")) {
     points <- points %>%
       dplyr::mutate(
         X_var = convert_fish_passability(.data[[x_axis_variable]])
       )
-    categorical_x <- TRUE
+    is_categorical_x <- TRUE
   }
   if (y_axis_variable %in% c("percent_fish_passable_code")) {
     points <- points %>%
       dplyr::mutate(
         Y_var = convert_fish_passability(.data[[y_axis_variable]])
       )
-    categorical_y <- TRUE
+    is_categorical_y <- TRUE
+  }
+
+
+  # Fish species are handled differently since there is a many:1 mapping of
+  # fish species to culverts instead of a 1:1. We'll use the X or Y axis
+  # click target to identify which fish species they've selected, then fill in
+  # points$X_var or points$Y_var with that column number if that culvert has
+  # that fish species, or NA if that culvert does not.
+  get_species <- function(rounded_point) {
+    switch(
+      as.character(rounded_x_point),
+      "1" = "Bull Trout",
+      "2" = "Chinook",
+      "3" = "Chum",
+      "4" = "Coho",
+      "5" = "Pink",
+      "6" = "Resident Trout",
+      "7" = "Sockeye",
+      "8" = "SR Cutthroat",
+      "9" = "Steelhead"
+    )
+  }
+
+  # Helper function to update X_var or Y_var with appropriate categorical axis
+  # value or NA if that culvert does not contain that fish species
+  set_x_or_y_var_potential_species <- function(points, variable, rounded_point, column_name) {
+    if (rounded_point < 10) {
+      species <- get_species(rounded_point)
+      points <- points %>%
+        dplyr::mutate(
+          {{ column_name }} := ifelse(
+            grepl(species, .data[[variable]]),
+            rounded_point,
+            NA_real_
+          )
+        )
+    }
+    else {
+      points <- points %>%
+        dplyr::mutate(
+          {{ column_name }} := ifelse(
+            is.na(.data[[variable]]),
+            rounded_point,
+            NA_real_
+          )
+        )
+    }
+    return(points)
+  }
+
+  if (x_axis_variable == "potential_species") {
+    rounded_x_point <- round(plotClickX)
+    if (rounded_x_point == 0) {
+      rounded_x_point <- 1
+    }
+    points <- set_x_or_y_var_potential_species(points, "potential_species", rounded_x_point, "X_var")
+    is_categorical_x <- TRUE
+  }
+
+  if (y_axis_variable == "potential_species") {
+    rounded_y_point <- round(plotClickY)
+    if (rounded_y_point == 0) {
+      rounded_y_point <- 1
+    }
+    points <- set_x_or_y_var_potential_species(points, "potential_species", rounded_x_point, "Y_var")
+    is_categorical_y <- TRUE
   }
 
   # Adds X_var and Y_var for non-categorical variables
-  if (!categorical_x) {
+  if (!is_categorical_x) {
     points <- points %>%
       dplyr::mutate(X_var = as.numeric(.data[[x_axis_variable]]))
   }
-  if (!categorical_y) {
+  if (!is_categorical_y) {
     points <- points %>%
       dplyr::mutate(Y_var = as.numeric(.data[[y_axis_variable]]))
   }
 
   points <- points %>% dplyr::filter(!is.na(X_var) & !is.na(Y_var))
 
-  browser()
-
   # Calculate relative positions and differences
   max_X_var <- max(points$X_var, na.rm = TRUE)
   max_Y_var <- max(points$Y_var, na.rm = TRUE)
-
-  browser()
 
   points <- points %>%
     dplyr::mutate(RelX = X_var / max_X_var,
@@ -1259,8 +1321,6 @@ get_plot_click_site_id <- function(
                   Diff = sqrt((RelX - plotClickX / max_X_var)^2 + (RelY - plotClickY / max_Y_var)^2)) %>%
     dplyr::arrange(Diff) %>%
     dplyr::slice(1)
-
-  browser()
 
   # Check if click is close to a point
   if(nrow(points) > 0 && points$Diff[1] < .03){
