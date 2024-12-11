@@ -13,4 +13,7 @@ golem::detach_all_attached()
 golem::document_and_reload()
 
 # Run the application
-run_app()
+# Add profiling from profvis, wrapping run_app in print statement per golem issue #146
+profvis::profvis({
+  print(run_app())
+})
