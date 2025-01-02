@@ -1,10 +1,6 @@
 load("upstream_inputs.Rdata")
 load("upstream_inputs_gm.Rdata")
 
-#temporary until next data update
-culverts_cmb$popup <- str_replace_all(culverts_cmb$popup, "http:", "https:")
-culverts_cmb_gm$popup <- str_replace_all(culverts_cmb_gm$popup, "http:", "https:")
-
 usethis::use_data(culverts_cmb, overwrite = TRUE)
 usethis::use_data(D, overwrite = TRUE)
 usethis::use_data(E, overwrite = TRUE)

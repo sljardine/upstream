@@ -45,27 +45,15 @@ mod_Figures_server <- function(id, r){
     # initiates plot
     user_plot <- reactiveVal(FALSE)
 
-    # Value to store if map has been modified to avoid unnecessary rerenders
-    map_modified <- reactiveVal(FALSE)
-
     # tab events
     observeEvent(r$tab_sel, {
-      # If map has been modified, reset it fully
-      leaf_map <- leaflet::leafletProxy(ns("base_map"))
-      if (map_modified()) {
-        reset_map(leaf_map)
-        map_modified(FALSE)
-      }
-
-      # Reset zoom regardless of modification
-      bbox <- get_wria_bounding_box(wrias$WRIA_NR)
-      leaf_map %>% leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+      reset_map(leaflet::leafletProxy(ns("base_map")))
       user_plot(FALSE)
     })
 
     # Explore submit button event for base_map
     observeEvent(r$submit_explore, {
-      map_modified(TRUE)
+      
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_explore,
@@ -99,11 +87,11 @@ mod_Figures_server <- function(id, r){
         )
       }
       user_plot(TRUE)
+
     })
 
     # fly to selected wrias on Explore submit
     observeEvent(r$submit_explore, {
-
       if(r$rezoom_on_submit_explore){
         # selected wria bounding box
         bbox <- get_wria_bounding_box(r$area_sel_explore)
@@ -116,7 +104,6 @@ mod_Figures_server <- function(id, r){
 
     # Suggest submit button event
     observeEvent(r$submit_suggest, {
-      map_modified(TRUE)
 
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
@@ -209,8 +196,6 @@ mod_Figures_server <- function(id, r){
 
     # Custom submit button event
     observeEvent(r$submit_custom, {
-      map_modified(TRUE)
-
       update_map_selected_polygons(
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_custom,
@@ -388,7 +373,7 @@ mod_Figures_server <- function(id, r){
             culverts_cmb,
             r$owner_sel_explore, r$area_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
             r$y_axis_variable_explore, input$plot_click$x, input$plot_click$y
-            )
+            )  
           }
         }
       }
