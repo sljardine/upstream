@@ -62,11 +62,11 @@ get_leaflet_map <- function(){
       radius = 5,
       weight = 1.5,
       color = ~dplyr::case_when(
-        is_upstream_non_culvert_barrier ~ "#ED6345",
+        is_upstream_non_culvert_barrier ~ "#C0C0C0",
         bad_match ~ "black",
         TRUE ~ "grey"), # marks bad matches
       opacity = 1,
-      fillColor = ~ifelse(is_upstream_non_culvert_barrier, "#ED6345", 'grey'),
+      fillColor = ~ifelse(is_upstream_non_culvert_barrier, "#C0C0C0", 'grey'),
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
@@ -84,7 +84,18 @@ get_leaflet_map <- function(){
         disableClusteringAtZoom = 10
       ),
       popup = ~popup
+    ) 
+  
+  #add legend 
+  m <- m %>% 
+    leaflet::addLegend(
+      position = "bottomright",
+      colors = c("grey", "grey", "#C0C0C0"),
+      labels = c("Good Stream Match", "Bad Stream Match", "Upstream Non-Culvert"),
+      title = "Culvert Marker Colors",
+      opacity = 1
     )
+  
 }
 
 #' @title Reset the map
@@ -107,11 +118,11 @@ reset_map <- function(leaf_proxy){
       radius = 5,
       weight = 1.5,
       color = ~dplyr::case_when(
-        is_upstream_non_culvert_barrier ~ "#ED6345",
+        is_upstream_non_culvert_barrier ~ "#C0C0C0",
         bad_match ~ "black",
         TRUE ~ "grey"), # marks bad matches
       opacity = 1,
-      fillColor = ~ifelse(is_upstream_non_culvert_barrier, "#ED6345", 'grey'),
+      fillColor = ~ifelse(is_upstream_non_culvert_barrier, "#C0C0C0", 'grey'),
       fillOpacity = 1,
       clusterOptions = leaflet::markerClusterOptions(
         iconCreateFunction = htmlwidgets::JS("function (cluster) {
@@ -135,10 +146,10 @@ reset_map <- function(leaf_proxy){
     # to visual bugs.
     leaflet::addLegend(
       position = "bottomright",
-      colors = c("grey", "grey", "#ED6345"),
-      labels = c("Good Matches", "Bad Matches", "Culverts Upstream of Non-Culvert Barrier"),
+      colors = c("grey", "grey", "#C0C0C0"),
+      labels = c("Good Stream Match", "Bad Stream Match", "Upstream Non-Culvert"),
       title = "Culvert Marker Colors",
-      opacity = 1,
+      opacity = 1
     )
 
   # selected wria bounding box
