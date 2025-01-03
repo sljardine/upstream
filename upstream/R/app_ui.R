@@ -69,8 +69,30 @@ golem_add_external_resources <- function() {
     tags$link(
       rel = "canonical",
       href = "https://upstream-wca.app"
-    )
+    ),
+    tags$style(HTML("
+  .legend.leaflet-control {
+    font-size: 9px; /* Adjust text size to 9px */
+  }
+  .legend.leaflet-control i {
+    margin-bottom: 3px;
+    border-radius: 50%;
+    float: left; /* Left-align markers */
+    margin-right: 6px; /* Ensure sufficient spacing between markers and text */
+    width: 10px; /* Set a consistent marker width */
+    height: 10px; /* Set a consistent marker height */
+  }
+  .legend.leaflet-control span {
+    display: inline-block; /* Prevent text from wrapping */
+    vertical-align: middle; /* Align text vertically with the markers */
+    line-height: 1.2; /* Adjust line height to prevent excessive space */
+  }
+  .legend.leaflet-control i:nth-child(4) {
+    border: 2px solid black;
+  }
+"))
     # Add other external resources if needed
   )
+
 }
 
