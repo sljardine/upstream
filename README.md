@@ -13,3 +13,8 @@ Released on 07/24/2024
 - Satellite and topographic base map options 
 - Current stream temperatures now from [NorWeST](https://www.fs.usda.gov/rm/boise/AWAE/projects/NorWeST.html) (Explore; Suggest)
 - Future [NorWeST](https://www.fs.usda.gov/rm/boise/AWAE/projects/NorWeST.html) stream temperature predictions for years 2040 and 2080 (Explore) 
+
+## Upstream WCA 1.2 
+Released on 01/22/2025
+- Improved culvert to stream matching procedure
+- Welcome map includes culverts determined to be upstream of non-culvert barriers
