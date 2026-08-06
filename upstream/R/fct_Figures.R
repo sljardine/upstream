@@ -13,6 +13,38 @@ get_wria_bounding_box <- function(area_sel){
   return(bbox)
 }
 
+#' @title Get a bounding box around a set of barriers
+#'
+#' @description
+#' Companion to [get_wria_bounding_box()] for the ID lookup, where the map
+#' should frame the barriers themselves rather than the WRIA containing them.
+#' A single barrier has no extent, so the box is padded to give the marker some
+#' context instead of zooming to a point.
+#'
+#' @param points a simple features point data frame
+#' @param ids site ids to frame; all points if `NULL`
+#' @param pad padding in degrees applied to a degenerate extent
+#'
+#' @return a numeric vector of xmin, ymin, xmax, ymax, or `NULL` if nothing matched
+#' @export
+get_points_bounding_box <- function(points, ids = NULL, pad = 0.02){
+  if(!is.null(ids)) points <- points %>% dplyr::filter(site_id %in% ids)
+  if(nrow(points) == 0) return(NULL)
+
+  bbox <- points %>% sf::st_bbox() %>% as.vector()
+
+  # widen a zero-width extent (one barrier, or several stacked on a point)
+  if(bbox[3] - bbox[1] < pad){
+    mid <- (bbox[1] + bbox[3]) / 2
+    bbox[1] <- mid - pad; bbox[3] <- mid + pad
+  }
+  if(bbox[4] - bbox[2] < pad){
+    mid <- (bbox[2] + bbox[4]) / 2
+    bbox[2] <- mid - pad; bbox[4] <- mid + pad
+  }
+  bbox
+}
+
 #' @title Get a leaflet map including WRIAs and points
 #' @return none
 #' @export
@@ -249,13 +281,22 @@ update_map_culvert_markers <- function(
     remove_bad_match,
     color_variable,
     highlight,
-    barrier_ids){
+    barrier_ids,
+    only_ids = NULL){
   # set null variables for initial map draw
   if(is.null(color_variable)){color_variable <- "none"} else {color_variable <- color_variable}
   if(is.null(area_sel)){area_sel <- wrias$WRIA_NR} else {area_sel <- area_sel}
   if(is.null(subarea_sel)){subarea_sel <- huc12_wrias %>% dplyr::select(huc_number) %>% dplyr::distinct()} else {subarea_sel <- subarea_sel}
   if(is.null(owner_sel)){owner_sel <- c(1:9, 11:12)} else {owner_sel <- owner_sel}
   if(is.null(highlight)){highlight <- 0} else {highlight <- highlight}
+
+  # ID lookup: the ids are the whole selection, so the area and owner filters
+  # are bypassed. Otherwise a barrier could be searched for by id and then
+  # silently dropped for sitting outside the area filter left over from the
+  # previous browse.
+  if(length(only_ids) > 0){
+    points <- points %>% dplyr::filter(site_id %in% only_ids)
+  } else {
 
   # filter culverts to selected wrias
   points <- points %>%
@@ -276,6 +317,7 @@ update_map_culvert_markers <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
+  }
 
   # replace owner_type_code with name
   if(color_variable == "owner_type_code"){
@@ -288,6 +330,14 @@ update_map_culvert_markers <- function(
   if(color_variable == "wria_number"){
     points <- replace_WRIA_number_with_name(points, wrias)
   }
+
+  # Clear the markers and stop here when nothing matched. This must come before
+  # the colour columns are built: assigning a scalar to a zero-row data frame
+  # errors, so a selection matching no culverts (an owner type absent from the
+  # chosen subarea, say) used to fail before it ever reached the guard that was
+  # sitting further down.
+  leaf_proxy %>% leaflet::clearGroup("culverts")
+  if(nrow(points) == 0){return(invisible(NULL))}
 
   # assign color variable to C
   if(color_variable %in% c("none", "")) {
@@ -348,11 +398,6 @@ update_map_culvert_markers <- function(
   # define stroke palette function
   strokePal <- leaflet::colorFactor(palette = c("#00ffff", "black"), domain = c("Highlighted", "Not Highlighted"), ordered = TRUE)
 
-  # remove the culverts from the map
-  leaf_proxy %>% leaflet::clearGroup("culverts")
-
-  # return if no culverts to draw
-  if(nrow(points) == 0){return()}
 
   # Define a custom function to determine the stroke color: highlight overrides bad match
   getStrokeColor <- function(highlighted, badMatch) {
@@ -500,11 +545,22 @@ filter_and_format_culverts_for_scatterplot <- function(
     owner_sel,
     x_axis_variable,
     y_axis_variable,
-    color_variable){
+    color_variable,
+    only_ids = NULL){
+
+  points <- points %>% sf::st_drop_geometry()
+
+  # ID lookup: the ids are the whole selection, so area and owner are bypassed
+  # here exactly as they are on the map, keeping the two in step.
+  if(length(only_ids) > 0){
+    points <- points %>% dplyr::filter(site_id %in% only_ids)
+    return(format_culverts_for_scatterplot(
+      points, x_axis_variable, y_axis_variable, color_variable
+    ))
+  }
 
   # filter by subarea
   points <- points %>%
-    sf::st_drop_geometry() %>%
     dplyr::filter(huc_number %in% subarea_sel)
 
   # filter by owner class
@@ -522,6 +578,27 @@ filter_and_format_culverts_for_scatterplot <- function(
   if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
   if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
   points <- points %>% dplyr::filter(site_id %in% cSiteIds)
+
+  format_culverts_for_scatterplot(points, x_axis_variable, y_axis_variable, color_variable)
+}
+
+#' @title Shape filtered culverts into the frame the scatterplot draws
+#'
+#' @description
+#' Split out so the area filter and the ID lookup share one definition of the
+#' plotted frame. The click handler matches against whatever this returns, so
+#' the two paths must agree.
+#'
+#' @param points a filtered culvert data frame with geometry already dropped
+#' @param x_axis_variable,y_axis_variable,color_variable variable names
+#'
+#' @return a data frame of site_id, X, Y, C and bad_match
+#' @export
+format_culverts_for_scatterplot <- function(
+    points,
+    x_axis_variable,
+    y_axis_variable,
+    color_variable){
 
   # this swaps wria_name if X = wria_number
   if(x_axis_variable == "wria_number" | y_axis_variable == "wria_number" | color_variable == "wria_number"){

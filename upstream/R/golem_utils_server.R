@@ -85,6 +85,23 @@ count_culverts_by_huc <- function(huc_numbers, remove_bad_match) {
   out
 }
 
+#' The Explore ID-lookup selection, or nothing when browsing by area
+#'
+#' Returns a non-empty vector only when Explore is in ID lookup mode and at
+#' least one id is entered. Callers treat an empty result as "browse by area",
+#' which keeps the two paths from needing separate branches everywhere.
+#'
+#' @param r the shared reactiveValues object
+#'
+#' @return a character vector of site ids, possibly empty
+#'
+#' @noRd
+explore_lookup_ids <- function(r) {
+  if (!identical(r$explore_mode, "id")) return(character(0))
+  ids <- r$lookup_ids_explore
+  if (is.null(ids)) character(0) else as.character(ids)
+}
+
 #' Site ids of WSDOT barriers already scheduled for correction
 #'
 #' Washington is under a federal injunction to correct fish-passage barriers on

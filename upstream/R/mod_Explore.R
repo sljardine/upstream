@@ -59,39 +59,74 @@ mod_Explore_ui <- function(id){
   tagList(
     fluidPage(
       fluidRow(
-        selectizeInput(
-          inputId = ns("area_sel"),
-          label = "Select Area",
-          choices = setNames(
-            c(0, wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
-            nm = c('All WRIAs', wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
-          ),
-          selected = 0,
-          width = '50%',
-          multiple = TRUE
+        radioButtons(
+          inputId = ns("explore_mode"),
+          label = "Find Barriers By",
+          choiceNames = list("Area", "Barrier ID"),
+          choiceValues = c("area", "id"),
+          selected = "area",
+          inline = TRUE
         )
       ),
-      fluidRow(
-        selectizeInput(
-        inputId = ns("subarea_sel"),
-        label = "Select Subarea",
-        choices = NULL,
-        width = '50%',
-        multiple = TRUE
-       )
-      ),
-      fluidRow(
-        selectizeInput(
-          inputId = ns("owner_sel"),
-          label = "Select Ownership Type",
-          choices = setNames(
-            c(0:9, 11, 12),
-            nm = c("All Ownership Types","City", "County", "Federal", "Private",
-                   "State", "Tribal", "Other", "Port", "Drainage District", "Irrigation District", "Unknown")
-          ),
-          selected = 0,
+      conditionalPanel(
+        condition = "input.explore_mode == 'area'",
+        ns = ns,
+        fluidRow(
+          selectizeInput(
+            inputId = ns("area_sel"),
+            label = "Select Area",
+            choices = setNames(
+              c(0, wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NR)),
+              nm = c('All WRIAs', wrias %>% dplyr::arrange(WRIA_NM) %>% dplyr::pull(WRIA_NM))
+            ),
+            selected = 0,
+            width = '50%',
+            multiple = TRUE
+          )
+        ),
+        fluidRow(
+          selectizeInput(
+          inputId = ns("subarea_sel"),
+          label = "Select Subarea",
+          choices = NULL,
           width = '50%',
           multiple = TRUE
+         )
+        ),
+        fluidRow(
+          selectizeInput(
+            inputId = ns("owner_sel"),
+            label = "Select Ownership Type",
+            choices = setNames(
+              c(0:9, 11, 12),
+              nm = c("All Ownership Types","City", "County", "Federal", "Private",
+                     "State", "Tribal", "Other", "Port", "Drainage District", "Irrigation District", "Unknown")
+            ),
+            selected = 0,
+            width = '50%',
+            multiple = TRUE
+          )
+        )
+      ),
+      conditionalPanel(
+        condition = "input.explore_mode == 'id'",
+        ns = ns,
+        fluidRow(
+          # Server-side, so the whole inventory is searched as you type even
+          # though only the first maxOptions matches are rendered. The label
+          # carries the live count, because a list that stops after a screenful
+          # otherwise reads as "there are only a few".
+          selectizeInput(
+            inputId = ns("lookup_ids"),
+            label = "Enter Barrier ID(s)",
+            choices = NULL,
+            multiple = TRUE,
+            width = "100%",
+            options = list(
+              placeholder = "start typing an ID to search, e.g. 606315",
+              maxOptions = 500
+            )
+          )
         )
       ),
       hr(),
@@ -267,9 +302,45 @@ cHistogramVariables <- commonVariables
 # color choices
 cColorVariables <- commonVariables
 
+    # ID lookup: search the whole inventory, not just the current area/owner
+    # selection, so a barrier can be found without knowing where it is.
+    observeEvent(input$remove_bad_match, {
+      sfC <- if(identical(as.character(input$remove_bad_match), "2")){
+        culverts_cmb_gm
+      } else {
+        culverts_cmb
+      }
+      ids <- sfC %>% sf::st_drop_geometry() %>% dplyr::pull(site_id) %>% sort()
+
+      updateSelectizeInput(
+        session,
+        inputId = "lookup_ids",
+        label = paste0(
+          "Enter Barrier ID(s) — searching ",
+          format(length(ids), big.mark = ","), " barriers"
+        ),
+        choices = setNames(ids, nm = ids),
+        selected = character(0),
+        server = TRUE
+      )
+    })
+
+    observeEvent(input$explore_mode, r$explore_mode <- input$explore_mode)
+    observeEvent(input$lookup_ids, r$lookup_ids_explore <- input$lookup_ids,
+                 ignoreNULL = FALSE)
+
     # Explore tab submit event
     observeEvent(input$submit, {
-      if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
+      if(identical(input$explore_mode, "id")){
+        # only requirement in lookup mode is at least one id
+        if(length(input$lookup_ids) > 0){
+          r$submit_explore <- input$submit
+        } else {
+          showModal(modalDialog(title = "Warning!",
+                                "Please enter at least one barrier ID before you click Submit."))
+        }
+      }
+      else if(!is.null(input$owner_sel) && !is.null(input$area_sel) && !is.null(input$subarea_sel) &&
          input$highlight == 1)
       {r$submit_explore <- input$submit}
       else

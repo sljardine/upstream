@@ -70,38 +70,37 @@ mod_Figures_server <- function(id, r){
     # Explore submit button event for base_map
     observeEvent(r$submit_explore, {
       map_modified(TRUE)
-      update_map_selected_polygons(
+
+      lookup <- explore_lookup_ids(r)
+      pts <- if(r$remove_bad_match_explore) culverts_cmb_gm else culverts_cmb
+
+      # in ID lookup mode there is no area selection to outline
+      if(length(lookup) == 0){
+        update_map_selected_polygons(
+          leaflet::leafletProxy(ns('base_map')),
+          r$area_sel_explore,
+          r$subarea_sel_explore,
+          r$area_choice_explore,
+          r$subarea_choice_explore
+        )
+      } else {
+        leaflet::leafletProxy(ns('base_map')) %>%
+          leaflet::clearGroup("selected_wria") %>%
+          leaflet::clearGroup("selected_huc")
+      }
+
+      update_map_culvert_markers(
+        pts,
         leaflet::leafletProxy(ns('base_map')),
         r$area_sel_explore,
         r$subarea_sel_explore,
-        r$area_choice_explore,
-        r$subarea_choice_explore
+        r$owner_sel_explore,
+        r$remove_bad_match_explore,
+        r$color_variable_explore,
+        r$highlight_explore,
+        r$barrier_ids_explore,
+        only_ids = lookup
       )
-      if(r$remove_bad_match_explore){
-        update_map_culvert_markers(
-          culverts_cmb_gm,
-          leaflet::leafletProxy(ns('base_map')),
-          r$area_sel_explore,
-          r$subarea_sel_explore,
-          r$owner_sel_explore,
-          r$remove_bad_match_explore,
-          r$color_variable_explore,
-          r$highlight_explore,
-          r$barrier_ids_explore
-        )
-      } else {
-        update_map_culvert_markers(
-          culverts_cmb,
-          leaflet::leafletProxy(ns('base_map')),
-          r$area_sel_explore,
-          r$subarea_sel_explore,
-          r$owner_sel_explore,
-          r$remove_bad_match_explore,
-          r$color_variable_explore,
-          r$highlight_explore,
-          r$barrier_ids_explore
-        )
-      }
       user_plot(TRUE)
     })
 
@@ -109,12 +108,21 @@ mod_Figures_server <- function(id, r){
     observeEvent(r$submit_explore, {
 
       if(r$rezoom_on_submit_explore){
-        # selected wria bounding box
-        bbox <- get_wria_bounding_box(r$area_sel_explore)
+        lookup <- explore_lookup_ids(r)
 
-        # zoom map to selected wrias
+        bbox <- if(length(lookup) > 0){
+          # frame the barriers themselves, not the WRIA that contains them
+          pts <- if(r$remove_bad_match_explore) culverts_cmb_gm else culverts_cmb
+          get_points_bounding_box(pts, lookup)
+        } else {
+          get_wria_bounding_box(r$area_sel_explore)
+        }
+
+        # zoom map to selection
+        if(!is.null(bbox)){
         leaflet::leafletProxy(mapId = ns("base_map")) %>%
         leaflet::flyToBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+        }
       }
     })
 
@@ -284,7 +292,8 @@ mod_Figures_server <- function(id, r){
                   owner_sel = r$owner_sel_explore,
                   x_axis_variable = r$x_axis_variable_explore,
                   y_axis_variable = r$y_axis_variable_explore,
-                  color_variable = r$color_variable_explore
+                  color_variable = r$color_variable_explore,
+                  only_ids = explore_lookup_ids(r)
                 )
 
               # hold on to exactly what gets drawn: the click handler matches
