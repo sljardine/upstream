@@ -133,6 +133,11 @@ mod_Custom_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
+    # drop the "All ..."/"None" default once a specific value is chosen
+    for (sel in c("area_sel", "subarea_sel", "owner_sel", "barrier_idp")) {
+      sync_sentinel_selection(session, input, sel)
+    }
+
     # render leaflet output
     output$base_map <- leaflet::renderLeaflet({
       get_leaflet_map()

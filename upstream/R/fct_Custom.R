@@ -24,8 +24,10 @@ get_points_sel_hab_custom <- function(
     E #connectivity
     ){
 
+  barrier_idp <- drop_sentinel(barrier_idp)
+
   #Convert custom portfolio to TRUE/FALSE vector
-  if(! 0 %in% barrier_idp){
+  if(length(barrier_idp) > 0){
     prtf_cust_idp <- c(prtf_cust, barrier_idp)
   } else {
     prtf_cust_idp <- prtf_cust
@@ -75,9 +77,11 @@ map_leaflet_custom <- function(
     barrier_idp #planned barrier IDs
 ){
 
+  barrier_idp <- drop_sentinel(barrier_idp)
+
   #Convert custom portfolio to TRUE/FALSE vector
   cust <- points$site_id %in% prtf_cust
-  if(! 0 %in% barrier_idp){
+  if(length(barrier_idp) > 0){
     idp <- (points$site_id %in% barrier_idp) * 2
     prtf_cust_idp <- c(prtf_cust, barrier_idp)
   } else {
@@ -120,7 +124,7 @@ map_leaflet_custom <- function(
   cust_stream_ids <- marginal_line_ids[prtf_cust_idp[which(as.logical( h_inc * cust_sel))]] %>% base::unlist()
   ds_stream_ids <- downstream_line_ids[prtf_cust_idp[h_inc]] %>% base::unlist()
 
-  if(! 0 %in% barrier_idp){
+  if(length(barrier_idp) > 0){
     idp_stream_ids <- marginal_line_ids[prtf_cust_idp[which(as.logical( h_inc * idp_sel))]] %>% base::unlist()
   } else {
     idp_stream_ids <- NULL

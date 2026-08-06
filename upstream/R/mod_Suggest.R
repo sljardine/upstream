@@ -197,6 +197,13 @@ mod_Suggest_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
+    # drop the "All ..."/"None" default once a specific value is chosen.
+    # barrier_idp matters most: while "None" stayed selected, solve_opt()
+    # skipped its cost-zeroing and "Select Projects to Ignore" did nothing.
+    for (sel in c("area_sel", "subarea_sel", "owner_sel", "barrier_idp")) {
+      sync_sentinel_selection(session, input, sel)
+    }
+
     # update huc options, filtering HUCs in selected WRIA ----
     observeEvent(c(input$area_sel), {
       # get areas to filter by

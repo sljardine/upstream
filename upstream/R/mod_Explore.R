@@ -246,6 +246,11 @@ mod_Explore_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
+    # drop the "All ..." default once a specific value is chosen
+    for (sel in c("area_sel", "subarea_sel", "owner_sel")) {
+      sync_sentinel_selection(session, input, sel)
+    }
+
 # scatter plot variable choices
 cScatterPlotVariables <- commonVariables
 

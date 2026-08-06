@@ -42,7 +42,8 @@ get_summary_table <- function(
       )
   }
   # planned barrier selection: set benefit to zero if barrier is already planned by user
-  if(! 0 %in% barrier_idp){
+  barrier_idp <- drop_sentinel(barrier_idp)
+  if(length(barrier_idp) > 0){
     points <- points %>%
       dplyr::mutate(hmarg = ifelse(site_id %in% barrier_idp, 0, hmarg)
       )

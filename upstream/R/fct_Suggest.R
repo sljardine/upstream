@@ -36,6 +36,8 @@ solve_opt <- function(
   mean_construction_cost  #user-defined mean construction cost
 ){
 
+  barrier_idp <- drop_sentinel(barrier_idp)
+
   #habitat quantity definition
   ##length
   if(hq == 1){
@@ -113,7 +115,7 @@ solve_opt <- function(
   }
 
   # planned barrier selection: set cost to zero if barrier is already planned by user
-  if(! 0 %in% barrier_idp){
+  if(length(barrier_idp) > 0){
     points <- points %>%
       dplyr::mutate(cost = ifelse(site_id %in% barrier_idp, 0, cost)
       )
@@ -187,6 +189,8 @@ map_leaflet_opt <- function(
     barrier_idp #planned barrier IDs
   ){
 
+  barrier_idp <- drop_sentinel(barrier_idp)
+
   #Lines to display depend on whether the solution is a null set
   if(sum(soln) == 0){
 
@@ -237,7 +241,7 @@ map_leaflet_opt <- function(
   ds_stream_ids <- downstream_line_ids[soln] %>% base::unlist()
 
   #Define idp lines
-  if(! 0 %in% barrier_idp){
+  if(length(barrier_idp) > 0){
     names(marginal_line_ids) <- points$site_id
     idp_stream_ids <- marginal_line_ids[barrier_idp] %>% base::unlist()
   } else {
@@ -293,7 +297,7 @@ map_leaflet_opt <- function(
   match_pal <- leaflet::colorFactor(palette = c("black", "transparent"), domain = c(TRUE, FALSE), ordered = TRUE)
 
   # define idp points
-  if(! 0 %in% barrier_idp){
+  if(length(barrier_idp) > 0){
     idp_point <- points$site_id %in% barrier_idp
     soln <- soln + as.numeric(idp_point)
   }
