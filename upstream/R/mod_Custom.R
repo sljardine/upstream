@@ -98,7 +98,7 @@ mod_Custom_ui <- function(id){
         selectizeInput(
           inputId = ns("barrier_idp"),
           label = "Select Projects to Ignore",
-          selected = 0,
+          # no "None" option: an empty box already means nothing is ignored
           multiple = TRUE,
           choices = NULL,
           width = "50%")
@@ -134,7 +134,7 @@ mod_Custom_server <- function(id, r){
     ns <- session$ns
 
     # drop the "All ..."/"None" default once a specific value is chosen
-    for (sel in c("area_sel", "subarea_sel", "owner_sel", "barrier_idp")) {
+    for (sel in c("area_sel", "owner_sel")) {
       sync_sentinel_selection(session, input, sel)
     }
 
@@ -184,7 +184,9 @@ mod_Custom_server <- function(id, r){
           nm = c("All HUC 12s in selected WRIA(s)", options_hucs %>% dplyr::pull(huc_name))
         ),
         selected = 0,
-        server = TRUE
+        # only ~36 subareas per WRIA, so client-side: updateSelectizeInput()
+        # can then set `selected` reliably, which it cannot server-side
+        server = FALSE
       )
     })
 
@@ -206,7 +208,7 @@ mod_Custom_server <- function(id, r){
       }
 
       # get subareas to filter by
-      if("0" %in% input$subarea_sel){
+      if(length(drop_sentinel(input$subarea_sel)) == 0){
         choice_huc_number <- huc12_wrias %>%
           dplyr::filter(wria_number %in% cWRIA_NR) %>%
           dplyr::pull(huc_number)
@@ -263,7 +265,7 @@ mod_Custom_server <- function(id, r){
         cWRIA_NR <- as.integer(input$area_sel)
       }
 
-      if("0" %in% input$subarea_sel){
+      if(length(drop_sentinel(input$subarea_sel)) == 0){
         r$subarea_sel_custom <- huc12_wrias %>%
           dplyr::filter(wria_number %in% cWRIA_NR) %>%
           dplyr::pull(huc_number)
@@ -284,7 +286,7 @@ mod_Custom_server <- function(id, r){
     })
 
     ##projects to ignore ----
-    observeEvent(input$barrier_idp, r$barrier_idp_custom <- input$barrier_idp)
+    observeEvent(input$barrier_idp, r$barrier_idp_custom <- drop_sentinel(input$barrier_idp), ignoreNULL = FALSE)
     observeEvent(c(input$remove_bad_match), {
 
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
@@ -293,15 +295,13 @@ mod_Custom_server <- function(id, r){
         sfC <- culverts_cmb_gm %>% sf::st_drop_geometry()
       }
 
+      ids <- sfC %>% dplyr::pull(site_id) %>% sort()
+
       updateSelectizeInput(
         session,
         inputId = "barrier_idp",
-        choices = setNames(
-          c(0, sfC %>% dplyr::pull(site_id) %>% sort()),
-          nm = c('None',
-                 sfC %>% dplyr::pull(site_id) %>% sort())
-        ),
-        selected = 0,
+        choices = setNames(ids, nm = ids),
+        selected = character(0),
         server = TRUE
       )
     }

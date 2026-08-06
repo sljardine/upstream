@@ -296,10 +296,18 @@ map_leaflet_opt <- function(
   # define match border pallet
   match_pal <- leaflet::colorFactor(palette = c("black", "transparent"), domain = c(TRUE, FALSE), ordered = TRUE)
 
-  # define idp points
+  # Define idp points.
+  #
+  # 0 = not in the plan, 1 = chosen by the optimiser, 2 = already planned by
+  # someone else. Adding the two indicators together instead gave a planned
+  # barrier the optimiser had *not* chosen a value of 1, painting it the same
+  # blue as a funded project. That is not a cosmetic slip: a planned barrier
+  # can be locked out by an unselected barrier downstream of it, so the map
+  # claimed habitat the plan does not actually unlock. Assign the category
+  # rather than summing.
   if(length(barrier_idp) > 0){
     idp_point <- points$site_id %in% barrier_idp
-    soln <- soln + as.numeric(idp_point)
+    soln <- ifelse(idp_point, 2, as.numeric(soln))
   }
 
   #Add culverts

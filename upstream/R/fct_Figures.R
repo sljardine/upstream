@@ -360,6 +360,31 @@ update_map_culvert_markers <- function(
            ifelse(badMatch, "black", "grey"))
   }
 
+  # Cluster only when there is enough to cluster. A selection of one culvert
+  # drew nothing at all on the map: R emits a well-formed single marker with
+  # valid coordinates and styling, identical in structure to a selection of
+  # three, so the marker is lost inside the cluster layer rather than before
+  # it. Below this many points clustering buys nothing anyway.
+  cluster_opts <- if (nrow(points) >= 25) {
+    leaflet::markerClusterOptions(
+      iconCreateFunction = htmlwidgets::JS("function (cluster) {
+          var childCount = cluster.getChildCount();
+          if (childCount < 500) {
+          c = 'rgba(241, 226, 185, 255);'
+          } else if (childCount < 1000) {
+          c = 'rgba(197, 247, 244, 255);'
+          } else {
+          c = 'rgba(232, 169, 157, 255);'
+          }
+         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
+         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
+      spiderfyOnMaxZoom = FALSE,
+      disableClusteringAtZoom = 10
+    )
+  } else {
+    NULL
+  }
+
   # add culverts to map if zoomed in enough
   leaf_proxy %>%
     leaflet::clearControls() %>%
@@ -372,21 +397,7 @@ update_map_culvert_markers <- function(
       opacity = 1,
       fillColor = ~pal(C),
       fillOpacity = 1,
-      clusterOptions = leaflet::markerClusterOptions(
-        iconCreateFunction = htmlwidgets::JS("function (cluster) {
-          var childCount = cluster.getChildCount();
-          if (childCount < 500) {
-          c = 'rgba(241, 226, 185, 255);'
-          } else if (childCount < 1000) {
-          c = 'rgba(197, 247, 244, 255);'
-          } else {
-          c = 'rgba(232, 169, 157, 255);'
-          }
-         return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>',
-         className: 'marker-cluster', iconSize: new L.Point(40, 40) });}"),
-        spiderfyOnMaxZoom = FALSE,
-        disableClusteringAtZoom = 10
-      ),
+      clusterOptions = cluster_opts,
       popup = ~popup
     )
 }
@@ -642,31 +653,56 @@ figure_scatterplot <- function(
       legend.key.width = ggplot2::unit(55, "native")
     )
 
-  # Custom label function
+  # Custom label function.
+  # accuracy = 1 keeps the axis in whole dollars. Without it, brushing into a
+  # narrow cost range makes ggplot choose fractional breaks and label_dollar()
+  # renders cents, so ticks read "$12,277.78". Cents are meaningless for a
+  # culvert cost estimate at any zoom.
+  # NA is passed through rather than fed to the comparison, since ggplot appends
+  # an out-of-range break whose label would otherwise come back as NA.
   custom_dollar_label <- function() {
     function(x) {
-      ifelse(x >= 1e6,
-             paste0("$", formatC(x / 1e6, format = "f", digits = 1), "M"),
-             scales::label_dollar()(x))
+      ifelse(
+        is.na(x), NA_character_,
+        ifelse(
+          x >= 1e6,
+          paste0("$", formatC(x / 1e6, format = "f", digits = 1), "M"),
+          scales::label_dollar(accuracy = 1)(x)
+        )
+      )
     }
+  }
+
+  # Breaks for a near-degenerate axis. Selecting a single culvert gives a
+  # zero-width range, so the default algorithm places several breaks within a
+  # dollar of each other: they either all round to the same label or, with
+  # cents, grow long enough to overlap. One break in the middle is the honest
+  # rendering of an axis with nothing to span.
+  safe_breaks <- function(limits) {
+    limits <- limits[is.finite(limits)]
+    if (length(limits) < 2) return(limits)
+    span <- diff(range(limits))
+    if (!is.finite(span) || span <= 0) return(mean(limits))
+    if (span < 1) return(mean(limits))
+    scales::breaks_extended(n = 5)(limits)
   }
 
   # y axis variable
   if(y_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
     ggP <- ggP + ggplot2::scale_y_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
   } else if(y_axis_variable == "cost"){
-    ggP <- ggP + ggplot2::scale_y_continuous(labels = custom_dollar_label())
+    ggP <- ggP + ggplot2::scale_y_continuous(breaks = safe_breaks, labels = custom_dollar_label())
   } else {
-    ggP <- ggP + ggplot2::scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
+    ggP <- ggP + ggplot2::scale_y_continuous(breaks = safe_breaks, labels = function(x) prettyNum(signif(x, 4), big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
   }
 
   # x axis variable
   if(x_axis_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
-    ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
+    ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10))
   } else if(x_axis_variable == "cost"){
-    ggP <- ggP + ggplot2::scale_x_continuous(labels = custom_dollar_label())
+    ggP <- ggP + ggplot2::scale_x_continuous(breaks = safe_breaks, labels = custom_dollar_label())
   } else {
-    ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
+    ggP <- ggP + ggplot2::scale_x_continuous(breaks = safe_breaks, labels = function(x) prettyNum(signif(x, 4), big.mark = ",", scientific = FALSE))
   }
 
   # color (fill) scale and legend
@@ -826,9 +862,9 @@ figure_histogram <- function(points, x_axis_variable, y_axis_variable, color_var
 
   # x axis variable
   if(histogram_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
-    ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10) %>% sprintf(fmt = "%10s"))
+    ggP <- ggP + ggplot2::scale_x_discrete(labels = function(x) abbreviate(x, 10))
   } else if(!histogram_variable %in% c("owner_type_code", "wria_number", "potential_species", "percent_fish_passable_code")){
-    ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE) %>% sprintf(fmt = "%10s"))
+    ggP <- ggP + ggplot2::scale_x_continuous(labels = function(x) prettyNum(x, big.mark = ",", scientific = FALSE))
   }
 
   # color variable

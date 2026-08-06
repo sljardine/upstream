@@ -63,10 +63,18 @@ mod_Suggest_ui <- function(id){
       ),
       hr(),
       fluidRow(
+        checkboxInput(
+          inputId = ns("ignore_planned_wsdot"),
+          label = "Ignore WSDOT barriers already planned for correction",
+          value = TRUE)
+      ),
+      fluidRow(
+        # No "None" option: an empty box already means nothing is ignored, so
+        # the sentinel only ever got in the way. It is a server-side selectize
+        # (7,592 ids), where a stuck sentinel could not be cleared reliably.
         selectizeInput(
           inputId = ns("barrier_idp"),
-          label = "Select Projects to Ignore",
-          selected = 0,
+          label = "Select Additional Projects to Ignore",
           multiple = TRUE,
           choices = NULL,
           width = "50%")
@@ -200,7 +208,7 @@ mod_Suggest_server <- function(id, r){
     # drop the "All ..."/"None" default once a specific value is chosen.
     # barrier_idp matters most: while "None" stayed selected, solve_opt()
     # skipped its cost-zeroing and "Select Projects to Ignore" did nothing.
-    for (sel in c("area_sel", "subarea_sel", "owner_sel", "barrier_idp")) {
+    for (sel in c("area_sel", "owner_sel")) {
       sync_sentinel_selection(session, input, sel)
     }
 
@@ -226,7 +234,9 @@ mod_Suggest_server <- function(id, r){
           nm = c("All HUC 12s in selected WRIA(s)", options_hucs %>% dplyr::pull(huc_name))
         ),
         selected = 0,
-        server = TRUE
+        # only ~36 subareas per WRIA, so client-side: updateSelectizeInput()
+        # can then set `selected` reliably, which it cannot server-side
+        server = FALSE
       )
     })
 
@@ -253,7 +263,7 @@ mod_Suggest_server <- function(id, r){
         cWRIA_NR <- as.integer(input$area_sel)
       }
 
-      if("0" %in% input$subarea_sel){
+      if(length(drop_sentinel(input$subarea_sel)) == 0){
         r$subarea_sel_suggest <- huc12_wrias %>% dplyr::filter(wria_number %in% cWRIA_NR) %>% dplyr::pull(huc_number)
         r$subarea_choice_suggest <- "all"
         } else {
@@ -271,23 +281,40 @@ mod_Suggest_server <- function(id, r){
       }
     })
     ##projects to ignore ----
-    observeEvent(input$barrier_idp, r$barrier_idp_suggest <- input$barrier_idp)
+    # The set passed to solve_opt() is whatever the user picked, plus the WSDOT
+    # barriers already scheduled for correction when that box is ticked. Those
+    # get a cost of zero, which is the right model: they will be fixed and paid
+    # for by someone else, and treating them as free also releases the culverts
+    # upstream of them, which the hydrology constraint otherwise locks out.
+    observeEvent(
+      c(input$barrier_idp, input$ignore_planned_wsdot, input$remove_bad_match), {
+        manual <- drop_sentinel(input$barrier_idp)
+        planned <- if (isTRUE(input$ignore_planned_wsdot)) {
+          planned_wsdot_ids(input$remove_bad_match)
+        } else {
+          character(0)
+        }
+        r$barrier_idp_suggest <- union(manual, planned)
+      },
+      ignoreNULL = FALSE
+    )
+
     observeEvent(c(input$remove_bad_match), {
-      
+
       sfC <- culverts_cmb %>% sf::st_drop_geometry()
-      
+
       if(input$remove_bad_match == 2){
         sfC <- culverts_cmb_gm %>% sf::st_drop_geometry()
       }
-      
+
+      ids <- sfC %>% dplyr::pull(site_id) %>% sort()
+
+      # no "None" entry: an empty box already means nothing is ignored
       updateSelectizeInput(
         session,
         inputId = "barrier_idp",
-        choices = setNames(
-          c(0, sfC %>% dplyr::pull(site_id) %>% sort()),
-          nm = c('None', sfC %>% dplyr::pull(site_id) %>% sort())
-        ),
-        selected = 0,
+        choices = setNames(ids, nm = ids),
+        selected = character(0),
         server = TRUE
       )
     }

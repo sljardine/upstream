@@ -88,7 +88,9 @@ map_leaflet_custom <- function(
     idp <- rep(0, base::nrow(points))
     prtf_cust_idp <- prtf_cust
   }
-   cust_idp <- cust + idp
+   # clamped: a barrier both in the plan and on the ignore list would otherwise
+   # sum to 3, outside the 0:2 domain of the palette below, and draw as NA
+   cust_idp <- pmin(cust + idp, 2)
 
    cust_sel <- prtf_cust_idp %in% prtf_cust
    idp_sel <- prtf_cust_idp %in% barrier_idp

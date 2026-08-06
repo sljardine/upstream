@@ -62,6 +62,52 @@ drop_nulls <- function(x) {
 rv <- function(...) shiny::reactiveValues(...)
 rvtl <- function(...) shiny::reactiveValuesToList(...)
 
+#' Count culverts in each HUC 12 under the current bad-match setting
+#'
+#' Used to keep empty subareas out of the "Select Subarea" dropdown and to
+#' label the rest with how many culverts they hold.
+#'
+#' @param huc_numbers HUC 12 numbers to count
+#' @param remove_bad_match the radio input value; "2" means drop bad matches
+#'
+#' @return an integer vector the same length as `huc_numbers`
+#'
+#' @noRd
+count_culverts_by_huc <- function(huc_numbers, remove_bad_match) {
+  pts <- if (identical(as.character(remove_bad_match), "2")) {
+    culverts_cmb_gm
+  } else {
+    culverts_cmb
+  }
+  tally <- table(sf::st_drop_geometry(pts)$huc_number)
+  out <- as.integer(tally[as.character(huc_numbers)])
+  out[is.na(out)] <- 0L
+  out
+}
+
+#' Site ids of WSDOT barriers already scheduled for correction
+#'
+#' Washington is under a federal injunction to correct fish-passage barriers on
+#' state highways, so these will be fixed regardless of how a cost-effectiveness
+#' ranking scores them. Treating them as already funded is what lets Suggest
+#' reach the culverts upstream of them.
+#'
+#' @param remove_bad_match the radio input value; "2" means drop bad matches
+#'
+#' @return a character vector of site ids, possibly empty
+#'
+#' @noRd
+planned_wsdot_ids <- function(remove_bad_match) {
+  pts <- if (identical(as.character(remove_bad_match), "2")) {
+    culverts_cmb_gm
+  } else {
+    culverts_cmb
+  }
+  d <- sf::st_drop_geometry(pts)
+  if (!"planned_wsdot" %in% names(d)) return(character(0))
+  as.character(d$site_id[!is.na(d$planned_wsdot) & d$planned_wsdot == "Yes"])
+}
+
 #' Drop the "None"/"All" sentinel from a selection
 #'
 #' Guards of the form `if (! 0 %in% barrier_idp)` disable themselves whenever
@@ -94,13 +140,30 @@ drop_sentinel <- function(x, sentinel = "0") {
 #' @param session,input the module session and input objects
 #' @param id un-namespaced input id
 #' @param sentinel the sentinel value, as a character scalar
+#' @param choices for a server-side selectize, a function returning its current
+#'   named choices. `updateSelectizeInput()` cannot reliably set `selected` on a
+#'   server-side input without also re-sending `choices`; omitting them can empty
+#'   the box, which downstream reads as "nothing selected" rather than "all".
 #'
 #' @noRd
-sync_sentinel_selection <- function(session, input, id, sentinel = "0") {
+sync_sentinel_selection <- function(session, input, id, sentinel = "0",
+                                    choices = NULL) {
   # observeEvent evaluates input[[id]] lazily at flush time, so `id` must be
   # forced here or a loop over ids would leave every observer watching the last
   force(id)
   force(sentinel)
+  force(choices)
+
+  update <- function(selected) {
+    if (is.null(choices)) {
+      shiny::updateSelectizeInput(session, id, selected = selected)
+    } else {
+      shiny::updateSelectizeInput(
+        session, id,
+        choices = choices(), selected = selected, server = TRUE
+      )
+    }
+  }
 
   previous <- shiny::reactiveVal(sentinel)
 
@@ -110,7 +173,7 @@ sync_sentinel_selection <- function(session, input, id, sentinel = "0") {
 
     # empty box: restore the sentinel rather than pass nothing downstream
     if (length(current) == 0) {
-      shiny::updateSelectizeInput(session, id, selected = sentinel)
+      update(sentinel)
       previous(sentinel)
       return(invisible(NULL))
     }
@@ -119,7 +182,7 @@ sync_sentinel_selection <- function(session, input, id, sentinel = "0") {
       # sentinel already present means the user just added a real value;
       # otherwise they just clicked the sentinel and want everything reset
       keep <- if (sentinel %in% prev) setdiff(current, sentinel) else sentinel
-      shiny::updateSelectizeInput(session, id, selected = keep)
+      update(keep)
       previous(keep)
       return(invisible(NULL))
     }

@@ -246,7 +246,14 @@ mod_Explore_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    # drop the "All ..." default once a specific value is chosen
+    # Drop the "All ..." default once a specific value is chosen.
+    #
+    # subarea_sel works here only because it is now a client-side selectize.
+    # While it was server-side, rewriting its selection failed two different
+    # ways: setting `selected` without `choices` emptied the box, and
+    # re-sending `choices` wiped the option list before they were built. The
+    # readers below still strip the sentinel independently, so the filter stays
+    # correct even if an update does not land.
     for (sel in c("area_sel", "subarea_sel", "owner_sel")) {
       sync_sentinel_selection(session, input, sel)
     }
@@ -275,7 +282,7 @@ cColorVariables <- commonVariables
     })
 
     # update huc options
-    observeEvent(c(input$area_sel), {
+    observeEvent(c(input$area_sel, input$remove_bad_match), {
 
       # get areas to filter by
       if("0" %in% input$area_sel){
@@ -284,9 +291,17 @@ cColorVariables <- commonVariables
         cWRIA_NR <- as.integer(input$area_sel)
       }
 
-      # filter hucs
+      # Offer only subareas that actually hold culverts under the current
+      # bad-match setting, and say how many. The list used to come straight
+      # from huc12_wrias, so it advertised HUC 12s that plot nothing at all
+      # (9 of 305 are empty once bad matches are dropped) and gave no warning
+      # about the many holding only one or two.
       options_hucs <- huc12_wrias %>%
-        dplyr::filter(wria_number %in% cWRIA_NR)
+        dplyr::filter(wria_number %in% cWRIA_NR) %>%
+        dplyr::mutate(
+          n_culverts = count_culverts_by_huc(huc_number, input$remove_bad_match)
+        ) %>%
+        dplyr::filter(n_culverts > 0)
 
       # update select input choices
       updateSelectizeInput(
@@ -294,10 +309,18 @@ cColorVariables <- commonVariables
         inputId = "subarea_sel",
         choices = setNames(
           c(0, options_hucs %>% dplyr::pull(huc_number)),
-          nm = c("All HUC 12s in selected WRIA(s)", options_hucs %>% dplyr::pull(huc_name))
+          nm = c(
+            "All HUC 12s in selected WRIA(s)",
+            paste0(
+              options_hucs %>% dplyr::pull(huc_name),
+              " (", options_hucs %>% dplyr::pull(n_culverts), ")"
+            )
+          )
         ),
         selected = 0,
-        server = TRUE
+        # only ~36 subareas per WRIA, so client-side: updateSelectizeInput()
+        # can then set `selected` reliably, which it cannot server-side
+        server = FALSE
       )
     })
 
@@ -345,7 +368,7 @@ cColorVariables <- commonVariables
       }
 
       # get subareas to filter by
-      if("0" %in% input$subarea_sel){
+      if(length(drop_sentinel(input$subarea_sel)) == 0){
         choice_huc_number <- huc12_wrias %>%
           dplyr::filter(wria_number %in% cWRIA_NR) %>%
           dplyr::pull(huc_number)
@@ -443,12 +466,18 @@ cColorVariables <- commonVariables
         cWRIA_NR <- as.integer(input$area_sel)
       }
 
-      if("0" %in% input$subarea_sel){
+      # A real subarea beats a lingering "All HUC 12s". Testing for the
+      # sentinel first meant that picking Clover Creek while "All HUC 12s" was
+      # still selected silently widened the filter back to the whole WRIA, and
+      # an empty box narrowed it to nothing.
+      chosen <- drop_sentinel(input$subarea_sel)
+
+      if(length(chosen) > 0){
+        r$subarea_sel_explore <- chosen
+        r$subarea_choice_explore <- "selection"
+      } else {
         r$subarea_sel_explore <- huc12_wrias %>% dplyr::filter(wria_number %in% cWRIA_NR) %>% dplyr::pull(huc_number)
         r$subarea_choice_explore <- "all"
-      } else {
-        r$subarea_sel_explore <- input$subarea_sel
-        r$subarea_choice_explore <- "selection"
       }
     })
 
