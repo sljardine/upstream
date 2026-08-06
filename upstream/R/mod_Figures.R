@@ -45,6 +45,10 @@ mod_Figures_server <- function(id, r){
     # initiates plot
     user_plot <- reactiveVal(FALSE)
 
+    # the data frame behind the current scatterplot, kept so plot clicks are
+    # matched against what is actually on screen
+    scatter_data <- reactiveVal(NULL)
+
     # Value to store if map has been modified to avoid unnecessary rerenders
     map_modified <- reactiveVal(FALSE)
 
@@ -272,35 +276,29 @@ mod_Figures_server <- function(id, r){
         if(user_plot()){
           if(r$tab_sel == "Explore"){
             if(r$plot_type_explore == "Scatterplot"){
-              if(r$remove_bad_match_explore){
-                culverts_cmb_gm %>%
-                  filter_and_format_culverts_for_scatterplot(
-                    area_sel = r$area_sel_explore,
-                    subarea_sel = r$subarea_sel_explore,
-                    owner_sel = r$owner_sel_explore,
-                    x_axis_variable = r$x_axis_variable_explore,
-                    y_axis_variable = r$y_axis_variable_explore,
-                    color_variable = r$color_variable_explore
-                  ) %>%
-                  figure_scatterplot(
-                    r$x_axis_variable_explore, r$y_axis_variable_explore,
-                    r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
-                    r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
-                    r$plot_ymin, r$plot_ymax
-                  )
-              } else {
-                culverts_cmb %>%
-                  filter_and_format_culverts_for_scatterplot(
-                    r$area_sel_explore, r$subarea_sel_explore, r$owner_sel_explore, r$x_axis_variable_explore,
-                    r$y_axis_variable_explore, r$color_variable_explore
-                  ) %>%
-                  figure_scatterplot(
-                    r$x_axis_variable_explore, r$y_axis_variable_explore,
-                    r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
-                    r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
-                    r$plot_ymin, r$plot_ymax
-                  )
-              }
+              scatter_df <-
+                (if(r$remove_bad_match_explore) culverts_cmb_gm else culverts_cmb) %>%
+                filter_and_format_culverts_for_scatterplot(
+                  area_sel = r$area_sel_explore,
+                  subarea_sel = r$subarea_sel_explore,
+                  owner_sel = r$owner_sel_explore,
+                  x_axis_variable = r$x_axis_variable_explore,
+                  y_axis_variable = r$y_axis_variable_explore,
+                  color_variable = r$color_variable_explore
+                )
+
+              # hold on to exactly what gets drawn: the click handler matches
+              # against this, so it cannot drift from the plot the way the old
+              # re-filtering did (it omitted the subarea filter entirely)
+              scatter_data(scatter_df)
+
+              scatter_df %>%
+                figure_scatterplot(
+                  r$x_axis_variable_explore, r$y_axis_variable_explore,
+                  r$color_variable_explore, r$x_jitter_explore, r$y_jitter_explore,
+                  r$highlight_explore, r$barrier_ids_explore, r$plot_xmin, r$plot_xmax,
+                  r$plot_ymin, r$plot_ymax
+                )
             } else if(r$plot_type_explore == 'Histogram'){
               if(r$remove_bad_match_explore){
                 culverts_cmb_gm %>%
@@ -372,24 +370,17 @@ mod_Figures_server <- function(id, r){
     # plot click event to identify culvert
     observeEvent(input$plot_click, {
       if(r$tab_sel == 'Explore'){
-        if(r$plot_type_explore == 'histogram'){
-          r$plot_click_text_output <- ''
-        } else if(r$x_axis_variable_explore %in% c("potential_species", "owner_type_code", "percent_fish_passable_code") | r$y_axis_variable_explore %in% c("potential_species", "owner_type_code", "percent_fish_passable_code")){
-          r$plot_click_text_output_explore <- ''
+        if(identical(r$plot_type_explore, "Scatterplot")){
+          # no special case for categorical axes: nearPoints resolves them from
+          # the click's discrete_limits, so they behave like any other axis
+          r$plot_click_text_output_explore <- get_plot_click_site_id(
+            points = scatter_data(),
+            coordinfo = input$plot_click,
+            x_jitter = r$x_jitter_explore,
+            y_jitter = r$y_jitter_explore
+          )
         } else {
-          if(r$remove_bad_match_explore){
-          r$plot_click_text_output_explore <- get_plot_click_site_id(
-            culverts_cmb_gm,
-            r$owner_sel_explore, r$area_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
-            r$y_axis_variable_explore, input$plot_click$x, input$plot_click$y
-            )
-          } else {
-          r$plot_click_text_output_explore <- get_plot_click_site_id(
-            culverts_cmb,
-            r$owner_sel_explore, r$area_sel_explore, r$remove_bad_match_explore, r$x_axis_variable_explore,
-            r$y_axis_variable_explore, input$plot_click$x, input$plot_click$y
-            )
-          }
+          r$plot_click_text_output_explore <- ''
         }
       }
     })

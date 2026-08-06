@@ -1144,74 +1144,67 @@ get_pretty_variable_name <- function(varName){
   return(prettyName)
 }
 
-#' @title get plot click site id
-#' @param points points
-#' @param owner_sel owner selection
-#' @param area_sel wria selection
-#' @param remove_bad_match indicator for removing a bad match
-#' @param x_axis_variable variable on the x axis
-#' @param y_axis_variable variable on the y axis
-#' @param plotClickX x coordinate from plot click event
-#' @param plotClickY y coordinate from plot click event
-#' @return string value of culvert site id closest to plot click coordinates or empty string if beyond maximum distance
+#' @title Identify the culvert nearest a scatterplot click
+#'
+#' @description
+#' Matches a click against the same data frame that was plotted, using
+#' [shiny::nearPoints()] so the search radius is measured in screen pixels.
+#'
+#' The previous implementation normalised each axis by the maximum of the full
+#' dataset and required a Euclidean distance under 0.03 in that space. That tied
+#' the hit radius to the data range rather than to what was on screen, so it
+#' broke in two ways: brushing to zoom left the tolerance referring to nothing
+#' visible, and on a heavy-tailed axis it grew enormous. With costs reaching
+#' $229M the radius on a cost axis was about $6.9M wide. It also re-filtered the
+#' culverts itself and omitted the subarea filter the plot applies, so it could
+#' match a point that was not drawn.
+#'
+#' Passing the plotted frame removes that whole class of bug, and nearPoints
+#' handles discrete axes natively via the click's `discrete_limits`, so
+#' categorical axes need no special casing.
+#'
+#' @param points the data frame that was plotted, carrying `X`, `Y` and `site_id`
+#' @param coordinfo a Shiny click object (`input$plot_click`)
+#' @param x_jitter,y_jitter jitter widths in data units, as passed to `geom_jitter`
+#' @param threshold hit radius in CSS pixels, before any jitter allowance
+#'
+#' @return the site id as a display string, or `""` when nothing is near enough
 #' @export
 get_plot_click_site_id <- function(
     points,
-    owner_sel,
-    area_sel,
-    remove_bad_match,
-    x_axis_variable,
-    y_axis_variable,
-    plotClickX,
-    plotClickY
-    ){
+    coordinfo,
+    x_jitter = 0,
+    y_jitter = 0,
+    threshold = 10
+){
 
-  # Filter by owner selection
-  cSiteIds <- c()
-  if("1" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_city) %>% dplyr::pull(site_id))}
-  if("2" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_county) %>% dplyr::pull(site_id))}
-  if("3" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_federal) %>% dplyr::pull(site_id))}
-  if("4" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_private) %>% dplyr::pull(site_id))}
-  if("5" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_state) %>% dplyr::pull(site_id))}
-  if("6" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_tribal) %>% dplyr::pull(site_id))}
-  if("7" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_other) %>% dplyr::pull(site_id))}
-  if("8" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_port) %>% dplyr::pull(site_id))}
-  if("9" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_drainage_district) %>% dplyr::pull(site_id))}
-  if("11" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_irrigation_district) %>% dplyr::pull(site_id))}
-  if("12" %in% owner_sel){cSiteIds <- c(cSiteIds, points %>% dplyr::filter(is_unknown) %>% dplyr::pull(site_id))}
+  if(is.null(points) || is.null(coordinfo) || nrow(points) == 0) return("")
+  if(!all(c("X", "Y", "site_id") %in% names(points))) return("")
 
-  # Filter by area and owner
-  points <- points %>%
-    dplyr::filter(wria_number %in% area_sel & site_id %in% cSiteIds)
-
-  # Filter bad culvert matches
-  if(remove_bad_match){
-    points <- points %>% dplyr::filter(!bad_match)
+  # geom_jitter draws each point up to the jitter width away from its true
+  # value, and the offset is redrawn every render, so it cannot be recovered.
+  # Widen the radius by that displacement instead. Jitter is expressed in data
+  # units, so convert via the panel's domain and range.
+  pad <- 0
+  dom <- coordinfo$domain
+  rng <- coordinfo$range
+  if(!is.null(dom) && !is.null(rng)){
+    if(isTRUE(x_jitter > 0) && is.numeric(dom$right) && is.numeric(dom$left) &&
+       !identical(dom$right, dom$left)){
+      pad <- max(pad, x_jitter * abs(rng$right - rng$left) / abs(dom$right - dom$left))
+    }
+    if(isTRUE(y_jitter > 0) && is.numeric(dom$top) && is.numeric(dom$bottom) &&
+       !identical(dom$top, dom$bottom)){
+      pad <- max(pad, y_jitter * abs(rng$bottom - rng$top) / abs(dom$top - dom$bottom))
+    }
   }
 
-  # Ensure the x and y axis variables are numeric and handle NA values
-  points <- points %>%
-    dplyr::mutate(X_var = as.numeric(.data[[x_axis_variable]]),
-                  Y_var = as.numeric(.data[[y_axis_variable]])) %>%
-    dplyr::filter(!is.na(X_var) & !is.na(Y_var))
+  hit <- shiny::nearPoints(
+    points, coordinfo,
+    xvar = "X", yvar = "Y",
+    threshold = threshold + pad,
+    maxpoints = 1
+  )
 
-  # Calculate relative positions and differences
-  max_X_var <- max(points$X_var, na.rm = TRUE)
-  max_Y_var <- max(points$Y_var, na.rm = TRUE)
-
-  points <- points %>%
-    dplyr::mutate(RelX = X_var / max_X_var,
-                  RelY = Y_var / max_Y_var,
-                  Diff = sqrt((RelX - plotClickX / max_X_var)^2 + (RelY - plotClickY / max_Y_var)^2)) %>%
-    dplyr::arrange(Diff) %>%
-    dplyr::slice(1)
-
-  # Check if click is close to a point
-  if(nrow(points) > 0 && points$Diff[1] < .03){
-    siteId <- paste0("Site Id: ", points$site_id[1])
-  } else {
-    siteId <- ''
-  }
-
-  return(siteId)
+  if(nrow(hit) == 0) "" else paste0("Site Id: ", hit$site_id[1])
 }
