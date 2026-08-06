@@ -1,7 +1,7 @@
 testServer(
   mod_Welcome_server,
   # Add here your module params
-  args = list()
+  args = list(r = shiny::reactiveValues())
   , {
     ns <- session$ns
     expect_true(
