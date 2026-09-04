@@ -52,8 +52,13 @@ get_leaflet_map <- function(){
   # initalize the map
   m <- wrias %>%
     leaflet::leaflet() %>%
+    # Was CartoDB.Positron. CARTO began requiring an API key for their basemaps
+    # after the January 2025 deploy and now serve an "API KEY REQUIRED"
+    # watermark instead of the tile, which showed across open water on the
+    # default layer. Esri.WorldGrayCanvas is the closest keyless equivalent and
+    # comes from a provider already used for the other two layers here.
     leaflet::addProviderTiles(
-      "CartoDB.Positron",
+      "Esri.WorldGrayCanvas",
       options = leaflet::providerTileOptions(minZoom = 6.5),
       group = "Street")  %>%
     leaflet::addProviderTiles(
@@ -294,8 +299,16 @@ update_map_culvert_markers <- function(
   # are bypassed. Otherwise a barrier could be searched for by id and then
   # silently dropped for sitting outside the area filter left over from the
   # previous browse.
-  if(length(only_ids) > 0){
-    points <- points %>% dplyr::filter(site_id %in% only_ids)
+  # In ID lookup mode the looked-up barriers are HIGHLIGHTED rather than
+  # filtered to. Filtering removed every other barrier, so the map zoomed to a
+  # lone point with nothing around it and no sense of where it sat. Keeping the
+  # network as context and colouring the selection is what the zoom was always
+  # meant to accompany. The area and owner filters stay bypassed here, so a
+  # barrier searched by id is never dropped for sitting outside a filter left
+  # over from a previous browse.
+  lookup_mode <- length(only_ids) > 0
+  if(lookup_mode){
+    # keep all points; only_ids drives the highlight below
   } else {
 
   # filter culverts to selected wrias
@@ -384,7 +397,9 @@ update_map_culvert_markers <- function(
   }
 
   # set barrier ids
-  if(is.null(barrier_ids) | highlight == 0){
+  if(lookup_mode){
+    cBarrierIds <- only_ids
+  } else if(is.null(barrier_ids) | highlight == 0){
     cBarrierIds <- ''
   } else {
     cBarrierIds <- barrier_ids
@@ -436,8 +451,10 @@ update_map_culvert_markers <- function(
     leaflet::addCircleMarkers(
       data = points,
       group = "culverts",
-      radius = 5,
-      weight = 1.5,
+      # highlighted barriers are drawn larger and heavier so they read against a
+      # dense background; arrange(IsHighlighted) above already draws them last
+      radius = ~ifelse(IsHighlighted == "Highlighted", 9, 5),
+      weight = ~ifelse(IsHighlighted == "Highlighted", 3.5, 1.5),
       color = ~getStrokeColor(IsHighlighted, bad_match),
       opacity = 1,
       fillColor = ~pal(C),
@@ -1161,13 +1178,13 @@ get_pretty_variable_name <- function(varName){
   } else if(varName ==  "hmarg_area"){
     prettyName <-  "Marginal Habitat Area (km^2)"
   } else if(varName ==  "hmarg_volume"){
-    prettyName <-  "Marginal Habitat Volume (km^3)"
+    prettyName <-  "Marginal Habitat Volume (m^3)"
   } else if(varName ==  "hfull_length"){
     prettyName <-  "Full Habitat Length (km)"
   } else if(varName ==  "hfull_area"){
     prettyName <-  "Full Habitat Area (km^2)"
   } else if(varName ==  "hfull_volume"){
-    prettyName <-  "Full Habitat Volume (km^3)"
+    prettyName <-  "Full Habitat Volume (m^3)"
   } else if(varName == "wria_number"){
     prettyName <- "WRIA"
   } else if(varName == "owner_type_code"){
@@ -1183,19 +1200,19 @@ get_pretty_variable_name <- function(varName){
   }else if(varName == "hmarg_area_agri"){
     prettyName <- "Marginal Agricultural Habitat Area (km^2)"
   }else if(varName == "hmarg_volume_agri"){
-    prettyName <- "Marginal Agricultural Habitat Volume (km^3)"
+    prettyName <- "Marginal Agricultural Habitat Volume (m^3)"
   }else if(varName == "hmarg_length_urb"){
     prettyName <- "Marginal Urban Habitat Length (km)"
   }else if(varName == "hmarg_area_urb"){
     prettyName <- "Marginal Urban Habitat Area (km^2)"
   }else if(varName == "hmarg_volume_urb"){
-    prettyName <- "Marginal Urban Habitat Volume (km^3)"
+    prettyName <- "Marginal Urban Habitat Volume (m^3)"
   }else if(varName == "hmarg_length_natural"){
     prettyName <- "Marginal Natural Habitat Length (km)"
   }else if(varName == "hmarg_area_natural"){
     prettyName <- "Marginal Natural Habitat Area (km^2)"
   }else if(varName == "hmarg_volume_natural"){
-    prettyName <- "Marginal Natural Habitat Volume (km^3)"
+    prettyName <- "Marginal Natural Habitat Volume (m^3)"
   }else if(varName == "hmarg_length_hist_temp"){
     prettyName <- "Marginal Length-Weighted Temperature (C)"
   }else if(varName == "hmarg_area_hist_temp"){
@@ -1221,19 +1238,19 @@ get_pretty_variable_name <- function(varName){
   }else if(varName == "hfull_area_agri"){
     prettyName <- "Full Agricultural Habitat Area (km^2)"
   }else if(varName == "hfull_volume_agri"){
-    prettyName <- "Full Agricultural Habitat Volume (km^3)"
+    prettyName <- "Full Agricultural Habitat Volume (m^3)"
   }else if(varName == "hfull_length_urb"){
     prettyName <- "Full Urban Habitat Length (km)"
   }else if(varName == "hfull_area_urb"){
     prettyName <- "Full Urban Habitat Area (km^2)"
   }else if(varName == "hfull_volume_urb"){
-    prettyName <- "Full Urban Habitat Volume (km^3)"
+    prettyName <- "Full Urban Habitat Volume (m^3)"
   }else if(varName == "hfull_length_natural"){
     prettyName <- "Full Natural Habitat Length (km)"
   }else if(varName == "hfull_area_natural"){
     prettyName <- "Full Natural Habitat Area (km^2)"
   }else if(varName == "hfull_volume_natural"){
-    prettyName <- "Full Natural Habitat Volume (km^3)"
+    prettyName <- "Full Natural Habitat Volume (m^3)"
   }else if(varName == "hfull_length_hist_temp"){
     prettyName <- "Full Length-Weighted Temperature (C)"
   }else if(varName == "hfull_area_hist_temp"){
