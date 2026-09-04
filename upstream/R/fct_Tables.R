@@ -76,7 +76,7 @@ get_summary_table <- function(
     sum_tab <- sum_tab %>% dplyr::rename(`Habitat (km^2)` = V1)
     ##volume
   } else {
-    sum_tab <- sum_tab %>% dplyr::rename(`Habitat (km^3)` = V1)
+    sum_tab <- sum_tab %>% dplyr::rename(`Habitat (m^3)` = V1)
   }
   return(sum_tab)
 }
@@ -101,10 +101,22 @@ get_plan_list <- function(
 ){
 
   # cost adjustment
+  #
+  # Must match fct_Suggest.R exactly or the table contradicts the plan it
+  # describes: scale ONLY cost_source == "holland", on the median of that
+  # subset. wsdot_direct are actual HDR engineering estimates and are left
+  # alone; see the fuller note in fct_Suggest.R.
   if(cost == 2){
+    holland <- points$cost_source == "holland" & !is.na(points$cost_source)
+    if(any(holland)){
+      denom <- stats::median(points$cost[holland])
+      if(is.finite(denom) && denom > 0){
+        points$cost[holland] <-
+          points$cost[holland] * mean_construction_cost / denom + mean_design_cost
+      }
+    }
     points <- points %>%
       dplyr::mutate(
-        cost = cost * mean_construction_cost / mean(cost) + mean_design_cost,
         cost_text = paste0("$", format(round(cost, 0), nsmall = 0, big.mark = ","))
       )
   } else {

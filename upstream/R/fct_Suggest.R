@@ -107,11 +107,36 @@ solve_opt <- function(
   }
 
   # adjust cost with user inputs
+  #
+  # Applies ONLY to cost_source == "holland", the modelled culvert predictions.
+  #
+  # The stored cost is a three-source estimate. 118 crossings carry
+  # cost_source == "wsdot_direct", which are actual HDR engineering estimates
+  # for specific projects, and rescaling those would invent a figure on top of
+  # a known one. "wsdot_estimated" is a tail model calibrated to those same HDR
+  # actuals, and "idw_interpolated" is a spatial fill; neither is a culvert
+  # prediction that a typical-culvert cost should recalibrate. So the user's
+  # input recalibrates the modelled culvert costs and leaves the rest standing.
+  #
+  # Rescales on the MEDIAN of that subset, not the mean. Across the whole
+  # column mean(cost) is 9.3x the median because of the 547 state-highway
+  # crossings near $16M, so rescaling on the mean silently divided every cost
+  # by about four. Under the previous Van Deynze predictions the column was
+  # homogeneous and mean and median sat within 8% of each other, which is why
+  # neither problem existed before.
+  #
+  # The input ids are still mean_construction_cost / mean_design_cost; they are
+  # wired through three modules and the server, so only the user-facing labels
+  # say "Median".
   if(cost == 2){
-    points <- points %>%
-      dplyr::mutate(
-        cost = cost * mean_construction_cost / mean(cost) + mean_design_cost
-      )
+    holland <- points$cost_source == "holland" & !is.na(points$cost_source)
+    if(any(holland)){
+      denom <- stats::median(points$cost[holland])
+      if(is.finite(denom) && denom > 0){
+        points$cost[holland] <-
+          points$cost[holland] * mean_construction_cost / denom + mean_design_cost
+      }
+    }
   }
 
   # planned barrier selection: set cost to zero if barrier is already planned by user
@@ -209,7 +234,7 @@ map_leaflet_opt <- function(
     leaflet_lines <- lines %>% dplyr::filter(COMID %in% blocked_lines)
     ds_leaflet_lines <- dslines %>% dplyr::filter(COMID %in% ds_blocked_lines)
 
-    if (inherits(sf::st_geometry(leaflet_lines), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
+    if (nrow(leaflet_lines) > 0){
 
     leaf_proxy <- leaf_proxy %>%
       leafgl::addGlPolylines(data = leaflet_lines,
@@ -272,7 +297,7 @@ map_leaflet_opt <- function(
 
   #test for null sets in ds lines. If FALSE draw lines
   testfilter <- ds_leaflet_lines %>% dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% milp_stream_ids)
-  if (inherits(sf::st_geometry(testfilter), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
+  if (nrow(testfilter) > 0){
 
     leaf_proxy <- leaf_proxy %>%
       leafgl::addGlPolylines(

@@ -142,8 +142,16 @@ map_leaflet_custom <- function(
     )
 
   #draw unblocked lines if there are any
+  # nrow(), not inherits(). An EMPTY sf filtered from a linestring layer still
+  # reports class sfc_LINESTRING, so the old inherits() test passed on zero
+  # features and handed leafgl::addGlPolylines nothing to draw. That errors
+  # inside sf::st_sf ("arguments imply differing number of rows: 0, n"), kills
+  # the observer, and leaves the whole map grey. Reported 2026-09-04 for a
+  # custom plan on six WRIA 1 barriers: the barriers were fine, but the
+  # projects-to-ignore set was empty because barrier_idp held the "None"
+  # sentinel, which matches no site_id.
   draw_ub_lines <- leaflet_lines %>% dplyr::filter(COMID %in% cust_stream_ids)
-  if (inherits(sf::st_geometry(draw_ub_lines), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
+  if (nrow(draw_ub_lines) > 0){
 
     leaf_proxy <- leaf_proxy %>%
       leafgl::addGlPolylines(
@@ -158,7 +166,7 @@ map_leaflet_custom <- function(
 
     #draw idp lines if there are any
     draw_idp_lines <- leaflet_lines %>% dplyr::filter(COMID %in% idp_stream_ids)
-    if (inherits(sf::st_geometry(draw_idp_lines ), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
+    if (nrow(draw_idp_lines) > 0){
 
     leaf_proxy <- leaf_proxy %>%
       leafgl::addGlPolylines(
@@ -175,7 +183,7 @@ map_leaflet_custom <- function(
 
   #draw downstream lines if there are any
   draw_ds_lines <- ds_leaflet_lines %>% dplyr::filter(COMID %in% ds_stream_ids & !COMID %in% cust_stream_ids & !COMID %in% idp_stream_ids)
-  if (inherits(sf::st_geometry(draw_ds_lines), c("sfc_LINESTRING", "sfc_MULTILINESTRING")) == TRUE){
+  if (nrow(draw_ds_lines) > 0){
 
     leaf_proxy <- leaf_proxy %>%
       leafgl::addGlPolylines(
