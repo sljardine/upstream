@@ -149,10 +149,10 @@ mod_Suggest_ui <- function(id){
       hr(),
       fluidRow(
         radioButtons(inputId = ns("cost"),
-          label = "Cost",
+          label = "Cost (default predictions are construction cost only, excluding design, permitting and right-of-way)",
           choiceNames = list(
             "Default Predictions",
-            "Provide Mean Project Cost"
+            "Provide Median Project Cost"
           ),
           choiceValues = c(1, 2),
           inline = TRUE,
@@ -164,13 +164,13 @@ mod_Suggest_ui <- function(id){
           ns = ns,
           column(6,
           numericInput(inputId = ns("mean_design_cost"),
-            label = "Mean Design & Permitting Cost ($)",
+            label = "Median Design & Permitting Cost ($)",
             min = 0,
             value = NULL)
           ),
           column(6,
           numericInput(inputId = ns("mean_construction_cost"),
-            label = "Mean Construction Cost ($)",
+            label = "Median Construction Cost ($)",
             min = 0,
             value = NULL)
           )
@@ -208,9 +208,18 @@ mod_Suggest_server <- function(id, r){
     # drop the "All ..."/"None" default once a specific value is chosen.
     # barrier_idp matters most: while "None" stayed selected, solve_opt()
     # skipped its cost-zeroing and "Select Projects to Ignore" did nothing.
-    for (sel in c("area_sel", "owner_sel")) {
+    for (sel in c("area_sel", "subarea_sel", "owner_sel")) {
       sync_sentinel_selection(session, input, sel)
     }
+
+    # species_sel carries the same fault with a different sentinel: it defaults
+    # to "All" with multiple = TRUE, so choosing Coho leaves c("all", "coho"),
+    # and fct_Suggest.R tests `if(! "all" %in% species_sel)` -- the species
+    # filter then silently does nothing.
+    sync_sentinel_selection(session, input, "species_sel", sentinel = "all")
+
+    # barrier_idp needs no sync here: it has no "None" entry and starts empty,
+    # so an empty box already means "ignore nothing".
 
     # update huc options, filtering HUCs in selected WRIA ----
     observeEvent(c(input$area_sel), {

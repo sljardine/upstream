@@ -66,10 +66,10 @@ mod_Custom_ui <- function(id){
       hr(),
       fluidRow(
         radioButtons(inputId = ns("cost"),
-                     label = "Cost",
+                     label = "Cost (default predictions are construction cost only, excluding design, permitting and right-of-way)",
                      choiceNames = list(
                        "Default Predictions",
-                       "Provide Mean Project Cost"
+                       "Provide Median Project Cost"
                      ),
                      choiceValues = c(1, 2),
                      inline = TRUE,
@@ -81,13 +81,13 @@ mod_Custom_ui <- function(id){
           ns = ns,
           column(6,
                  numericInput(inputId = ns("mean_design_cost"),
-                              label = "Mean Design & Permitting Cost ($)",
+                              label = "Median Design & Permitting Cost ($)",
                               min = 0,
                               value = NULL)
           ),
           column(6,
                  numericInput(inputId = ns("mean_construction_cost"),
-                              label = "Mean Construction Cost ($)",
+                              label = "Median Construction Cost ($)",
                               min = 0,
                               value = NULL)
           )
@@ -134,7 +134,7 @@ mod_Custom_server <- function(id, r){
     ns <- session$ns
 
     # drop the "All ..."/"None" default once a specific value is chosen
-    for (sel in c("area_sel", "owner_sel")) {
+    for (sel in c("area_sel", "subarea_sel", "owner_sel")) {
       sync_sentinel_selection(session, input, sel)
     }
 
