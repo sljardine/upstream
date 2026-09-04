@@ -57,7 +57,20 @@ RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org
 RUN R -e "Sys.setenv(RENV_CONFIG_REPOS_OVERRIDE = 'https://cloud.r-project.org'); renv::restore(repos = c(CRAN = 'https://cloud.r-project.org'))"
 
 # Install leafgl
-RUN R -e "remotes::install_github('r-spatial/leafgl')"
+#
+# Pinned to the CRAN release rather than install_github('r-spatial/leafgl').
+# Every other package here comes from renv::restore() at an exact version, but
+# leafgl is absent from renv.lock, so the GitHub form installed whatever sat on
+# the default branch at build time -- two builds of the same commit could ship
+# different code. That branch is `master`, not `main`, so a rename would also
+# break the build outright, and there is no PR check: a push to main deploys
+# straight to production.
+#
+# leafgl draws every line on the Explore, Suggest and Custom maps via
+# addGlPolylines. 0.2.4 is the current CRAN release (2026-04-15) and the
+# version the app was tested against locally. Note this is a step back from
+# 0.2.4.9000, the development build the GitHub form was installing.
+RUN R -e "remotes::install_version('leafgl', version = '0.2.4', repos = 'https://cloud.r-project.org')"
 
 # Create the missing directory for Rprofile.site
 RUN mkdir -p /usr/lib/R/etc
